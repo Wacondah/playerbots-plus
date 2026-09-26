@@ -66,7 +66,11 @@ each decision.
   `ShareSnapshot`: `errandsIdle`, giver's items, each with the giver's `usage` and
   `tier`, and per receiver `{guid, usage, tier, gain, held}`. Usage is a small enum for
   the upstream values used (`Equip`, `Replace`, `Quest`, `Other`); tiers are computed by
-  the adapter from `PlayerbotAI::HasSkill` and `RandomItemMgr::IsUsedBySkill`.
+  the adapter from the bot's skills and our own reagent index.
+- `ReagentIndex`: built once at `OnStartup` from `SkillLineAbility` entries of the 11
+  professions and their spells' reagents: item → set of professions consuming it.
+  Upstream `RandomItemMgr::IsUsedBySkill` is not usable: its cache is keyed by item only,
+  so an item found for one skill is reported as used by every skill.
 - `ShareItemAction` (`"share item"`): builds the snapshot, runs `PlanShare` in
   `isUseful()`, transfers in `Execute()`.
 - `ErrandsShareStrategy` (`"errands share"`, non-combat): trigger `"errands tick"` →
