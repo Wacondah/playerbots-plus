@@ -23,6 +23,12 @@ struct Vec3
 
 float Distance(Vec3 const& a, Vec3 const& b);
 
+// Wrap-safe: getMSTime() wraps after ~49 days.
+inline bool Elapsed(uint32_t now, uint32_t since, uint32_t duration)
+{
+    return static_cast<uint32_t>(now - since) >= duration;
+}
+
 // Declaration order is the priority order.
 enum class ErrandKind : uint8_t
 {

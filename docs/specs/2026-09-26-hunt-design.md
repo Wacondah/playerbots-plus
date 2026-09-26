@@ -58,8 +58,9 @@ reason: `not puller`, `group not ready`, `no quest mob`, `pack nearby`…).
 
 ## Design
 
-- `ErrandPlanner`: expose the leash check as `char const* LeashBlocker(...)`, used by
-  both planners. Behaviour unchanged, existing tests stay green.
+- Leash reuse: hunting runs only when this tick's errands decision is
+  `Idle / nothing to do` (recorded with a timestamp in `errands data`), which implies
+  every leash condition holds; no code is extracted.
 - `HuntPlanner.{h,cpp}` (pure, unit tested):
   - `ElectPuller(std::vector<GroupBot> const&) -> uint64_t` (`GroupBot`: guid, isTank,
     hasHunt);

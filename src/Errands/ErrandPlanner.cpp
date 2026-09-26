@@ -14,11 +14,6 @@ namespace
 // Below this, a master position change is jitter, not movement.
 constexpr float MasterMoveEpsilon = 0.5f;
 
-bool Elapsed(uint32_t now, uint32_t since, uint32_t duration)
-{
-    return static_cast<uint32_t>(now - since) >= duration;
-}
-
 Decision Idle(ErrandState& state, std::string reason)
 {
     state.lastReason = reason;

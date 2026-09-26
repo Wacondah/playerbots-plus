@@ -9,7 +9,9 @@ enable_testing()
 
 add_executable(planner_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/ErrandPlanner.cpp
-    ErrandPlannerTest.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/HuntPlanner.cpp
+    ErrandPlannerTest.cpp
+    HuntPlannerTest.cpp)
 target_include_directories(planner_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands)
 target_compile_options(planner_tests PRIVATE -Wall -Wextra -Werror)
 target_link_libraries(planner_tests PRIVATE GTest::gtest_main)
