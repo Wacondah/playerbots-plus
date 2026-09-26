@@ -15,3 +15,7 @@ start here.
 | `sPlayerbotAIConfig.mediumHealth`, `.mediumMana` | `RunErrandAction::BuildSnapshot` | rest threshold |
 | strategies `"stay"`, `"guard"` | `RunErrandAction::BuildSnapshot` | player orders win |
 | `PlayerbotAIConfig::Initialize()` building the lists before `OnStartup` | `PlayerbotsPlusScript.cpp` | registration timing |
+| `AttackAction::Attack` (protected) | `HuntQuestMobAction` | engaging switches to the combat engine |
+| `PlayerbotAI::IsTank`, `GET_PLAYERBOT_AI` | `HuntQuestMobAction` | puller election |
+| value `"possible targets"` | `HuntQuestMobAction` | mob candidates |
+| logic of `GrindTargetValue::needForQuest` (copied) | `HuntQuestMobAction::NeededBy` | quest need |

@@ -18,3 +18,17 @@ restarted, a party of altbots. Bots with saved strategies ignore that setting: s
 | 9 | Bot without master (random bot) with `+errands` | nothing happens |
 | 10 | Inside a dungeon | nothing happens (`errands` → `in instance`) |
 | 11 | Mounted, stop without dismounting | nothing happens (`master mounted`) |
+
+## Errands hunt
+
+Setup: `/p nc +errands hunt`, party with quests needing kills.
+
+| # | Scenario | Expected |
+|---|---|---|
+| H1 | Stop near a lone quest mob | one bot pulls it, the group kills it, bots return |
+| H2 | Only packed quest mobs around | nothing; puller's `errands` shows `hunt: pack nearby` |
+| H3 | Elite quest mob | ignored |
+| H4 | Healer below rest mana | no pull until rested (`group not ready`) |
+| H5 | Move during the fight | fight ends normally, bots follow |
+| H6 | Mob needed by one bot only | still hunted |
+| H7 | `errands` to a non-puller | `hunt: not puller` |

@@ -32,3 +32,16 @@ PlayerbotsPlus.Errands.Blacklist = 60000
 PlayerbotsPlus.Errands.RepairThreshold = 30
 PlayerbotsPlus.Errands.SellWhite = 0
 PlayerbotsPlus.Errands.InInstances = 0
+
+###################################################################################################
+# ERRANDS HUNT  (strategy "errands hunt", on top of "errands")
+#
+# When the master is idle and no errand is left, one bot of the group (a tank first) pulls
+# a quest mob near the master; the group fights it as usual.
+#
+#    PlayerbotsPlus.Hunt.MaxLevelAbove  Max levels above the lowest group bot.  Default: 2
+#    PlayerbotsPlus.Hunt.PackRadius     Other hostiles this close (yd) veto
+#                                       the pull.                               Default: 8
+
+PlayerbotsPlus.Hunt.MaxLevelAbove = 2
+PlayerbotsPlus.Hunt.PackRadius = 8

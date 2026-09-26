@@ -15,6 +15,14 @@ you, then follow you again:
 They drop the errand as soon as you move, enter combat or mount, and they obey `stay` and
 `guard`. Nothing happens inside instances unless enabled.
 
+## Errands hunt
+
+Optional, on top of errands: `nc +errands hunt` (or `/p nc +errands hunt` for the whole
+party). When you stand still and no errand is left, one bot (a tank first) pulls a quest
+mob within the radius that some bot of the group still needs; the group fights it as
+usual. Never elites, never a mob with another hostile within 8 yd, never while someone
+is low on health or mana, never above the lowest bot level + 2.
+
 ## Install
 
 Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
@@ -45,6 +53,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 |---|---|
 | `nc +errands` / `nc -errands` | enable / disable errands |
 | `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
+| `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
 
 ## Configuration
