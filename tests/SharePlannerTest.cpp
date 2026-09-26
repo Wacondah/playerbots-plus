@@ -142,3 +142,29 @@ TEST(Share, NothingToShare)
     EXPECT_EQ(d.reason, "nothing to share");
     EXPECT_EQ(state.lastReason, "nothing to share");
 }
+
+TEST(WantedByGroup, UpgradeForAnotherBot)
+{
+    EXPECT_TRUE(WantedByGroup({1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Replace, 0, 1.f)}}));
+}
+
+TEST(WantedByGroup, HolderAlsoWantsItIsNotAGroupNeed)
+{
+    EXPECT_FALSE(WantedByGroup({1, ShareUsage::Equip, 0, {Receiver(10, ShareUsage::Replace, 0, 1.f)}}));
+}
+
+TEST(WantedByGroup, HigherTierProfession)
+{
+    EXPECT_TRUE(WantedByGroup({1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Other, 1)}}));
+}
+
+TEST(WantedByGroup, EqualTierOrNobody)
+{
+    EXPECT_FALSE(WantedByGroup({1, ShareUsage::Other, 1, {Receiver(10, ShareUsage::Other, 1)}}));
+    EXPECT_FALSE(WantedByGroup({1, ShareUsage::Other, 0, {}}));
+}
+
+TEST(WantedByGroup, QuestItemsCountAsWanted)
+{
+    EXPECT_TRUE(WantedByGroup({1, ShareUsage::Quest, 0, {}}));
+}

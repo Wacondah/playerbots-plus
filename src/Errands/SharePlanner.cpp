@@ -83,6 +83,16 @@ ShareDecision PlanShare(ShareSnapshot const& snap, ShareState& state, ShareConfi
     return Result(state, 0, 0, "nothing to share");
 }
 
+bool WantedByGroup(ShareItem const& item)
+{
+    if (item.usage == ShareUsage::Quest)
+        return true;
+    for (ShareReceiver const& r : item.receivers)
+        if ((!WantsToEquip(item.usage) && WantsToEquip(r.usage)) || r.tier > item.tier)
+            return true;
+    return false;
+}
+
 void MarkShareFailed(ShareState& state, uint64_t item, uint64_t receiver, uint32_t now)
 {
     state.blacklistedAt[{item, receiver}] = now;

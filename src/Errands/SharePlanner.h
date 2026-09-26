@@ -88,6 +88,10 @@ struct ShareDecision
 
 ShareDecision PlanShare(ShareSnapshot const& snap, ShareState& state, ShareConfig const& cfg, uint32_t now);
 
+// Some bot of the group would take the item under the PlanShare rules (distance
+// and blacklist ignored). Selling keeps such items; quest items count as wanted.
+bool WantedByGroup(ShareItem const& item);
+
 // The receiver could not store the item: skip that pair for a while.
 void MarkShareFailed(ShareState& state, uint64_t item, uint64_t receiver, uint32_t now);
 }  // namespace PlayerbotsPlus
