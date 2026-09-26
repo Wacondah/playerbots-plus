@@ -1,0 +1,34 @@
+[worldserver]
+
+###################################################################################################
+# PLAYERBOTS PLUS
+#
+#    PlayerbotsPlus.Enable
+#        Description: Master switch. Strategies still need to be enabled per bot, e.g.
+#                     AiPlayerbot.NonCombatStrategies = "+errands" in playerbots.conf.
+#        Default:     1
+
+PlayerbotsPlus.Enable = 1
+
+###################################################################################################
+# ERRANDS
+#
+# When its master stands still, an altbot turns in / accepts quests, repairs and sells junk
+# at NPCs near the master, then resumes following. Distances in yards, times in ms.
+#
+#    PlayerbotsPlus.Errands.Radius           Radius around the master.            Default: 20
+#    PlayerbotsPlus.Errands.IdleDelay        Master stillness before starting.    Default: 3000
+#    PlayerbotsPlus.Errands.Timeout          Max time per errand.                 Default: 20000
+#    PlayerbotsPlus.Errands.Blacklist        Ignore a failed target / rest a
+#                                            visited vendor for this long.        Default: 60000
+#    PlayerbotsPlus.Errands.RepairThreshold  Repair below this durability %.      Default: 30
+#    PlayerbotsPlus.Errands.SellWhite        Also sell white weapons and armor.   Default: 0
+#    PlayerbotsPlus.Errands.InInstances      Allow errands in dungeons/raids/BGs. Default: 0
+
+PlayerbotsPlus.Errands.Radius = 20
+PlayerbotsPlus.Errands.IdleDelay = 3000
+PlayerbotsPlus.Errands.Timeout = 20000
+PlayerbotsPlus.Errands.Blacklist = 60000
+PlayerbotsPlus.Errands.RepairThreshold = 30
+PlayerbotsPlus.Errands.SellWhite = 0
+PlayerbotsPlus.Errands.InInstances = 0

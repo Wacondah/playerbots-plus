@@ -1,0 +1,29 @@
+/*
+ * This file is part of mod-playerbots-plus. Released under GNU GPL v2 or later.
+ */
+
+#include "PlayerbotsPlusConfig.h"
+
+#include "Config.h"
+#include "Define.h"
+
+namespace PlayerbotsPlus
+{
+void ModuleConfig::Load()
+{
+    enabled = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Enable", true);
+    planner.radius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Errands.Radius", 20.0f);
+    planner.idleDelayMs = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.IdleDelay", 3000);
+    planner.timeoutMs = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.Timeout", 20000);
+    planner.blacklistMs = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.Blacklist", 60000);
+    planner.inInstances = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.InInstances", false);
+    repairThreshold = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.RepairThreshold", 30);
+    sellWhite = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.SellWhite", false);
+}
+
+ModuleConfig& Config()
+{
+    static ModuleConfig config;
+    return config;
+}
+}  // namespace PlayerbotsPlus
