@@ -67,6 +67,71 @@ char const* Blocker(Snapshot const& snap, ErrandState const& state, PlannerConfi
         return "master moving";
     return nullptr;
 }
+
+void ExpireBlacklist(ErrandState& state, PlannerConfig const& cfg, uint32_t now)
+{
+    for (auto it = state.blacklistedAt.begin(); it != state.blacklistedAt.end();)
+    {
+        if (Elapsed(now, it->second, cfg.blacklistMs))
+            it = state.blacklistedAt.erase(it);
+        else
+            ++it;
+    }
+}
+
+ErrandKind BestKind(Candidate const& c, Snapshot const& snap, ErrandState const& state, PlannerConfig const& cfg,
+                    uint32_t now)
+{
+    auto const visit = state.visits.find(c.id);
+    bool const visited = visit != state.visits.end();
+    // A quest giver is worth revisiting only once the bot's quest state changed.
+    bool const questsChanged = !visited || visit->second.fingerprint != snap.questFingerprint;
+    // A vendor rests after a visit, so an item it refuses cannot loop the bot.
+    bool const vendorRested = !visited || Elapsed(now, visit->second.at, cfg.blacklistMs);
+
+    if (questsChanged && c.canTurnIn)
+        return ErrandKind::TurnIn;
+    if (questsChanged && c.canAccept)
+        return ErrandKind::Accept;
+    if (vendorRested && snap.needsRepair && c.canRepair)
+        return ErrandKind::Repair;
+    if (vendorRested && snap.hasJunk && c.canSell)
+        return ErrandKind::Sell;
+    return ErrandKind::None;
+}
+
+Decision Pick(Snapshot const& snap, ErrandState& state, PlannerConfig const& cfg, uint32_t now)
+{
+    Candidate const* best = nullptr;
+    ErrandKind bestKind = ErrandKind::None;
+    float bestDistance = 0.f;
+
+    for (Candidate const& c : snap.candidates)
+    {
+        if (Distance(c.pos, snap.masterPos) > cfg.radius || state.blacklistedAt.count(c.id))
+            continue;
+
+        ErrandKind const kind = BestKind(c, snap, state, cfg, now);
+        if (kind == ErrandKind::None)
+            continue;
+
+        float const distance = Distance(c.pos, snap.botPos);
+        if (!best || kind < bestKind || (kind == bestKind && distance < bestDistance))
+        {
+            best = &c;
+            bestKind = kind;
+            bestDistance = distance;
+        }
+    }
+
+    if (!best)
+        return Idle(state, "nothing to do");
+
+    state.active = ActiveErrand{best->id, bestKind, now};
+    std::string reason = std::string("start ") + ToString(bestKind);
+    state.lastReason = reason;
+    return Decision{DecisionType::Start, best->id, bestKind, std::move(reason)};
+}
 }  // namespace
 
 float Distance(Vec3 const& a, Vec3 const& b)
@@ -93,11 +158,12 @@ Decision Plan(Snapshot const& snap, ErrandState& state, PlannerConfig const& cfg
 {
     if (snap.hasMaster && snap.masterSameMap)
         TrackMaster(snap, state, now);
+    ExpireBlacklist(state, cfg, now);
 
     if (char const* blocker = Blocker(snap, state, cfg, now))
         return state.active.IsActive() ? Abandon(state, blocker) : Idle(state, blocker);
 
-    return Idle(state, "nothing to do");
+    return Pick(snap, state, cfg, now);
 }
 
 void MarkDone(ErrandState& state, uint64_t fingerprint, uint32_t now)

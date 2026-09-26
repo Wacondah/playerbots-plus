@@ -106,3 +106,117 @@ TEST(Blockers, InstanceAllowedByConfig)
     cfg.inInstances = true;
     EXPECT_EQ(PlanAfterIdle(snap, state, cfg).reason, "nothing to do");
 }
+
+TEST(Pick, TurnInBeforeAcceptBeforeRepairBeforeSell)
+{
+    Snapshot snap = Ready();
+    snap.needsRepair = true;
+    snap.hasJunk = true;
+    Candidate sell = Npc(1, 1.f);
+    sell.canSell = true;
+    Candidate repair = Npc(2, 2.f);
+    repair.canRepair = true;
+    Candidate accept = Npc(3, 3.f);
+    accept.canAccept = true;
+    Candidate turnIn = Npc(4, 4.f);
+    turnIn.canTurnIn = true;
+
+    snap.candidates = {sell, repair, accept, turnIn};
+    ErrandState s1;
+    Decision d = PlanAfterIdle(snap, s1, PlannerConfig{});
+    EXPECT_EQ(d.type, DecisionType::Start);
+    EXPECT_EQ(d.target, 4u);
+    EXPECT_EQ(d.kind, ErrandKind::TurnIn);
+    EXPECT_EQ(s1.active.target, 4u);
+
+    snap.candidates = {sell, repair, accept};
+    ErrandState s2;
+    EXPECT_EQ(PlanAfterIdle(snap, s2, PlannerConfig{}).kind, ErrandKind::Accept);
+
+    snap.candidates = {sell, repair};
+    ErrandState s3;
+    EXPECT_EQ(PlanAfterIdle(snap, s3, PlannerConfig{}).kind, ErrandKind::Repair);
+
+    snap.candidates = {sell};
+    ErrandState s4;
+    EXPECT_EQ(PlanAfterIdle(snap, s4, PlannerConfig{}).kind, ErrandKind::Sell);
+}
+
+TEST(Pick, RepairAndSellOnlyWhenNeeded)
+{
+    Snapshot snap = Ready();
+    Candidate vendor = Npc(1, 3.f);
+    vendor.canRepair = true;
+    vendor.canSell = true;
+    snap.candidates = {vendor};
+    ErrandState state;
+    EXPECT_EQ(PlanAfterIdle(snap, state, PlannerConfig{}).reason, "nothing to do");
+}
+
+TEST(Pick, RadiusIsMeasuredFromMaster)
+{
+    Snapshot snap = Ready();
+    snap.masterPos = {0.f, 0.f, 0.f};
+    snap.botPos = {20.f, 0.f, 0.f};
+    Candidate nearBotOnly = Npc(1, 25.f);  // 5 yd from bot, 25 from master
+    nearBotOnly.canAccept = true;
+    snap.candidates = {nearBotOnly};
+    ErrandState state;
+    EXPECT_EQ(PlanAfterIdle(snap, state, PlannerConfig{}).reason, "nothing to do");
+}
+
+TEST(Pick, NearestToBotWinsWithinSameKind)
+{
+    Snapshot snap = Ready();
+    snap.botPos = {10.f, 0.f, 0.f};
+    Candidate far = Npc(1, -10.f);
+    far.canAccept = true;
+    Candidate near = Npc(2, 12.f);
+    near.canAccept = true;
+    snap.candidates = {far, near};
+    ErrandState state;
+    EXPECT_EQ(PlanAfterIdle(snap, state, PlannerConfig{}).target, 2u);
+}
+
+TEST(Pick, SkipsQuestGiverVisitedWithSameFingerprint)
+{
+    Snapshot snap = Ready();
+    snap.questFingerprint = 42;
+    Candidate giver = Npc(1, 3.f);
+    giver.canAccept = true;
+    snap.candidates = {giver};
+    ErrandState state;
+    state.visits[1] = Visit{42, T0};
+    EXPECT_EQ(PlanAfterIdle(snap, state, PlannerConfig{}).reason, "nothing to do");
+
+    snap.questFingerprint = 43;
+    EXPECT_EQ(Plan(snap, state, PlannerConfig{}, T0 + 5000).kind, ErrandKind::Accept);
+}
+
+TEST(Pick, VendorRestsForBlacklistDurationAfterVisit)
+{
+    Snapshot snap = Ready();
+    snap.hasJunk = true;
+    Candidate vendor = Npc(1, 3.f);
+    vendor.canSell = true;
+    snap.candidates = {vendor};
+    PlannerConfig cfg;
+    ErrandState state;
+    state.visits[1] = Visit{0, T0};
+    EXPECT_EQ(PlanAfterIdle(snap, state, cfg).reason, "nothing to do");
+    EXPECT_EQ(Plan(snap, state, cfg, T0 + cfg.blacklistMs).kind, ErrandKind::Sell);
+}
+
+TEST(Pick, BlacklistedTargetIgnoredUntilExpiry)
+{
+    Snapshot snap = Ready();
+    Candidate giver = Npc(1, 3.f);
+    giver.canAccept = true;
+    snap.candidates = {giver};
+    PlannerConfig cfg;
+    ErrandState state;
+    state.blacklistedAt[1] = T0;
+    EXPECT_EQ(PlanAfterIdle(snap, state, cfg).reason, "nothing to do");
+    EXPECT_EQ(Plan(snap, state, cfg, T0 + cfg.blacklistMs).type, DecisionType::Start);
+    EXPECT_TRUE(state.blacklistedAt.empty());
+}
