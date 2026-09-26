@@ -115,11 +115,14 @@ Opt-in: `AiPlayerbot.NonCombatStrategies = "+errands"`, or `nc +errands` per bot
 
 ## CI and distribution
 
-Forgejo Actions: `unit` on every push; `build` (core fork + mod-playerbots `master` +
-module) weekly and on tags, moved to a self-hosted runner if hosted ones can't fit it.
+Hosted on GitHub (`Wacondah/playerbots-plus`), next to AzerothCore and mod-playerbots.
+Codeberg was dropped: its terms forbid projects mostly written by generative AI.
 
-GPL-2.0-or-later, like AzerothCore and mod-playerbots. English README (install, activation, commands, tested commits, limits),
-`CHANGELOG.md`, tagged releases.
+GitHub Actions: `unit` on every push; `build` (core fork + mod-playerbots `master` +
+module) weekly, on tags and on demand.
+
+GPL-2.0-or-later, like AzerothCore and mod-playerbots. English README (install,
+activation, commands, tested commits, limits), `CHANGELOG.md`, tagged releases.
 
 ## Risks
 

@@ -1,0 +1,26 @@
+name: build
+# Full core build against mod-playerbots master, to catch upstream changes to the
+# internals this module relies on (docs/upstream-dependencies.md).
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: >
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends
+          cmake make clang libmysqlclient-dev libssl-dev libbz2-dev libreadline-dev
+          libncurses-dev libboost-all-dev
+      - run: git clone --depth 1 https://github.com/mod-playerbots/azerothcore-wotlk.git ac
+      - run: git clone --depth 1 https://github.com/mod-playerbots/mod-playerbots.git ac/modules/mod-playerbots
+      - uses: actions/checkout@v4
+        with:
+          path: ac/modules/mod-playerbots-plus
+      - run: >
+          cmake -S ac -B ac/build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          -DAPPS_BUILD=world-only -DTOOLS_BUILD=none -DSCRIPTS=static -DMODULES=static
+      - run: cmake --build ac/build -j"$(nproc)"

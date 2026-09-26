@@ -1,0 +1,9 @@
+name: unit
+on: [push, pull_request]
+jobs:
+  planner:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake g++ libgtest-dev
+      - run: tests/run.sh

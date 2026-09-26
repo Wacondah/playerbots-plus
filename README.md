@@ -1,0 +1,65 @@
+# mod-playerbots-plus
+
+Extra behaviours for [mod-playerbots](https://github.com/mod-playerbots/mod-playerbots),
+as a separate AzerothCore module: nothing in mod-playerbots is patched.
+
+## Errands
+
+When you stand still, your altbots handle their own errands with NPCs within 20 yards of
+you, then follow you again:
+
+- turn in completed quests, accept available ones (organising a full quest log);
+- repair when an item drops below 30 % durability;
+- sell grey items (optionally white weapons and armor).
+
+They drop the errand as soon as you move, enter combat or mount, and they obey `stay` and
+`guard`. Nothing happens inside instances unless enabled.
+
+## Install
+
+Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
+
+```bash
+cd azerothcore/modules
+git clone https://github.com/Wacondah/playerbots-plus.git mod-playerbots-plus
+```
+
+The directory name must be `mod-playerbots-plus`. Rebuild the core, then enable the
+strategy for all altbots in `playerbots.conf`:
+
+```
+AiPlayerbot.NonCombatStrategies = "+errands"
+```
+
+or per bot with a whisper: `nc +errands`.
+
+## Commands (whisper a bot)
+
+| Command | Effect |
+|---|---|
+| `nc +errands` / `nc -errands` | enable / disable errands |
+| `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
+| `nc +debug errands` | log each decision to chat and the `playerbots` log |
+
+## Configuration
+
+See `conf/playerbots-plus.conf.dist`: radius, idle delay, timeout, blacklist, repair
+threshold, white items, instances.
+
+## Compatibility
+
+Tested with `azerothcore-wotlk@06234df3d` and `mod-playerbots@b6696bdb`. The module uses
+mod-playerbots internals (listed in `docs/upstream-dependencies.md`); a weekly CI build
+against mod-playerbots `master` catches breakage.
+
+## Development
+
+Unit tests (planner only, no core needed): `tests/run.sh` (needs cmake and GoogleTest).
+In-game checklist: `docs/testing.md`.
+
+This module was written with the help of an AI assistant (Claude) and reviewed and
+tested by its maintainer.
+
+## License
+
+GPL-2.0-or-later.
