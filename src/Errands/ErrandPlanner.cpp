@@ -132,6 +132,28 @@ Decision Pick(Snapshot const& snap, ErrandState& state, PlannerConfig const& cfg
     state.lastReason = reason;
     return Decision{DecisionType::Start, best->id, bestKind, std::move(reason)};
 }
+
+Decision Continue(Snapshot const& snap, ErrandState& state, PlannerConfig const& cfg, uint32_t now)
+{
+    // Also covers unreachable targets: movement keeps failing until the deadline.
+    if (Elapsed(now, state.active.startedAt, cfg.timeoutMs))
+    {
+        state.blacklistedAt[state.active.target] = now;
+        return Abandon(state, "timeout");
+    }
+
+    for (Candidate const& c : snap.candidates)
+    {
+        if (c.id != state.active.target)
+            continue;
+        if (Distance(c.pos, snap.masterPos) > cfg.radius)
+            break;
+        state.lastReason = "on errand";
+        return Decision{DecisionType::Continue, c.id, state.active.kind, "on errand"};
+    }
+
+    return Abandon(state, "target gone");
+}
 }  // namespace
 
 float Distance(Vec3 const& a, Vec3 const& b)
@@ -163,19 +185,27 @@ Decision Plan(Snapshot const& snap, ErrandState& state, PlannerConfig const& cfg
     if (char const* blocker = Blocker(snap, state, cfg, now))
         return state.active.IsActive() ? Abandon(state, blocker) : Idle(state, blocker);
 
+    if (state.active.IsActive())
+        return Continue(snap, state, cfg, now);
+
     return Pick(snap, state, cfg, now);
 }
 
 void MarkDone(ErrandState& state, uint64_t fingerprint, uint32_t now)
 {
-    (void)state;
-    (void)fingerprint;
-    (void)now;
+    if (!state.active.IsActive())
+        return;
+    state.visits[state.active.target] = Visit{fingerprint, now};
+    state.active = ActiveErrand{};
+    state.lastReason = "done";
 }
 
 void MarkFailed(ErrandState& state, uint32_t now)
 {
-    (void)state;
-    (void)now;
+    if (!state.active.IsActive())
+        return;
+    state.blacklistedAt[state.active.target] = now;
+    state.active = ActiveErrand{};
+    state.lastReason = "failed";
 }
 }  // namespace PlayerbotsPlus

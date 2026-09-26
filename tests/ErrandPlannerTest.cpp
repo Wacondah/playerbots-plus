@@ -220,3 +220,100 @@ TEST(Pick, BlacklistedTargetIgnoredUntilExpiry)
     EXPECT_EQ(Plan(snap, state, cfg, T0 + cfg.blacklistMs).type, DecisionType::Start);
     EXPECT_TRUE(state.blacklistedAt.empty());
 }
+
+namespace
+{
+// Snapshot + state with an errand to candidate 7 started at T0 + IdleDelay.
+struct Running
+{
+    Snapshot snap = Ready();
+    ErrandState state;
+    PlannerConfig cfg;
+    uint32_t startedAt = T0 + PlannerConfig{}.idleDelayMs;
+
+    Running()
+    {
+        Candidate giver = Npc(7, 4.f);
+        giver.canAccept = true;
+        snap.candidates = {giver};
+        Decision d = PlanAfterIdle(snap, state, cfg);
+        EXPECT_EQ(d.type, DecisionType::Start);
+    }
+};
+}  // namespace
+
+TEST(Lifecycle, ContinuesActiveErrand)
+{
+    Running r;
+    Decision d = Plan(r.snap, r.state, r.cfg, r.startedAt + 100);
+    EXPECT_EQ(d.type, DecisionType::Continue);
+    EXPECT_EQ(d.target, 7u);
+    EXPECT_TRUE(d.Acts());
+}
+
+TEST(Lifecycle, AbandonsWhenMasterMoves)
+{
+    Running r;
+    r.snap.masterPos = {2.f, 0.f, 0.f};
+    Decision d = Plan(r.snap, r.state, r.cfg, r.startedAt + 100);
+    EXPECT_EQ(d.type, DecisionType::Abandon);
+    EXPECT_EQ(d.reason, "master moving");
+    EXPECT_FALSE(r.state.active.IsActive());
+    EXPECT_FALSE(d.Acts());
+}
+
+TEST(Lifecycle, AbandonsOnCombat)
+{
+    Running r;
+    r.snap.botInCombat = true;
+    EXPECT_EQ(Plan(r.snap, r.state, r.cfg, r.startedAt + 100).type, DecisionType::Abandon);
+}
+
+TEST(Lifecycle, TimeoutAbandonsAndBlacklists)
+{
+    Running r;
+    Decision d = Plan(r.snap, r.state, r.cfg, r.startedAt + r.cfg.timeoutMs);
+    EXPECT_EQ(d.type, DecisionType::Abandon);
+    EXPECT_EQ(d.reason, "timeout");
+    EXPECT_EQ(r.state.blacklistedAt.count(7), 1u);
+}
+
+TEST(Lifecycle, AbandonsWhenTargetGone)
+{
+    Running r;
+    r.snap.candidates.clear();
+    Decision d = Plan(r.snap, r.state, r.cfg, r.startedAt + 100);
+    EXPECT_EQ(d.type, DecisionType::Abandon);
+    EXPECT_EQ(d.reason, "target gone");
+}
+
+TEST(Lifecycle, MarkDoneRecordsVisitAndFreesBot)
+{
+    Running r;
+    MarkDone(r.state, 99, r.startedAt + 500);
+    EXPECT_FALSE(r.state.active.IsActive());
+    ASSERT_EQ(r.state.visits.count(7), 1u);
+    EXPECT_EQ(r.state.visits[7].fingerprint, 99u);
+    EXPECT_EQ(r.state.visits[7].at, r.startedAt + 500);
+}
+
+TEST(Lifecycle, MarkFailedBlacklists)
+{
+    Running r;
+    MarkFailed(r.state, r.startedAt + 500);
+    EXPECT_FALSE(r.state.active.IsActive());
+    EXPECT_EQ(r.state.blacklistedAt[7], r.startedAt + 500);
+}
+
+TEST(Lifecycle, TimeWrapIsHandled)
+{
+    Snapshot snap = Ready();
+    Candidate giver = Npc(1, 3.f);
+    giver.canAccept = true;
+    snap.candidates = {giver};
+    ErrandState state;
+    PlannerConfig cfg;
+    uint32_t const nearWrap = 0xFFFFFFFFu - 1000;
+    Plan(snap, state, cfg, nearWrap);
+    EXPECT_EQ(Plan(snap, state, cfg, nearWrap + cfg.idleDelayMs).type, DecisionType::Start);
+}
