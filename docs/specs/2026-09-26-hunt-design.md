@@ -29,7 +29,9 @@ radius.
 tank; otherwise the one with the lowest GUID among bots with `errands hunt`. Every bot
 computes the same election from the group roster; only the elected bot hunts.
 
-**Target** — among hostile units visible to the puller, within `Radius` of the master:
+**Target** — among hostile units visible to the puller, within `Hunt.Radius` (35 yd) of the
+master, wider than the errands `Radius`: mobs closer than ~20 yd aggro before the master
+has been idle long enough:
 
 - needed by at least one group bot: a missing kill objective
   (`RequiredNpcOrGo` / `CreatureOrGOCount`) or quest loot it still needs
@@ -81,6 +83,7 @@ reason: `not puller`, `group not ready`, `no quest mob`, `pack nearby`…).
 
 | Key | Default | |
 |---|---|---|
+| `PlayerbotsPlus.Hunt.Radius` | `35` | yd from the master |
 | `PlayerbotsPlus.Hunt.MaxLevelAbove` | `2` | levels above the lowest group bot |
 | `PlayerbotsPlus.Hunt.PackRadius` | `8` | yd; other hostiles this close veto the pull |
 

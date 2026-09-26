@@ -20,6 +20,7 @@ struct ModuleConfig
     bool sellWhite = false;
     uint32_t maxSellQuality = 3;  // 0 grey .. 4 epic
     uint32_t huntMaxLevelAbove = 2;
+    float huntRadius = 35.f;
     float huntPackRadius = 8.f;
 
     void Load();

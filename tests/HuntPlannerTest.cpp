@@ -94,7 +94,7 @@ TEST(HuntPick, EachFilterRejects)
         {[](Mob& m) { m.inCombat = true; }, "in combat"},
         {[](Mob& m) { m.tappedByOther = true; }, "tapped"},
         {[](Mob& m) { m.level = 8; }, "level 5+3"},
-        {[](Mob& m) { m.pos = {21.f, 0.f, 0.f}; }, "outside radius"},
+        {[](Mob& m) { m.pos = {36.f, 0.f, 0.f}; }, "outside radius"},
     };
     for (Case const& c : cases)
     {
@@ -178,4 +178,12 @@ TEST(HuntLifecycle, GateDuringHuntAbandonsWithoutBlacklist)
     EXPECT_EQ(d.type, DecisionType::Abandon);
     EXPECT_EQ(state.target, 0u);
     EXPECT_TRUE(state.blacklistedAt.empty());
+}
+
+TEST(HuntPick, DefaultRadiusReachesBeyondAggroRange)
+{
+    HuntSnapshot snap = Ready();
+    snap.mobs = {QuestMob(1, 30.f)};
+    HuntState state;
+    EXPECT_EQ(PlanHunt(snap, state, HuntConfig{}, T0).type, DecisionType::Start);
 }

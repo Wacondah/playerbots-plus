@@ -44,9 +44,13 @@ PlayerbotsPlus.Errands.InInstances = 0
 # When the master is idle and no errand is left, one bot of the group (a tank first) pulls
 # a quest mob near the master; the group fights it as usual.
 #
+#    PlayerbotsPlus.Hunt.Radius         Yd from the master. Wider than the
+#                                       errands radius: closer mobs aggro
+#                                       before the master is idle.              Default: 35
 #    PlayerbotsPlus.Hunt.MaxLevelAbove  Max levels above the lowest group bot.  Default: 2
 #    PlayerbotsPlus.Hunt.PackRadius     Other hostiles this close (yd) veto
 #                                       the pull.                               Default: 8
 
+PlayerbotsPlus.Hunt.Radius = 35
 PlayerbotsPlus.Hunt.MaxLevelAbove = 2
 PlayerbotsPlus.Hunt.PackRadius = 8

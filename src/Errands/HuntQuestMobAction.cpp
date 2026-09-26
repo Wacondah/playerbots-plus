@@ -74,7 +74,7 @@ HuntSnapshot HuntQuestMobAction::BuildSnapshot(ErrandsData& data, uint32 now)
     if (!snap.errandsIdle || !snap.isPuller || !snap.groupReady)
         return snap;  // no need to scan
 
-    float const radius = Config().planner.radius;
+    float const radius = Config().huntRadius;
     GuidVector const targets = AI_VALUE(GuidVector, "possible targets");
     for (ObjectGuid const& guid : targets)
     {
