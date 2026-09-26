@@ -26,8 +26,6 @@ public:
 
 private:
     ShareSnapshot BuildSnapshot(ErrandsData& data, uint32 now);
-    std::vector<Player*> Receivers();
-    ShareItem Describe(Item* item, std::vector<Player*> const& receivers, uint32 giverKnown);
     Item* FindItem(uint64_t guid);
 };
 }  // namespace PlayerbotsPlus

@@ -7,6 +7,8 @@
 #include "Config.h"
 #include "Define.h"
 
+#include <algorithm>
+
 namespace PlayerbotsPlus
 {
 void ModuleConfig::Load()
@@ -19,6 +21,7 @@ void ModuleConfig::Load()
     planner.inInstances = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.InInstances", false);
     repairThreshold = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.RepairThreshold", 30);
     sellWhite = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.SellWhite", false);
+    maxSellQuality = std::min<uint32>(sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.MaxSellQuality", 3), 4);
     huntMaxLevelAbove = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Hunt.MaxLevelAbove", 2);
     huntPackRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.PackRadius", 8.0f);
 }

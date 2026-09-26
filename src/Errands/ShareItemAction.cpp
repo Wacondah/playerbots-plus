@@ -4,62 +4,15 @@
 
 #include "ShareItemAction.h"
 
-#include "Bag.h"
 #include "ErrandsCommon.h"
-#include "Group.h"
-#include "ItemUsageValue.h"
+#include "GroupItems.h"
 #include "ObjectAccessor.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
 #include "ReagentIndex.h"
-#include "StatsWeightCalculator.h"
 
 namespace PlayerbotsPlus
 {
-namespace
-{
-ShareUsage ToShareUsage(ItemUsage usage)
-{
-    switch (usage)
-    {
-        case ITEM_USAGE_EQUIP: return ShareUsage::Equip;
-        case ITEM_USAGE_REPLACE: return ShareUsage::Replace;
-        case ITEM_USAGE_QUEST: return ShareUsage::Quest;
-        default: return ShareUsage::Other;
-    }
-}
-
-ItemUsage UsageFor(Player* player, uint32 itemId)
-{
-    PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
-    return ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(itemId))->Get() : ITEM_USAGE_NONE;
-}
-
-float GainFor(Player* receiver, Item* item)
-{
-    StatsWeightCalculator calc(receiver);
-    float const score = calc.CalculateItem(item->GetEntry(), item->GetItemRandomPropertyId());
-    uint8 const slot = receiver->FindEquipSlot(item->GetTemplate(), NULL_SLOT, true);
-    Item* current = slot != NULL_SLOT ? receiver->GetItemByPos(INVENTORY_SLOT_BAG_0, slot) : nullptr;
-    float const currentScore =
-        current ? calc.CalculateItem(current->GetEntry(), current->GetItemRandomPropertyId()) : 0.f;
-    return score - currentScore;
-}
-
-template <class Fn>
-void ForEachBagItem(Player* bot, Fn fn)
-{
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
-        if (Item* item = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-            fn(item);
-    for (uint8 bagSlot = INVENTORY_SLOT_BAG_START; bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot)
-        if (Bag* bag = bot->GetBagByPos(bagSlot))
-            for (uint32 i = 0; i < bag->GetBagSize(); ++i)
-                if (Item* item = bag->GetItemByPos(i))
-                    fn(item);
-}
-}  // namespace
-
 bool ShareItemAction::isUseful()
 {
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
@@ -106,11 +59,10 @@ ShareSnapshot ShareItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
 {
     ShareSnapshot snap;
     snap.errandsIdle = ErrandsIdle(data, now);
-    std::vector<Player*> const receivers = Receivers();
+    std::vector<Player*> const receivers = GroupBots(bot, ShareDistance);
     if (receivers.empty())
         return snap;
 
-    uint32 const giverKnown = ReagentIndex::Known(bot);
     ForEachBagItem(bot,
                    [&](Item* item)
                    {
@@ -118,47 +70,9 @@ ShareSnapshot ShareItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
                        bool const gear = proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON;
                        if (!item->CanBeTraded() || (!gear && !ReagentIndex::UsedBy(proto->ItemId)))
                            return;
-                       snap.items.push_back(Describe(item, receivers, giverKnown));
+                       snap.items.push_back(DescribeForGroup(botAI, item, receivers));
                    });
     return snap;
-}
-
-std::vector<Player*> ShareItemAction::Receivers()
-{
-    std::vector<Player*> receivers;
-    Group* group = bot->GetGroup();
-    if (!group)
-        return receivers;
-    for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
-    {
-        Player* member = ref->GetSource();
-        if (member && member != bot && member->IsAlive() && GET_PLAYERBOT_AI(member) &&
-            bot->GetDistance(member) <= ShareDistance)
-            receivers.push_back(member);
-    }
-    return receivers;
-}
-
-ShareItem ShareItemAction::Describe(Item* item, std::vector<Player*> const& receivers, uint32 giverKnown)
-{
-    uint32 const itemId = item->GetEntry();
-    uint32 const usedBy = ReagentIndex::UsedBy(itemId);
-
-    ShareItem s;
-    s.id = item->GetGUID().GetRawValue();
-    s.usage = ToShareUsage(AI_VALUE2(ItemUsage, "item usage", int32(itemId)));
-    s.tier = TierFor(usedBy, giverKnown);
-    for (Player* receiver : receivers)
-    {
-        ShareReceiver r;
-        r.guid = receiver->GetGUID().GetRawValue();
-        r.usage = ToShareUsage(UsageFor(receiver, itemId));
-        r.tier = TierFor(usedBy, ReagentIndex::Known(receiver));
-        r.gain = (r.usage == ShareUsage::Equip || r.usage == ShareUsage::Replace) ? GainFor(receiver, item) : 0.f;
-        r.held = receiver->GetItemCount(itemId, true);
-        s.receivers.push_back(r);
-    }
-    return s;
 }
 
 Item* ShareItemAction::FindItem(uint64_t guid)

@@ -12,6 +12,8 @@ namespace PlayerbotsPlus
 {
 // Candidate NPCs are rescanned at most this often per bot.
 constexpr uint32 ScanIntervalMs = 1000;
+// Junk (which asks every group bot about every item) is re-evaluated at most this often.
+constexpr uint32 JunkIntervalMs = 5000;
 
 // Adapter between the core and ErrandPlanner. isUseful() runs the planner,
 // Execute() carries out its decision.
@@ -30,8 +32,9 @@ private:
     Candidate Describe(WorldObject* object);
     void VisitTarget(WorldObject* object);
     bool NeedsRepair();
-    bool HasJunk();
-    bool IsJunk(Item* item);
+    bool HasJunk(ErrandsData& data, uint32 now);
+    bool IsBasicJunk(Item* item);
+    std::vector<Item*> ExtraJunk();
     uint64_t QuestFingerprint();
 };
 }  // namespace PlayerbotsPlus

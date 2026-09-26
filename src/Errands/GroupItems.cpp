@@ -1,0 +1,86 @@
+/*
+ * This file is part of mod-playerbots-plus. Released under GNU GPL v2 or later.
+ */
+
+#include "GroupItems.h"
+
+#include "Group.h"
+#include "ItemUsageValue.h"
+#include "Playerbots.h"
+#include "ReagentIndex.h"
+#include "StatsWeightCalculator.h"
+
+namespace PlayerbotsPlus
+{
+namespace
+{
+ShareUsage ToShareUsage(ItemUsage usage)
+{
+    switch (usage)
+    {
+        case ITEM_USAGE_EQUIP: return ShareUsage::Equip;
+        case ITEM_USAGE_REPLACE: return ShareUsage::Replace;
+        case ITEM_USAGE_QUEST: return ShareUsage::Quest;
+        default: return ShareUsage::Other;
+    }
+}
+
+ItemUsage UsageFor(Player* player, uint32 itemId)
+{
+    PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
+    return ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(itemId))->Get() : ITEM_USAGE_NONE;
+}
+
+float GainFor(Player* receiver, Item* item)
+{
+    StatsWeightCalculator calc(receiver);
+    float const score = calc.CalculateItem(item->GetEntry(), item->GetItemRandomPropertyId());
+    uint8 const slot = receiver->FindEquipSlot(item->GetTemplate(), NULL_SLOT, true);
+    Item* current = slot != NULL_SLOT ? receiver->GetItemByPos(INVENTORY_SLOT_BAG_0, slot) : nullptr;
+    float const currentScore =
+        current ? calc.CalculateItem(current->GetEntry(), current->GetItemRandomPropertyId()) : 0.f;
+    return score - currentScore;
+}
+}  // namespace
+
+std::vector<Player*> GroupBots(Player* bot, float maxDistance)
+{
+    std::vector<Player*> bots;
+    Group* group = bot->GetGroup();
+    if (!group)
+        return bots;
+    for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+    {
+        Player* member = ref->GetSource();
+        if (!member || member == bot || !member->IsAlive() || !GET_PLAYERBOT_AI(member) ||
+            member->GetMapId() != bot->GetMapId())
+            continue;
+        if (maxDistance > 0.f && bot->GetDistance(member) > maxDistance)
+            continue;
+        bots.push_back(member);
+    }
+    return bots;
+}
+
+ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player*> const& others)
+{
+    uint32 const itemId = item->GetEntry();
+    uint32 const usedBy = ReagentIndex::UsedBy(itemId);
+
+    ShareItem s;
+    s.id = item->GetGUID().GetRawValue();
+    s.usage = ToShareUsage(UsageFor(holderAI->GetBot(), itemId));
+    s.tier = TierFor(usedBy, ReagentIndex::Known(holderAI->GetBot()));
+    for (Player* other : others)
+    {
+        ShareReceiver r;
+        r.guid = other->GetGUID().GetRawValue();
+        r.usage = ToShareUsage(UsageFor(other, itemId));
+        r.tier = TierFor(usedBy, ReagentIndex::Known(other));
+        r.gain = (r.usage == ShareUsage::Equip || r.usage == ShareUsage::Replace) ? GainFor(other, item) : 0.f;
+        r.held = other->GetItemCount(itemId, true);
+        s.receivers.push_back(r);
+    }
+    return s;
+}
+}  // namespace PlayerbotsPlus

@@ -28,6 +28,9 @@ struct ErrandsData
     ShareState share;
     ShareDecision shareDecision;
     uint32 lastShareScanAt = 0;
+    bool hasJunk = false;  // cached: evaluating junk asks every group bot about every item
+    bool junkChecked = false;
+    uint32 junkCheckedAt = 0;
 };
 
 // This tick's errands decision is "nothing to do": the leash holds and no errand is left.

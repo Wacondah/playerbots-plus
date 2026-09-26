@@ -23,6 +23,10 @@ PlayerbotsPlus.Enable = 1
 #                                            visited vendor for this long.        Default: 60000
 #    PlayerbotsPlus.Errands.RepairThreshold  Repair below this durability %.      Default: 30
 #    PlayerbotsPlus.Errands.SellWhite        Also sell white weapons and armor.   Default: 0
+#    PlayerbotsPlus.Errands.MaxSellQuality   Highest quality sold when neither the
+#                                            bot nor the group has a use for the
+#                                            item: 0 grey, 1 white, 2 green,
+#                                            3 blue, 4 epic.                      Default: 3
 #    PlayerbotsPlus.Errands.InInstances      Allow errands in dungeons/raids/BGs. Default: 0
 
 PlayerbotsPlus.Errands.Radius = 20
@@ -31,6 +35,7 @@ PlayerbotsPlus.Errands.Timeout = 20000
 PlayerbotsPlus.Errands.Blacklist = 60000
 PlayerbotsPlus.Errands.RepairThreshold = 30
 PlayerbotsPlus.Errands.SellWhite = 0
+PlayerbotsPlus.Errands.MaxSellQuality = 3
 PlayerbotsPlus.Errands.InInstances = 0
 
 ###################################################################################################

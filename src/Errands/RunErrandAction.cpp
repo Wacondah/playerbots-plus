@@ -6,10 +6,13 @@
 
 #include "Bag.h"
 #include "ErrandsCommon.h"
+#include "GroupItems.h"
 #include "Item.h"
+#include "ItemUsageValue.h"
 #include "ObjectAccessor.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
+#include "SellAction.h"
 
 namespace PlayerbotsPlus
 {
@@ -54,6 +57,7 @@ bool RunErrandAction::Execute(Event /*event*/)
         VisitTarget(object);
         MarkDone(data.state, QuestFingerprint(), getMSTime());
         data.scanned = false;  // rescan now so the next errand sees fresh quest flags
+        data.junkChecked = false;
         DebugErrands(botAI, std::string("done at ") + object->GetName());
         return true;
     }
@@ -75,7 +79,7 @@ Snapshot RunErrandAction::BuildSnapshot(ErrandsData& data, uint32 now)
     snap.inInstance = bot->GetMap() && bot->GetMap()->Instanceable();
     snap.botNeedsRest = NeedsRest(bot);
     snap.needsRepair = NeedsRepair();
-    snap.hasJunk = HasJunk();
+    snap.hasJunk = HasJunk(data, now);
     snap.questFingerprint = QuestFingerprint();
 
     Player* master = botAI->GetMaster();
@@ -177,6 +181,11 @@ void RunErrandAction::VisitTarget(WorldObject* object)
         botAI->DoSpecificAction("sell", Event("run errand", "gray"), true);
         if (Config().sellWhite)
             botAI->DoSpecificAction("sell", Event("run errand", "white"), true);
+
+        // Not upstream "sell vendor": it ignores quality and the group's needs.
+        SellAction sell(botAI);
+        for (Item* item : ExtraJunk())
+            sell.Sell(item);
     }
 }
 
@@ -197,7 +206,7 @@ bool RunErrandAction::NeedsRepair()
 
 // Mirrors what "sell gray" / "sell white" actually sell (see SellQualityItemsVisitor),
 // so a bot never walks to a vendor for items the sell action would skip.
-bool RunErrandAction::IsJunk(Item* item)
+bool RunErrandAction::IsBasicJunk(Item* item)
 {
     if (!item)
         return false;
@@ -214,19 +223,50 @@ bool RunErrandAction::IsJunk(Item* item)
            proto->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE && !proto->TotemCategory;
 }
 
-bool RunErrandAction::HasJunk()
+bool RunErrandAction::HasJunk(ErrandsData& data, uint32 now)
 {
-    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
-        if (IsJunk(bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot)))
-            return true;
+    if (data.junkChecked && !Elapsed(now, data.junkCheckedAt, JunkIntervalMs))
+        return data.hasJunk;
 
-    for (uint8 bagSlot = INVENTORY_SLOT_BAG_START; bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot)
-        if (Bag* bag = bot->GetBagByPos(bagSlot))
-            for (uint32 i = 0; i < bag->GetBagSize(); ++i)
-                if (IsJunk(bag->GetItemByPos(i)))
-                    return true;
+    bool basic = false;
+    ForEachBagItem(bot, [&](Item* item) { basic = basic || IsBasicJunk(item); });
+    data.hasJunk = basic || !ExtraJunk().empty();
+    data.junkChecked = true;
+    data.junkCheckedAt = now;
+    return data.hasJunk;
+}
 
-    return false;
+// Beyond greys/whites: bound junk, and tradeables no bot of the group would take.
+std::vector<Item*> RunErrandAction::ExtraJunk()
+{
+    std::vector<Item*> junk;
+    uint32 const maxQuality = Config().maxSellQuality;
+    std::vector<Player*> group;
+    bool groupLoaded = false;
+
+    ForEachBagItem(bot,
+                   [&](Item* item)
+                   {
+                       ItemTemplate const* proto = item->GetTemplate();
+                       if (!proto->SellPrice || proto->Quality == ITEM_QUALITY_POOR || proto->Quality > maxQuality)
+                           return;
+                       ItemUsage const usage = AI_VALUE2(ItemUsage, "item usage", int32(proto->ItemId));
+                       if (usage == ITEM_USAGE_VENDOR)
+                       {
+                           junk.push_back(item);
+                           return;
+                       }
+                       if (usage != ITEM_USAGE_AH || !item->CanBeTraded())
+                           return;
+                       if (!groupLoaded)
+                       {
+                           group = GroupBots(bot, 0.f);
+                           groupLoaded = true;
+                       }
+                       if (!WantedByGroup(DescribeForGroup(botAI, item, group)))
+                           junk.push_back(item);
+                   });
+    return junk;
 }
 
 // Changes whenever the bot could see different quests at a giver:

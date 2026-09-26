@@ -18,6 +18,7 @@ struct ModuleConfig
     PlannerConfig planner;
     uint32_t repairThreshold = 30;
     bool sellWhite = false;
+    uint32_t maxSellQuality = 3;  // 0 grey .. 4 epic
     uint32_t huntMaxLevelAbove = 2;
     float huntPackRadius = 8.f;
 
