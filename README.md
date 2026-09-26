@@ -24,7 +24,8 @@ cd azerothcore/modules
 git clone https://github.com/Wacondah/playerbots-plus.git mod-playerbots-plus
 ```
 
-The directory name must be `mod-playerbots-plus`. Rebuild the core, then enable the
+The directory name must be `mod-playerbots-plus`. Rebuild the core, copy
+`etc/modules/playerbots-plus.conf.dist` to `playerbots-plus.conf`, then enable the
 strategy for all altbots in `playerbots.conf`:
 
 ```
