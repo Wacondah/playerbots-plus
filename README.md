@@ -34,6 +34,11 @@ AiPlayerbot.NonCombatStrategies = "+errands"
 
 or per bot with a whisper: `nc +errands`.
 
+`AiPlayerbot.NonCombatStrategies` only applies to bots that have no saved strategies.
+mod-playerbots saves a bot's strategy list as soon as you change it with `nc`/`co`, and
+that saved list replaces the defaults on every login. For bots you have already
+configured, add it once from party chat — `/p nc +errands` — and it is saved.
+
 ## Commands (whisper a bot)
 
 | Command | Effect |

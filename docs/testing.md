@@ -1,7 +1,9 @@
 # In-game test checklist
 
 Setup: `AiPlayerbot.NonCombatStrategies = "+errands"` in `playerbots.conf`, server
-restarted, a party of altbots. Whisper `nc +debug errands` to one bot to see decisions.
+restarted, a party of altbots. Bots with saved strategies ignore that setting: send
+`/p nc +errands` once. Check with `nc ?` that `errands` is listed. Whisper
+`nc +debug errands` to one bot to see decisions.
 
 | # | Scenario | Expected |
 |---|---|---|
