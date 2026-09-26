@@ -32,3 +32,16 @@ Setup: `/p nc +errands hunt`, party with quests needing kills.
 | H5 | Move during the fight | fight ends normally, bots follow |
 | H6 | Mob needed by one bot only | still hunted |
 | H7 | `errands` to a non-puller | `hunt: not puller` |
+
+## Errands share
+
+Setup: `/p nc +errands share`, party with different classes and professions.
+
+| # | Scenario | Expected |
+|---|---|---|
+| S1 | A BoE green usable by another alt in a bot's bags | moves once, then gets equipped |
+| S2 | A soulbound item useful to another alt | never moves |
+| S3 | Linen on a first-aid bot, a tailor in the party | linen goes to the tailor |
+| S4 | Herbs on a non-alchemist, an alchemist in the party | herbs go to the alchemist |
+| S5 | Receiver with full bags | skipped; giver's `errands` shows `share: receiver bags full` |
+| S6 | Two tailors | cloth gathers on the one holding the most |

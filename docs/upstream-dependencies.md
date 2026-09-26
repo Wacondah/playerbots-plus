@@ -19,3 +19,6 @@ start here.
 | `PlayerbotAI::IsTank`, `GET_PLAYERBOT_AI` | `HuntQuestMobAction` | puller election |
 | value `"possible targets"` | `HuntQuestMobAction` | mob candidates |
 | logic of `GrindTargetValue::needForQuest` (copied) | `HuntQuestMobAction::NeededBy` | quest need |
+| value `"item usage"` of other bots (`ITEM_USAGE_EQUIP/REPLACE/QUEST`) | `ShareItemAction` | who can use an item |
+| `StatsWeightCalculator::CalculateItem` | `ShareItemAction` | upgrade gain |
+| item move as in `GiveItemAction` (`MoveItemFromInventory`/`MoveItemToInventory`) | `ShareItemAction::Execute` | transfer |

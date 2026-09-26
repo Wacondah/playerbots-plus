@@ -23,6 +23,19 @@ mob within the radius that some bot of the group still needs; the group fights i
 usual. Never elites, never a mob with another hostile within 8 yd, never while someone
 is low on health or mana, never above the lowest bot level + 2.
 
+## Errands share
+
+Optional, on top of errands: `nc +errands share` (party: `/p nc +errands share`). When
+you stand still and no errand is left, each alt gives from its bags, to another alt of
+the party within 10 yd:
+
+- tradeable gear that is an upgrade for that alt and not for itself (largest gain wins);
+- materials a profession of that alt consumes, when the giver's own professions rank
+  lower (a primary crafting profession beats first aid, cooking and fishing): linen goes
+  to the tailor.
+
+Bound items, quest items and equipped items never move.
+
 ## Install
 
 Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
@@ -54,6 +67,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `nc +errands` / `nc -errands` | enable / disable errands |
 | `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
 | `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |
+| `nc +errands share` | enable sharing (party chat: `/p nc +errands share`) |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
 
 ## Configuration
