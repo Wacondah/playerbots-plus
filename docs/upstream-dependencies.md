@@ -22,3 +22,5 @@ start here.
 | value `"item usage"` of other bots (`ITEM_USAGE_EQUIP/REPLACE/QUEST`) | `ShareItemAction` | who can use an item |
 | `StatsWeightCalculator::CalculateItem` | `ShareItemAction` | upgrade gain |
 | item move as in `GiveItemAction` (`MoveItemFromInventory`/`MoveItemToInventory`) | `ShareItemAction::Execute` | transfer |
+| upstream usages `ITEM_USAGE_VENDOR` / `ITEM_USAGE_AH` | `RunErrandAction::ExtraJunk` | what may be sold |
+| `SellAction::Sell(Item*)` | `RunErrandAction::VisitTarget` | selling one item |

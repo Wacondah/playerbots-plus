@@ -45,3 +45,14 @@ Setup: `/p nc +errands share`, party with different classes and professions.
 | S4 | Herbs on a non-alchemist, an alchemist in the party | herbs go to the alchemist |
 | S5 | Receiver with full bags | skipped; giver's `errands` shows `share: receiver bags full` |
 | S6 | Two tailors | cloth gathers on the one holding the most |
+
+## Selling
+
+| # | Scenario | Expected |
+|---|---|---|
+| V1 | Replaced soulbound quest reward in bags, vendor in camp | sold |
+| V2 | BoE green usable by another alt | not sold (shared instead) |
+| V3 | BoE green nobody in the group uses | sold |
+| V4 | `MaxSellQuality = 2`, useless blue | kept |
+| V5 | Linen, tailor in the group / no tailor nor first aid | kept / sold |
+| V6 | Equipped items | never sold |
