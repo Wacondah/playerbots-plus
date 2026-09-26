@@ -10,9 +10,6 @@
 
 namespace PlayerbotsPlus
 {
-// The errands decision is trusted for the hunt only if computed this recently.
-constexpr uint32 FreshDecisionMs = 2000;
-
 // Adapter between the core and PlanHunt. Attack() switches the bot to its
 // combat engine; the group's normal combat reactions take it from there.
 class HuntQuestMobAction : public AttackAction

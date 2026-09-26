@@ -39,8 +39,7 @@ bool HuntQuestMobAction::Execute(Event /*event*/)
 HuntSnapshot HuntQuestMobAction::BuildSnapshot(ErrandsData& data, uint32 now)
 {
     HuntSnapshot snap;
-    snap.errandsIdle = data.decision.type == DecisionType::Idle && data.decision.reason == "nothing to do" &&
-                       !Elapsed(now, data.decidedAt, FreshDecisionMs);
+    snap.errandsIdle = ErrandsIdle(data, now);
 
     Player* master = botAI->GetMaster();
     Group* group = bot->GetGroup();

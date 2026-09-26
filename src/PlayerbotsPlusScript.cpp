@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "PlayerbotsPlusConfig.h"
 #include "PlayerbotsPlusRegistry.h"
+#include "ReagentIndex.h"
 #include "ScriptMgr.h"
 
 using namespace PlayerbotsPlus;
@@ -26,6 +27,7 @@ public:
             LOG_INFO("server.loading", ">> playerbots-plus: disabled by config");
             return;
         }
+        ReagentIndex::Build();
         if (EnsureRegistered())
             LOG_INFO("server.loading", ">> playerbots-plus: errands registered");
         else

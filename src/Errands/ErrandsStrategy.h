@@ -16,6 +16,8 @@ constexpr float RunErrandRelevance = 2.0f;
 constexpr float ChatCommandRelevance = 100.0f;
 // Just below run errand: errands always come first.
 constexpr float HuntRelevance = 1.9f;
+// Between the two: sharing costs nothing, so it goes before hunting.
+constexpr float ShareRelevance = 1.95f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -44,6 +46,21 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("errands tick", {NextAction("hunt quest mob", HuntRelevance)}));
+    }
+};
+
+// Opt-in on top of "errands": give bag items another alt of the group can use.
+class ErrandsShareStrategy : public Strategy
+{
+public:
+    ErrandsShareStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands share"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("share item", ShareRelevance)}));
     }
 };
 
