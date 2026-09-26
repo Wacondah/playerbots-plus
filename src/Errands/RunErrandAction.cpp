@@ -5,8 +5,8 @@
 #include "RunErrandAction.h"
 
 #include "Bag.h"
+#include "ErrandsCommon.h"
 #include "Item.h"
-#include "Log.h"
 #include "ObjectAccessor.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
@@ -24,9 +24,10 @@ bool RunErrandAction::isUseful()
     uint32 const now = getMSTime();
     Snapshot const snap = BuildSnapshot(data, now);
     data.decision = Plan(snap, data.state, Config().planner, now);
+    data.decidedAt = now;
 
     if (data.decision.type == DecisionType::Start || data.decision.type == DecisionType::Abandon)
-        Debug(data.decision.reason);
+        DebugErrands(botAI, data.decision.reason);
 
     return data.decision.Acts();
 }
@@ -44,7 +45,7 @@ bool RunErrandAction::Execute(Event /*event*/)
     {
         MarkFailed(data.state, getMSTime());
         data.scanned = false;
-        Debug("target vanished");
+        DebugErrands(botAI, "target vanished");
         return false;
     }
 
@@ -53,7 +54,7 @@ bool RunErrandAction::Execute(Event /*event*/)
         VisitTarget(object);
         MarkDone(data.state, QuestFingerprint(), getMSTime());
         data.scanned = false;  // rescan now so the next errand sees fresh quest flags
-        Debug(std::string("done at ") + object->GetName());
+        DebugErrands(botAI, std::string("done at ") + object->GetName());
         return true;
     }
 
@@ -72,9 +73,7 @@ Snapshot RunErrandAction::BuildSnapshot(ErrandsData& data, uint32 now)
     snap.botHasStayOrGuard = botAI->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ||
                              botAI->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT);
     snap.inInstance = bot->GetMap() && bot->GetMap()->Instanceable();
-    snap.botNeedsRest = bot->GetHealthPct() < sPlayerbotAIConfig.mediumHealth ||
-                        (bot->getPowerType() == POWER_MANA &&
-                         bot->GetPowerPct(POWER_MANA) < sPlayerbotAIConfig.mediumMana);
+    snap.botNeedsRest = NeedsRest(bot);
     snap.needsRepair = NeedsRepair();
     snap.hasJunk = HasJunk();
     snap.questFingerprint = QuestFingerprint();
@@ -251,13 +250,5 @@ uint64_t RunErrandAction::QuestFingerprint()
             mix(bot->GetQuestStatus(questId));
     }
     return hash;
-}
-
-void RunErrandAction::Debug(std::string const& text)
-{
-    if (!botAI->HasStrategy("debug errands", BotState::BOT_STATE_NON_COMBAT))
-        return;
-    LOG_INFO("playerbots", "[errands] {}: {}", bot->GetName(), text);
-    botAI->TellMasterNoFacing("[errands] " + text);
 }
 }  // namespace PlayerbotsPlus

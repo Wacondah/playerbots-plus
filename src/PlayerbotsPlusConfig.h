@@ -6,6 +6,7 @@
 #define PLAYERBOTS_PLUS_CONFIG_H
 
 #include "ErrandPlanner.h"
+#include "HuntPlanner.h"
 
 #include <cstdint>
 
@@ -17,11 +18,14 @@ struct ModuleConfig
     PlannerConfig planner;
     uint32_t repairThreshold = 30;
     bool sellWhite = false;
+    uint32_t huntMaxLevelAbove = 2;
+    float huntPackRadius = 8.f;
 
     void Load();
 };
 
 ModuleConfig& Config();
+HuntConfig HuntSettings();
 }  // namespace PlayerbotsPlus
 
 #endif

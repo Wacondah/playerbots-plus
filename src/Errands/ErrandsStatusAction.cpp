@@ -31,6 +31,8 @@ bool ErrandsStatusAction::Execute(Event /*event*/)
 
     out << " | last: " << (data.state.lastReason.empty() ? "-" : data.state.lastReason)
         << " | blacklisted: " << data.state.blacklistedAt.size();
+    if (botAI->HasStrategy("errands hunt", BotState::BOT_STATE_NON_COMBAT))
+        out << " | hunt: " << (data.hunt.lastReason.empty() ? "-" : data.hunt.lastReason);
 
     botAI->TellMaster(out.str());
     return true;

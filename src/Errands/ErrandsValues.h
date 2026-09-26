@@ -6,6 +6,7 @@
 #define PLAYERBOTS_PLUS_ERRANDS_VALUES_H
 
 #include "ErrandPlanner.h"
+#include "HuntPlanner.h"
 #include "Value.h"
 
 namespace PlayerbotsPlus
@@ -17,6 +18,9 @@ struct ErrandsData
     uint32 lastScanAt = 0;
     bool scanned = false;
     Decision decision;
+    uint32 decidedAt = 0;  // when `decision` was computed; hunting trusts it only if fresh
+    HuntState hunt;
+    Decision huntDecision;
 };
 
 class ErrandsDataValue : public ManualSetValue<ErrandsData&>

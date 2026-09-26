@@ -12,6 +12,7 @@
 #include "ErrandsTriggers.h"
 #include "ErrandsValues.h"
 #include "HunterAiObjectContext.h"
+#include "HuntQuestMobAction.h"
 #include "MageAiObjectContext.h"
 #include "PaladinAiObjectContext.h"
 #include "PriestAiObjectContext.h"
@@ -32,6 +33,7 @@ public:
     {
         creators["errands"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsStrategy(ai); };
         creators["debug errands"] = [](PlayerbotAI* ai) -> Strategy* { return new DebugErrandsStrategy(ai); };
+        creators["errands hunt"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsHuntStrategy(ai); };
     }
 };
 
@@ -52,6 +54,7 @@ public:
     {
         creators["run errand"] = [](PlayerbotAI* ai) -> Action* { return new RunErrandAction(ai); };
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };
+        creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
     }
 };
 

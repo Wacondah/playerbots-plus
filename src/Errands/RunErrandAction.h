@@ -33,7 +33,6 @@ private:
     bool HasJunk();
     bool IsJunk(Item* item);
     uint64_t QuestFingerprint();
-    void Debug(std::string const& text);
 };
 }  // namespace PlayerbotsPlus
 

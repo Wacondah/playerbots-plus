@@ -19,11 +19,19 @@ void ModuleConfig::Load()
     planner.inInstances = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.InInstances", false);
     repairThreshold = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.RepairThreshold", 30);
     sellWhite = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.SellWhite", false);
+    huntMaxLevelAbove = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Hunt.MaxLevelAbove", 2);
+    huntPackRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.PackRadius", 8.0f);
 }
 
 ModuleConfig& Config()
 {
     static ModuleConfig config;
     return config;
+}
+
+HuntConfig HuntSettings()
+{
+    ModuleConfig const& c = Config();
+    return HuntConfig{c.planner.radius, c.huntMaxLevelAbove, c.planner.timeoutMs, c.planner.blacklistMs};
 }
 }  // namespace PlayerbotsPlus

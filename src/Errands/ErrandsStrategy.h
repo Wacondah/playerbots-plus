@@ -14,6 +14,8 @@ namespace PlayerbotsPlus
 constexpr float RunErrandRelevance = 2.0f;
 // Same relevance as mod-playerbots chat commands (PassThroughStrategy default).
 constexpr float ChatCommandRelevance = 100.0f;
+// Just below run errand: errands always come first.
+constexpr float HuntRelevance = 1.9f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -30,7 +32,22 @@ public:
     }
 };
 
-// Marker strategy: RunErrandAction logs its decisions while it is set.
+// Opt-in on top of "errands": one elected bot pulls a quest mob near the idle master.
+class ErrandsHuntStrategy : public Strategy
+{
+public:
+    ErrandsHuntStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands hunt"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("hunt quest mob", HuntRelevance)}));
+    }
+};
+
+// Marker strategy: errands actions log their decisions while it is set.
 class DebugErrandsStrategy : public Strategy
 {
 public:
