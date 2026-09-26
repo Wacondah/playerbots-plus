@@ -38,11 +38,16 @@ distance (10 yd) of the giver. Never the master or another real player.
 - Equipment: give if usage is `EQUIP` or `REPLACE` for a receiver and neither for the
   giver. Receiver: largest gain, gain = `StatsWeightCalculator` score of the item minus
   the score of the receiver's current item in that slot (0 if empty).
-- Materials: give if usage is `SKILL` for a receiver and not for the giver. Receiver:
-  the one already holding the most of that item (consolidates stacks); ties to the lowest
-  GUID.
-- No ping-pong by construction: the receiver finds the item useful, so the
-  "useless to me" rule stops it from giving it back.
+- Materials: each bot has a tier for the item. 2: one of its primary crafting
+  professions uses it (tailoring, leatherworking, blacksmithing, engineering, alchemy,
+  enchanting, jewelcrafting, inscription). 1: only a secondary one does (first aid,
+  cooking, fishing). 0: none. Give if a receiver's tier is higher than the giver's.
+  Receiver: highest tier, then the one already holding the most of that item
+  (consolidates stacks), then the lowest GUID. So linen leaves the first-aid bots for the
+  tailor.
+- No ping-pong by construction: equipment moves only to a bot for which it is an upgrade
+  and the giver's rule requires it to be none for itself; materials move only to a
+  strictly higher tier.
 
 **Pace:** one item per bot per tick (the errands tick). The receiver's periodic
 `equip upgrades` equips gear; nothing extra is needed.
@@ -58,9 +63,10 @@ each decision.
 
 - `SharePlanner.{h,cpp}` (pure, unit tested): `PlanShare(ShareSnapshot const&, ShareState&,
   ShareConfig const&, uint32_t now) -> ShareDecision` (`item`, `receiver`, reason).
-  `ShareSnapshot`: `errandsIdle`, giver's items, each with `giverUsage` and per receiver
-  `{guid, usage, gain, held}`. Usage is a small enum mirroring the few upstream values
-  used (`Equip`, `Replace`, `Skill`, `Quest`, `Other`).
+  `ShareSnapshot`: `errandsIdle`, giver's items, each with the giver's `usage` and
+  `tier`, and per receiver `{guid, usage, tier, gain, held}`. Usage is a small enum for
+  the upstream values used (`Equip`, `Replace`, `Quest`, `Other`); tiers are computed by
+  the adapter from `PlayerbotAI::HasSkill` and `RandomItemMgr::IsUsedBySkill`.
 - `ShareItemAction` (`"share item"`): builds the snapshot, runs `PlanShare` in
   `isUseful()`, transfers in `Execute()`.
 - `ErrandsShareStrategy` (`"errands share"`, non-combat): trigger `"errands tick"` →
@@ -70,17 +76,16 @@ each decision.
 
 ## Testing
 
-- Unit: each rule (equip vs replace vs none, skill, quest excluded, giver also wants it),
-  largest gain wins, stack consolidation and GUID tie-break, pair blacklist and expiry,
-  gate.
+- Unit: each rule (equip vs replace vs none, quest excluded, giver also wants it),
+  largest gain wins, tier order (primary over secondary, equal tier never moves), stack
+  consolidation and GUID tie-break, pair blacklist and expiry, gate.
 - In game (`docs/testing.md`): a BoE green usable by another class moves once and gets
-  equipped; a soulbound item never moves; herbs go to the herbalist-alchemist; linen goes
-  to the tailor rather than to every first-aid bot (consolidation); receiver with full
-  bags is skipped.
+  equipped; a soulbound item never moves; herbs go to the alchemist; linen held by
+  first-aid bots goes to the tailor; receiver with full bags is skipped.
 
 ## Risks
 
 - `"item usage"` of another bot is read from that bot's context: fine while all bots of a
   group share the map thread (same group, same map).
-- First aid and cooking make many bots `SKILL` for cloth or meat: consolidation keeps
-  items from spreading, but the "most held" alt may not be the one the player prefers.
+- Two alts with the same primary profession: the one holding the most wins, which may not
+  be the one the player prefers.
