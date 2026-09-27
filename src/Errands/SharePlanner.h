@@ -58,12 +58,15 @@ struct ShareItem
     ShareUsage usage = ShareUsage::Other;
     uint8_t tier = 0;
     std::vector<ShareReceiver> receivers;
+    float masterGain = 0.f;       // upgrade for the master (0: none, consumables never)
+    bool masterDeclined = false;  // the master refused this item recently
 };
 
 struct ShareSnapshot
 {
     bool errandsIdle = false;
     std::vector<ShareItem> items;
+    uint64_t master = 0;  // the real player, offered upgrades before any bot
 };
 
 struct ShareConfig
@@ -81,6 +84,7 @@ struct ShareDecision
 {
     uint64_t item = 0;
     uint64_t receiver = 0;
+    bool toMaster = false;  // an offer through a trade window, not a transfer
     std::string reason;
 
     bool Acts() const { return item && receiver; }

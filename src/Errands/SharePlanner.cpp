@@ -52,10 +52,17 @@ ShareReceiver const* BestReceiver(ShareItem const& item, ShareState const& state
     return best;
 }
 
-ShareDecision Result(ShareState& state, uint64_t item, uint64_t receiver, std::string reason)
+// The master comes first for an upgrade the holder does not want itself.
+bool ForMaster(ShareItem const& item)
+{
+    return item.usage != ShareUsage::Quest && !WantsToEquip(item.usage) && item.masterGain > 0.f &&
+           !item.masterDeclined;
+}
+
+ShareDecision Result(ShareState& state, uint64_t item, uint64_t receiver, std::string reason, bool toMaster = false)
 {
     state.lastReason = reason;
-    return ShareDecision{item, receiver, std::move(reason)};
+    return ShareDecision{item, receiver, toMaster, std::move(reason)};
 }
 }  // namespace
 
@@ -77,15 +84,19 @@ ShareDecision PlanShare(ShareSnapshot const& snap, ShareState& state, ShareConfi
         return Result(state, 0, 0, "errands first");
 
     for (ShareItem const& item : snap.items)
+    {
+        if (snap.master && ForMaster(item))
+            return Result(state, item.id, snap.master, "offer to master", true);
         if (ShareReceiver const* r = BestReceiver(item, state))
             return Result(state, item.id, r->guid, "give");
+    }
 
     return Result(state, 0, 0, "nothing to share");
 }
 
 bool WantedByGroup(ShareItem const& item)
 {
-    if (item.usage == ShareUsage::Quest)
+    if (item.usage == ShareUsage::Quest || ForMaster(item))
         return true;
     for (ShareReceiver const& r : item.receivers)
         if ((!WantsToEquip(item.usage) && WantsToEquip(r.usage)) || r.tier > item.tier)

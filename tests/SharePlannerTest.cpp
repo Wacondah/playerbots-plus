@@ -168,3 +168,50 @@ TEST(WantedByGroup, QuestItemsCountAsWanted)
 {
     EXPECT_TRUE(WantedByGroup({1, ShareUsage::Quest, 0, {}}));
 }
+
+namespace
+{
+ShareSnapshot WithMaster(ShareItem item, float masterGain, bool declined = false)
+{
+    item.masterGain = masterGain;
+    item.masterDeclined = declined;
+    ShareSnapshot snap = One(std::move(item));
+    snap.master = 99;
+    return snap;
+}
+}  // namespace
+
+TEST(ShareMaster, MasterFirst)
+{
+    ShareState state;
+    ShareDecision d = PlanShare(
+        WithMaster({1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Replace, 0, 50.f)}}, 1.f), state,
+        ShareConfig{}, T0);
+    EXPECT_EQ(d.receiver, 99u);
+    EXPECT_TRUE(d.toMaster);
+}
+
+TEST(ShareMaster, DeclinedFallsBackToBots)
+{
+    ShareState state;
+    ShareDecision d = PlanShare(
+        WithMaster({1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Replace, 0, 5.f)}}, 1.f, true), state,
+        ShareConfig{}, T0);
+    EXPECT_EQ(d.receiver, 10u);
+    EXPECT_FALSE(d.toMaster);
+}
+
+TEST(ShareMaster, HolderKeepsItsUpgrade)
+{
+    ShareState state;
+    EXPECT_FALSE(PlanShare(WithMaster({1, ShareUsage::Replace, 0, {}}, 3.f), state, ShareConfig{}, T0).Acts());
+}
+
+TEST(WantedByGroup, MasterCounts)
+{
+    ShareItem item{1, ShareUsage::Other, 0, {}};
+    item.masterGain = 2.f;
+    EXPECT_TRUE(WantedByGroup(item));
+    item.masterDeclined = true;
+    EXPECT_FALSE(WantedByGroup(item));
+}
