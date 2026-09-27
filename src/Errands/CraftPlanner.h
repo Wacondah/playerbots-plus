@@ -12,6 +12,18 @@
 // Pure decision logic for the "errands craft" strategy.
 namespace PlayerbotsPlus
 {
+// One reagent of a recipe, as the bot holds it and as a vendor sells it.
+struct ReagentNeed
+{
+    uint32_t item = 0;
+    uint32_t perCraft = 0;
+    uint32_t held = 0;
+    bool vendor = false;    // sold by a vendor without a supply limit
+    uint32_t lotPrice = 0;  // vendor price of one lot (ItemTemplate::BuyPrice)
+    uint32_t lotSize = 1;   // items per lot (ItemTemplate::BuyCount)
+    uint32_t maxStack = 1;
+};
+
 struct RecipeOption
 {
     uint32_t spell = 0;
@@ -22,6 +34,9 @@ struct RecipeOption
     bool declined = false;        // the master said "craft no" to this product
     bool skillUp = false;         // raises the profession skill
     uint32_t reagentCost = 0;     // vendor value of the reagents
+    bool buyable = false;         // only vendor reagents are missing (primary professions)
+    bool gear = false;            // armor, weapon or bag: one craft at a time
+    std::vector<ReagentNeed> reagents;
 };
 
 struct CraftSnapshot
@@ -51,7 +66,8 @@ enum class CraftAction : uint8_t
     None,
     Craft,
     Ask,
-    Disenchant
+    Disenchant,
+    Shop  // buy the missing vendor reagents first (the errand does the buying)
 };
 
 struct CraftDecision
@@ -65,7 +81,7 @@ struct CraftDecision
 };
 
 // Order: pending answer, approved recipe, ask the master, group needs, disenchant,
-// skill-ups.
+// skill-ups. A buyable pick shops instead of crafting.
 CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfig const& cfg, uint32_t now);
 
 // The master answered the pending question. False when nothing was asked.

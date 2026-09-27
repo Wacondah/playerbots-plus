@@ -167,3 +167,75 @@ TEST(Craft, DisenchantAfterGroupBeforeSkill)
     CraftState s2;
     EXPECT_EQ(PlanCraft(snap, s2, CraftConfig{}, T0).spell, 2u);
 }
+
+namespace
+{
+RecipeOption Buyable(uint32_t spell, uint32_t cost)
+{
+    RecipeOption r = Recipe(spell, cost);
+    r.castable = false;
+    r.buyable = true;
+    return r;
+}
+}  // namespace
+
+TEST(CraftShop, BuyableSkillUpShops)
+{
+    RecipeOption r = Buyable(4, 2);
+    r.skillUp = true;
+    CraftState state;
+    CraftDecision d = PlanCraft(Idle({r}), state, CraftConfig{}, T0);
+    EXPECT_EQ(d.action, CraftAction::Shop);
+    EXPECT_EQ(d.spell, 4u);
+    EXPECT_EQ(d.reason, "buy for skill");
+}
+
+TEST(CraftShop, CheapestWinsAcrossCastableAndBuyable)
+{
+    RecipeOption cheapBuy = Buyable(4, 1);
+    cheapBuy.usefulToGroup = true;
+    RecipeOption castable = Recipe(5, 9);
+    castable.usefulToGroup = true;
+    CraftState state;
+    CraftDecision d = PlanCraft(Idle({castable, cheapBuy}), state, CraftConfig{}, T0);
+    EXPECT_EQ(d.action, CraftAction::Shop);
+    EXPECT_EQ(d.reason, "buy for group");
+}
+
+TEST(CraftShop, MasterIsAskedForABuyableRecipe)
+{
+    RecipeOption r = Buyable(6, 3);
+    r.usefulToMaster = true;
+    CraftState state;
+    EXPECT_EQ(PlanCraft(Idle({r}), state, CraftConfig{}, T0).action, CraftAction::Ask);
+}
+
+TEST(CraftShop, ApprovedBuyableKeepsTheApprovalUntilCastable)
+{
+    RecipeOption r = Buyable(6, 3);
+    r.usefulToMaster = true;
+    CraftState state;
+    PlanCraft(Idle({r}), state, CraftConfig{}, T0);
+    ASSERT_TRUE(AnswerCraft(state, true));
+
+    CraftDecision d = PlanCraft(Idle({r}), state, CraftConfig{}, T0 + 10);
+    EXPECT_EQ(d.action, CraftAction::Shop);
+    EXPECT_TRUE(d.forMaster);
+    EXPECT_EQ(state.approvedSpell, 6u);
+
+    r.castable = true;
+    r.buyable = false;
+    d = PlanCraft(Idle({r}), state, CraftConfig{}, T0 + 20);
+    EXPECT_EQ(d.action, CraftAction::Craft);
+    EXPECT_TRUE(d.forMaster);
+    EXPECT_EQ(state.approvedSpell, 0u);
+}
+
+TEST(CraftShop, NeitherCastableNorBuyableIsIgnored)
+{
+    RecipeOption r = Buyable(7, 1);
+    r.buyable = false;
+    r.skillUp = true;
+    CraftState state;
+    EXPECT_EQ(PlanCraft(Idle({r}), state, CraftConfig{}, T0).action, CraftAction::None);
+}

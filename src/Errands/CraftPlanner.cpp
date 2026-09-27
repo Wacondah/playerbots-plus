@@ -24,15 +24,22 @@ CraftDecision Result(CraftState& state, CraftAction action, RecipeOption const* 
     return d;
 }
 
-// Castable recipe matching `pick` with the cheapest reagents.
+// Castable or buyable recipe matching `pick` with the cheapest reagents.
 template <class Pick>
 RecipeOption const* Cheapest(CraftSnapshot const& snap, Pick pick)
 {
     RecipeOption const* best = nullptr;
     for (RecipeOption const& r : snap.recipes)
-        if (r.castable && pick(r) && (!best || r.reagentCost < best->reagentCost))
+        if ((r.castable || r.buyable) && pick(r) && (!best || r.reagentCost < best->reagentCost))
             best = &r;
     return best;
+}
+
+// A buyable pick waits for the vendor reagents instead of crafting.
+CraftDecision Pick(CraftState& state, RecipeOption const* r, bool forMaster, std::string const& what)
+{
+    return r->castable ? Result(state, CraftAction::Craft, r, forMaster, "craft for " + what)
+                       : Result(state, CraftAction::Shop, r, forMaster, "buy for " + what);
 }
 }  // namespace
 
@@ -50,11 +57,14 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
 
     if (state.approvedSpell)
     {
-        uint32_t const approved = state.approvedSpell;
-        state.approvedSpell = state.approvedProduct = 0;
         for (RecipeOption const& r : snap.recipes)
-            if (r.spell == approved && r.castable)
-                return Result(state, CraftAction::Craft, &r, true, "craft for master");
+            if (r.spell == state.approvedSpell && (r.castable || r.buyable))
+            {
+                if (r.castable)
+                    state.approvedSpell = state.approvedProduct = 0;
+                return Pick(state, &r, true, "master");
+            }
+        state.approvedSpell = state.approvedProduct = 0;
         return Result(state, CraftAction::None, nullptr, false, "cannot craft the approved recipe now");
     }
 
@@ -67,7 +77,7 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
     }
 
     if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.usefulToGroup; }))
-        return Result(state, CraftAction::Craft, r, false, "craft for group");
+        return Pick(state, r, false, "group");
 
     // Nobody wants the item: its dust and essences feed enchanting skill-ups.
     if (snap.disenchantItem)
@@ -78,7 +88,7 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
     }
 
     if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.skillUp; }))
-        return Result(state, CraftAction::Craft, r, false, "craft for skill");
+        return Pick(state, r, false, "skill");
 
     return Result(state, CraftAction::None, nullptr, false, "nothing to craft");
 }
