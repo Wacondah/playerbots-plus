@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-09-27
 
 - `errands hunt` strategy: one elected bot pulls a quest mob near the idle master.
 - `errands share` strategy: alts pass tradeable gear and materials to the alt who can use them.
