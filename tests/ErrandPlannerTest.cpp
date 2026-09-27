@@ -377,3 +377,24 @@ TEST(Pick, BuyReagentsAfterTrainBeforeTool)
     EXPECT_EQ(d.kind, ErrandKind::BuyReagents);
     EXPECT_EQ(d.reason, "start buy reagents");
 }
+
+TEST(Pick, TrainClassAfterTrainBeforeReagents)
+{
+    Snapshot snap = Ready();
+    Candidate trainer = Npc(1, 3.f);
+    trainer.canTrain = true;
+    Candidate classTrainer = Npc(2, 2.f);
+    classTrainer.canTrainClass = true;
+    Candidate reagentVendor = Npc(3, 1.f);
+    reagentVendor.canSellReagent = true;
+
+    snap.candidates = {reagentVendor, classTrainer, trainer};
+    ErrandState s1;
+    EXPECT_EQ(PlanAfterIdle(snap, s1, PlannerConfig{}).kind, ErrandKind::Train);
+
+    snap.candidates = {reagentVendor, classTrainer};
+    ErrandState s2;
+    Decision d = PlanAfterIdle(snap, s2, PlannerConfig{});
+    EXPECT_EQ(d.kind, ErrandKind::TrainClass);
+    EXPECT_EQ(d.reason, "start train class");
+}

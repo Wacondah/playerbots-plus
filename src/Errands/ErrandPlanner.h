@@ -38,6 +38,7 @@ enum class ErrandKind : uint8_t
     Repair,
     Sell,
     Train,
+    TrainClass,
     BuyReagents,
     BuyTool
 };
@@ -53,6 +54,7 @@ struct Candidate
     bool canRepair = false;
     bool canSell = false;
     bool canTrain = false;        // tradeskill trainer teaching an assigned profession
+    bool canTrainClass = false;   // class trainer teaching the bot something affordable
     bool canSellTool = false;     // vendor selling a missing tool of an assigned profession
     bool canSellReagent = false;  // vendor selling an item of the craft shopping list
 };
