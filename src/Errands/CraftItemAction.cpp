@@ -215,8 +215,6 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         r.usefulToMaster = master && !copyWaiting && !master->HasItemCount(product, 1, false) &&
                            MasterGain(master, proto, 0) > 0.f;
         r.declined = declined.count(product) > 0;
-        // Gear nobody in the group uses is not crafted for skill: no bags piling up.
-        r.skillUp = r.skillUp && (!gear || r.usefulToGroup);
         snap.recipes.push_back(r);
     }
 
