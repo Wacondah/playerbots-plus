@@ -18,6 +18,8 @@ constexpr float ChatCommandRelevance = 100.0f;
 constexpr float HuntRelevance = 1.9f;
 // Between the two: sharing costs nothing, so it goes before hunting.
 constexpr float ShareRelevance = 1.95f;
+// The move is instant, so it may go before an errand.
+constexpr float BagsRelevance = 2.1f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -61,6 +63,21 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("errands tick", {NextAction("share item", ShareRelevance)}));
+    }
+};
+
+// Keeps a free bag slot on every alt by passing stackables around, out of combat.
+class ErrandsBagsStrategy : public Strategy
+{
+public:
+    ErrandsBagsStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands bags"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("bags tick", {NextAction("rebalance bags", BagsRelevance)}));
     }
 };
 

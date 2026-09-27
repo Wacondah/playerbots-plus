@@ -37,21 +37,16 @@ bool ShareItemAction::Execute(Event /*event*/)
     if (!item || !receiver)
         return false;
 
-    ItemPosCountVec dest;
-    if (receiver->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false) != EQUIP_ERR_OK)
+    // Formatted before the move: a merged stack no longer exists afterwards.
+    std::string const what = chat->FormatItem(item->GetTemplate(), item->GetCount());
+    if (!GiveItemTo(bot, item, receiver))
     {
         MarkShareFailed(data.share, decision.item, decision.receiver, getMSTime());
         DebugErrands(botAI, std::string("share: ") + receiver->GetName() + " bags full");
         return false;
     }
 
-    ItemTemplate const* proto = item->GetTemplate();
-    uint32 const count = item->GetCount();
-    bot->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
-    item->SetOwnerGUID(receiver->GetGUID());
-    receiver->MoveItemToInventory(dest, item, true);
-
-    botAI->TellMasterNoFacing("Gave " + chat->FormatItem(proto, count) + " to " + receiver->GetName());
+    botAI->TellMasterNoFacing("Gave " + what + " to " + receiver->GetName());
     return true;
 }
 

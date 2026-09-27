@@ -54,3 +54,13 @@ PlayerbotsPlus.Errands.InInstances = 0
 PlayerbotsPlus.Hunt.Radius = 45
 PlayerbotsPlus.Hunt.MaxLevelAbove = 2
 PlayerbotsPlus.Hunt.PackRadius = 8
+
+###################################################################################################
+# ERRANDS BAGS  (strategy "errands bags")
+#
+# Out of combat, an alt below this many free bag slots gives stackable items to a nearby
+# alt (merging into partial stacks first).
+#
+#    PlayerbotsPlus.Bags.MinFreeSlots   Free slots each alt tries to keep.      Default: 1
+
+PlayerbotsPlus.Bags.MinFreeSlots = 1

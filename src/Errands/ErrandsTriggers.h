@@ -19,6 +19,15 @@ public:
 
     bool IsActive() override { return Config().enabled && botAI->GetMaster(); }
 };
+
+// Bags are rebalanced out of combat, master moving or not.
+class BagsTickTrigger : public Trigger
+{
+public:
+    BagsTickTrigger(PlayerbotAI* botAI) : Trigger(botAI, "bags tick") {}
+
+    bool IsActive() override { return Config().enabled && !bot->IsInCombat() && bot->GetGroup(); }
+};
 }  // namespace PlayerbotsPlus
 
 #endif

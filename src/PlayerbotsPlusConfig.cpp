@@ -25,6 +25,7 @@ void ModuleConfig::Load()
     huntMaxLevelAbove = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Hunt.MaxLevelAbove", 2);
     huntRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.Radius", 45.0f);
     huntPackRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.PackRadius", 8.0f);
+    bagsMinFreeSlots = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Bags.MinFreeSlots", 1);
 }
 
 ModuleConfig& Config()

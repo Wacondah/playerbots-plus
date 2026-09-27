@@ -22,6 +22,7 @@ struct ModuleConfig
     uint32_t huntMaxLevelAbove = 2;
     float huntRadius = 45.f;
     float huntPackRadius = 8.f;
+    uint32_t bagsMinFreeSlots = 1;
 
     void Load();
 };

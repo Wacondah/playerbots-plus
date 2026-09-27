@@ -5,6 +5,7 @@
 #ifndef PLAYERBOTS_PLUS_ERRANDS_VALUES_H
 #define PLAYERBOTS_PLUS_ERRANDS_VALUES_H
 
+#include "BagPlanner.h"
 #include "ErrandPlanner.h"
 #include "HuntPlanner.h"
 #include "SharePlanner.h"
@@ -31,6 +32,9 @@ struct ErrandsData
     bool hasJunk = false;  // cached: evaluating junk asks every group bot about every item
     bool junkChecked = false;
     uint32 junkCheckedAt = 0;
+    BagState bags;
+    BagMove bagMove;
+    uint32 lastBagsAt = 0;
 };
 
 // This tick's errands decision is "nothing to do": the leash holds and no errand is left.

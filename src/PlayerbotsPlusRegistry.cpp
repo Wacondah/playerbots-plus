@@ -16,6 +16,7 @@
 #include "MageAiObjectContext.h"
 #include "PaladinAiObjectContext.h"
 #include "PriestAiObjectContext.h"
+#include "RebalanceBagsAction.h"
 #include "RogueAiObjectContext.h"
 #include "RunErrandAction.h"
 #include "ShamanAiObjectContext.h"
@@ -36,6 +37,7 @@ public:
         creators["debug errands"] = [](PlayerbotAI* ai) -> Strategy* { return new DebugErrandsStrategy(ai); };
         creators["errands hunt"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsHuntStrategy(ai); };
         creators["errands share"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsShareStrategy(ai); };
+        creators["errands bags"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsBagsStrategy(ai); };
     }
 };
 
@@ -45,6 +47,7 @@ public:
     PlusTriggerContext()
     {
         creators["errands tick"] = [](PlayerbotAI* ai) -> Trigger* { return new ErrandsTickTrigger(ai); };
+        creators["bags tick"] = [](PlayerbotAI* ai) -> Trigger* { return new BagsTickTrigger(ai); };
         creators["errands"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "errands"); };
     }
 };
@@ -58,6 +61,7 @@ public:
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };
         creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
+        creators["rebalance bags"] = [](PlayerbotAI* ai) -> Action* { return new RebalanceBagsAction(ai); };
     }
 };
 

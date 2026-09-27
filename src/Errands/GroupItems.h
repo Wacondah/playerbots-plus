@@ -34,6 +34,13 @@ std::vector<Player*> GroupBots(Player* bot, float maxDistance);
 
 // What the item means to its holder and to each of `others` (usage, tier, gain, held).
 ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player*> const& others);
+
+// Empty slots in the backpack and regular bags (profession bags excluded).
+uint32 FreeSlots(Player* player);
+
+// Moves the whole item into the receiver's bags, merging into partial stacks
+// (mirrors mod-playerbots' GiveItemAction). False, nothing moved, if it does not fit.
+bool GiveItemTo(Player* giver, Item* item, Player* receiver);
 }  // namespace PlayerbotsPlus
 
 #endif

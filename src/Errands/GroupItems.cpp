@@ -83,4 +83,28 @@ ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player
     }
     return s;
 }
+
+uint32 FreeSlots(Player* player)
+{
+    uint32 free = 0;
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+            ++free;
+    for (uint8 bagSlot = INVENTORY_SLOT_BAG_START; bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot)
+        if (Bag* bag = player->GetBagByPos(bagSlot))
+            if (bag->GetTemplate()->SubClass == ITEM_SUBCLASS_CONTAINER)
+                free += bag->GetFreeSlots();
+    return free;
+}
+
+bool GiveItemTo(Player* giver, Item* item, Player* receiver)
+{
+    ItemPosCountVec dest;
+    if (receiver->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false) != EQUIP_ERR_OK)
+        return false;
+    giver->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
+    item->SetOwnerGUID(receiver->GetGUID());
+    receiver->MoveItemToInventory(dest, item, true);
+    return true;
+}
 }  // namespace PlayerbotsPlus
