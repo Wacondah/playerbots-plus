@@ -46,11 +46,11 @@ PlayerbotsPlus.Errands.InInstances = 0
 #
 #    PlayerbotsPlus.Hunt.Radius         Yd from the master. Wider than the
 #                                       errands radius: closer mobs aggro
-#                                       before the master is idle.              Default: 35
+#                                       before the master is idle.              Default: 45
 #    PlayerbotsPlus.Hunt.MaxLevelAbove  Max levels above the lowest group bot.  Default: 2
 #    PlayerbotsPlus.Hunt.PackRadius     Other hostiles this close (yd) veto
 #                                       the pull.                               Default: 8
 
-PlayerbotsPlus.Hunt.Radius = 35
+PlayerbotsPlus.Hunt.Radius = 45
 PlayerbotsPlus.Hunt.MaxLevelAbove = 2
 PlayerbotsPlus.Hunt.PackRadius = 8

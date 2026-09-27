@@ -23,7 +23,7 @@ void ModuleConfig::Load()
     sellWhite = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.SellWhite", false);
     maxSellQuality = std::min<uint32>(sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.MaxSellQuality", 3), 4);
     huntMaxLevelAbove = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Hunt.MaxLevelAbove", 2);
-    huntRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.Radius", 35.0f);
+    huntRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.Radius", 45.0f);
     huntPackRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.PackRadius", 8.0f);
 }
 

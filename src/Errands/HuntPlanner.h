@@ -45,7 +45,7 @@ struct HuntSnapshot
 
 struct HuntConfig
 {
-    float radius = 35.f;  // wider than errands: mobs aggro inside ~20 yd before the master is idle
+    float radius = 45.f;  // wider than errands: mobs aggro inside ~20 yd before the master is idle
     uint32_t maxLevelAbove = 2;
     uint32_t timeoutMs = 20000;
     uint32_t blacklistMs = 60000;

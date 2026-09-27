@@ -21,9 +21,10 @@ They drop the errand as soon as you move, enter combat or mount, and they obey `
 
 Optional, on top of errands: `nc +errands hunt` (or `/p nc +errands hunt` for the whole
 party). When you stand still and no errand is left, one bot (a tank first) pulls a quest
-mob within 35 yd (`Hunt.Radius`, wider than the errands radius so it is spotted before it aggroes) that some bot of the group still needs; the group fights it as
-usual. Never elites, never a mob with another hostile within 8 yd, never while someone
-is low on health or mana, never above the lowest bot level + 2.
+mob within 45 yd (`Hunt.Radius`: wider than the errands radius, so the mob is spotted
+before it aggroes) that some bot of the group still needs; the group fights it as usual.
+Never elites, never a mob with another hostile within 8 yd, never while someone is low
+on health or mana, never above the lowest bot level + 2.
 
 ## Errands share
 
