@@ -45,6 +45,9 @@ bool ShareItemAction::Execute(Event /*event*/)
 
     // Formatted before the move: a merged stack no longer exists afterwards.
     std::string const what = chat->FormatItem(item->GetTemplate(), item->GetCount());
+    uint32 const itemClass = item->GetTemplate()->Class;
+    bool const gear =
+        itemClass == ITEM_CLASS_ARMOR || itemClass == ITEM_CLASS_WEAPON || itemClass == ITEM_CLASS_CONTAINER;
     if (!GiveItemTo(bot, item, receiver))
     {
         MarkShareFailed(data.share, decision.item, decision.receiver, getMSTime());
@@ -53,6 +56,9 @@ bool ShareItemAction::Execute(Event /*event*/)
     }
 
     botAI->TellMasterNoFacing("Gave " + what + " to " + receiver->GetName());
+    // Upstream equips on an item push packet, which a direct move does not send.
+    if (PlayerbotAI* receiverAI = gear ? GET_PLAYERBOT_AI(receiver) : nullptr)
+        receiverAI->DoSpecificAction("equip upgrade", Event("share item"), true);
     return true;
 }
 

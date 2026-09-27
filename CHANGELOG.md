@@ -9,6 +9,9 @@
 - Errands city: in a capital, bots leave the leash to train (class, professions), buy tools
   and craft reagents across the city, then come back (`City.Auto`, `errands city`).
 - Class training at a class trainer within the errands radius.
+- Share: the receiver equips gear it is given (bags included) right away.
+- Craft: gear nobody in the group uses (bags, armor, weapons) is no longer crafted just
+  for skill-ups.
 - README: restored the "Assigned professions" and "Install" headings lost in 0.5.0.
 
 ## 0.5.0 — 2026-09-27

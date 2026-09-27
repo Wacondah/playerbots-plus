@@ -32,3 +32,4 @@ start here.
 | `NewRpgBaseAction::MoveFarTo`, `WorldPosition` | `CityErrandAction` | long walks across a capital |
 | core `Trainer::Trainer` (class trainers, `IsTrainerValidForPlayer`, `CanTeachSpell`, `TeachSpell`) | `Professions` | class training |
 | core `ObjectMgr::GetAllCreatureData`, `MapMgr::GetZoneId`, `Map::GetCreatureBySpawnIdStore`, `Player::GetReputationPriceDiscount(FactionTemplateEntry const*)` | `CityIndex`, `CityErrandAction`, `Professions` | capital NPCs |
+| action `"equip upgrade"` (`EquipUpgradeAction`) | `ShareItemAction::Execute` | receivers equip shared gear (no item push packet on a direct move) |

@@ -45,6 +45,7 @@ Setup: `/p nc +errands share`, party with different classes and professions.
 | S4 | Herbs on a non-alchemist, an alchemist in the party | herbs go to the alchemist |
 | S5 | Receiver with full bags | skipped; giver's `errands` shows `share: receiver bags full` |
 | S6 | Two tailors | cloth gathers on the one holding the most |
+| S7 | Tailor crafts a Linen Bag, an alt has an empty bag slot | the alt receives it and equips it at once |
 
 ## Selling
 
@@ -96,6 +97,7 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | C3 | `craft no` | never asked again for that item, also after a restart |
 | C4 | Bandages useful to the party (first aid) | crafted without asking |
 | C5 | Recipes still orange/yellow, nothing useful | crafts for skill, cheapest materials first; stops when recipes turn grey |
+| C13 | Every alt has 4 bags at least as big as a Linen Bag | the tailor stops crafting Linen Bags, even if the recipe still gives skill |
 | C6 | A BoE green upgrade for you in a bot's bags (`errands share`) | offered to you before any bot |
 | C7 | Enchanter with `errands craft`, a BoE green nobody wants in another alt's bags | handed to the enchanter (share), disenchanted; not sold |
 | C8 | Soulbound replaced quest reward on the enchanter | disenchanted instead of sold |
