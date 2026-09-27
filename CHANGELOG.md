@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 — 2026-09-27
 
 - Selling: crafted materials none of the holder's professions uses (copper tube, bolts)
   are no longer kept because of an upstream cache bug; gatherers still keep raw materials.
