@@ -149,3 +149,21 @@ TEST(Craft, AnswerWithoutQuestionOrNo)
     EXPECT_EQ(state.askedSpell, 0u);
     EXPECT_EQ(state.approvedSpell, 0u);
 }
+
+TEST(Craft, DisenchantAfterGroupBeforeSkill)
+{
+    RecipeOption skill = Recipe(1, 1);
+    skill.skillUp = true;
+    CraftSnapshot snap = Idle({skill});
+    snap.disenchantItem = 77;
+    CraftState s1;
+    CraftDecision d = PlanCraft(snap, s1, CraftConfig{}, T0);
+    EXPECT_EQ(d.action, CraftAction::Disenchant);
+    EXPECT_EQ(d.item, 77u);
+
+    RecipeOption group = Recipe(2, 5);
+    group.usefulToGroup = true;
+    snap.recipes.push_back(group);
+    CraftState s2;
+    EXPECT_EQ(PlanCraft(snap, s2, CraftConfig{}, T0).spell, 2u);
+}

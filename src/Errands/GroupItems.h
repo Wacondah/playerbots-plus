@@ -40,6 +40,10 @@ ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player
 // than their smallest one, score gain for gear. 0 for consumables or anything unusable.
 float MasterGain(Player* master, ItemTemplate const* proto, int32 randomProperty);
 
+// A bot with "errands craft" and enough enchanting that would disenchant this item
+// (green or better up to MaxDisenchantQuality, weapon or armor).
+bool CanDisenchant(Player* player, ItemTemplate const* proto);
+
 // The bot's master when it is a real player, else nullptr.
 Player* RealMaster(PlayerbotAI* botAI);
 

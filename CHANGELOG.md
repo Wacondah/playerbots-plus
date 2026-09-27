@@ -5,6 +5,8 @@
 - Assigned professions: `professions` command; errands trains them and buys their tools.
 - `errands craft` strategy: craft for the master (asked first), the party, then skill-ups.
 - Share offers upgrades to the master first, through a trade window.
+- Disenchanting: enchanters with `errands craft` disenchant what nobody wants (up to
+  `Craft.MaxDisenchantQuality`); share routes it to them, selling keeps it.
 
 ## 0.4.0 — 2026-09-27
 

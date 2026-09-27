@@ -15,7 +15,13 @@ namespace
 CraftDecision Result(CraftState& state, CraftAction action, RecipeOption const* r, bool forMaster, std::string reason)
 {
     state.lastReason = reason;
-    return CraftDecision{action, r ? r->spell : 0, r ? r->product : 0, forMaster, std::move(reason)};
+    CraftDecision d;
+    d.action = action;
+    d.spell = r ? r->spell : 0;
+    d.product = r ? r->product : 0;
+    d.forMaster = forMaster;
+    d.reason = std::move(reason);
+    return d;
 }
 
 // Castable recipe matching `pick` with the cheapest reagents.
@@ -62,6 +68,14 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
 
     if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.usefulToGroup; }))
         return Result(state, CraftAction::Craft, r, false, "craft for group");
+
+    // Nobody wants the item: its dust and essences feed enchanting skill-ups.
+    if (snap.disenchantItem)
+    {
+        CraftDecision d = Result(state, CraftAction::Disenchant, nullptr, false, "disenchant");
+        d.item = snap.disenchantItem;
+        return d;
+    }
 
     if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.skillUp; }))
         return Result(state, CraftAction::Craft, r, false, "craft for skill");

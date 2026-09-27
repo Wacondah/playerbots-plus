@@ -60,6 +60,9 @@ you stand still and no errand is left, a bot crafts on purpose with the material
 bags: first it asks you about upgrades for you ("I can craft [item] for you. Whisper
 'craft yes' or 'craft no'."), then crafts what the party can use (gear upgrades, bigger
 bags, bandages, potions), then recipes that raise its skill, cheapest materials first.
+An enchanter with `errands craft` also disenchants weapons and armor nobody in the party
+(you included) wants, up to blue (`Craft.MaxDisenchantQuality`), before crafting for skill.
+With `errands share`, other alts hand such items to it; selling keeps them for it.
 Nothing else, never at random. `craft no` is remembered.
 
 &

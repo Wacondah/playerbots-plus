@@ -68,3 +68,12 @@ PlayerbotsPlus.Hunt.PackRadius = 8
 #    PlayerbotsPlus.Bags.MinFreeSlots   Free slots each alt tries to keep.      Default: 1
 
 PlayerbotsPlus.Bags.MinFreeSlots = 1
+
+###################################################################################################
+# ERRANDS CRAFT  (strategy "errands craft")
+#
+#    PlayerbotsPlus.Craft.MaxDisenchantQuality  Highest quality an enchanter bot
+#                                               disenchants when nobody (you included)
+#                                               wants the item: 2 green, 3 blue, 4 epic. Default: 3
+
+PlayerbotsPlus.Craft.MaxDisenchantQuality = 3

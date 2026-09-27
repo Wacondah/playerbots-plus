@@ -55,13 +55,30 @@ bool CraftItemAction::isUseful()
         if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(d.product))
             botAI->TellMaster("I can craft " + chat->FormatItem(proto) +
                               " for you. Whisper 'craft yes' or 'craft no'.");
-    return d.action == CraftAction::Craft;
+    return d.action == CraftAction::Craft || d.action == CraftAction::Disenchant;
 }
 
 bool CraftItemAction::Execute(Event /*event*/)
 {
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
     CraftDecision const d = data.craftDecision;
+    if (d.action == CraftAction::Disenchant)
+    {
+        Item* target = nullptr;
+        ForEachBagItem(bot,
+                       [&](Item* item)
+                       {
+                           if (item->GetGUID().GetRawValue() == d.item)
+                               target = item;
+                       });
+        if (!target)
+            return false;
+        std::string const what = chat->FormatItem(target->GetTemplate());
+        if (!botAI->CastSpell(DisenchantSpell, bot, target))
+            return false;
+        DebugErrands(botAI, "craft: disenchant " + what);
+        return true;
+    }
     if (!botAI->CastSpell(d.spell, bot))
         return false;
     if (d.forMaster)
@@ -128,6 +145,21 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         r.declined = declined.count(product) > 0;
         snap.recipes.push_back(r);
     }
+
+    // First item nobody wants (bound: only the bot's own use counts) to disenchant.
+    std::vector<Player*> const others = GroupBots(bot, 0.f);
+    ForEachBagItem(bot,
+                   [&](Item* item)
+                   {
+                       if (snap.disenchantItem || !CanDisenchant(bot, item->GetTemplate()))
+                           return;
+                       ShareItem const described = DescribeForGroup(botAI, item, others);
+                       bool const wanted = item->CanBeTraded()
+                                               ? WantedByGroup(described)
+                                               : (described.usage != ShareUsage::Other);
+                       if (!wanted)
+                           snap.disenchantItem = item->GetGUID().GetRawValue();
+                   });
     return snap;
 }
 

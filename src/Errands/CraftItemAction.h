@@ -14,6 +14,8 @@ namespace PlayerbotsPlus
 {
 // Recipes are re-evaluated at most this often per bot.
 constexpr uint32 CraftIntervalMs = 5000;
+// The Disenchant spell.
+constexpr uint32 DisenchantSpell = 13262;
 
 // Adapter between the core and PlanCraft: lists recipes, asks the master, casts.
 class CraftItemAction : public Action

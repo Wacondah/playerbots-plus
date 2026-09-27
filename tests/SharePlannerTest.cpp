@@ -215,3 +215,27 @@ TEST(WantedByGroup, MasterCounts)
     item.masterDeclined = true;
     EXPECT_FALSE(WantedByGroup(item));
 }
+
+TEST(ShareDisenchant, UnwantedItemGoesToTheEnchanter)
+{
+    ShareItem item{1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Other)}};
+    item.disenchanter = 10;
+    ShareState state;
+    ShareDecision d = PlanShare(One(item), state, ShareConfig{}, T0);
+    EXPECT_EQ(d.receiver, 10u);
+    EXPECT_EQ(d.reason, "give to disenchant");
+}
+
+TEST(ShareDisenchant, UpgradesAndHolderEnchanterComeFirst)
+{
+    ShareItem item{1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Other), Receiver(20, ShareUsage::Replace, 0, 3.f)}};
+    item.disenchanter = 10;
+    ShareState s1;
+    EXPECT_EQ(PlanShare(One(item), s1, ShareConfig{}, T0).receiver, 20u);
+
+    ShareItem own{1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Other)}};
+    own.disenchanter = 10;
+    own.holderCanDisenchant = true;
+    ShareState s2;
+    EXPECT_FALSE(PlanShare(One(own), s2, ShareConfig{}, T0).Acts());
+}

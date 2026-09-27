@@ -95,3 +95,5 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | C4 | Bandages useful to the party (first aid) | crafted without asking |
 | C5 | Recipes still orange/yellow, nothing useful | crafts for skill, cheapest materials first; stops when recipes turn grey |
 | C6 | A BoE green upgrade for you in a bot's bags (`errands share`) | offered to you before any bot |
+| C7 | Enchanter with `errands craft`, a BoE green nobody wants in another alt's bags | handed to the enchanter (share), disenchanted; not sold |
+| C8 | Soulbound replaced quest reward on the enchanter | disenchanted instead of sold |

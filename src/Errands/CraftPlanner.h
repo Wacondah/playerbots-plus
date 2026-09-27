@@ -28,6 +28,7 @@ struct CraftSnapshot
 {
     bool errandsIdle = false;
     std::vector<RecipeOption> recipes;
+    uint64_t disenchantItem = 0;  // an item in the bags to disenchant (0: none)
 };
 
 struct CraftConfig
@@ -49,7 +50,8 @@ enum class CraftAction : uint8_t
 {
     None,
     Craft,
-    Ask
+    Ask,
+    Disenchant
 };
 
 struct CraftDecision
@@ -57,11 +59,13 @@ struct CraftDecision
     CraftAction action = CraftAction::None;
     uint32_t spell = 0;
     uint32_t product = 0;
+    uint64_t item = 0;       // Disenchant: the item
     bool forMaster = false;  // crafted on the master's "craft yes": offer it afterwards
     std::string reason;
 };
 
-// Order: pending answer, approved recipe, ask the master, group needs, skill-ups.
+// Order: pending answer, approved recipe, ask the master, group needs, disenchant,
+// skill-ups.
 CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfig const& cfg, uint32_t now);
 
 // The master answered the pending question. False when nothing was asked.

@@ -7,6 +7,7 @@
 #include "Group.h"
 #include "ItemUsageValue.h"
 #include "Playerbots.h"
+#include "PlayerbotsPlusConfig.h"
 #include "ReagentIndex.h"
 #include "StatsWeightCalculator.h"
 
@@ -74,8 +75,20 @@ ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player
     s.usage = ToShareUsage(UsageFor(holderAI->GetBot(), itemId));
     s.tier = TierFor(usedBy, ReagentIndex::Known(holderAI->GetBot()));
     s.masterGain = MasterGain(RealMaster(holderAI), item->GetTemplate(), item->GetItemRandomPropertyId());
+    s.holderCanDisenchant = CanDisenchant(holderAI->GetBot(), item->GetTemplate());
+    s.groupCanDisenchant = s.holderCanDisenchant;
+    uint32 bestEnchanting = 0;
     for (Player* other : others)
     {
+        if (CanDisenchant(other, item->GetTemplate()))
+        {
+            s.groupCanDisenchant = true;
+            if (other->GetSkillValue(SKILL_ENCHANTING) > bestEnchanting)
+            {
+                bestEnchanting = other->GetSkillValue(SKILL_ENCHANTING);
+                s.disenchanter = other->GetGUID().GetRawValue();
+            }
+        }
         ShareReceiver r;
         r.guid = other->GetGUID().GetRawValue();
         r.usage = ToShareUsage(UsageFor(other, itemId));
@@ -116,6 +129,16 @@ float MasterGain(Player* master, ItemTemplate const* proto, int32 randomProperty
     float const currentScore =
         current ? calc.CalculateItem(current->GetEntry(), current->GetItemRandomPropertyId()) : 0.f;
     return std::max(0.f, calc.CalculateItem(proto->ItemId, randomProperty) - currentScore);
+}
+
+bool CanDisenchant(Player* player, ItemTemplate const* proto)
+{
+    PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
+    return ai && proto && proto->DisenchantID && proto->Quality >= ITEM_QUALITY_UNCOMMON &&
+           proto->Quality <= Config().maxDisenchantQuality &&
+           (proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) &&
+           player->GetSkillValue(SKILL_ENCHANTING) >= proto->RequiredDisenchantSkill &&
+           player->HasSkill(SKILL_ENCHANTING) && ai->HasStrategy("errands craft", BotState::BOT_STATE_NON_COMBAT);
 }
 
 Player* RealMaster(PlayerbotAI* botAI)

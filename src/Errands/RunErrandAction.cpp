@@ -270,6 +270,7 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
     bool const foodCheat = botAI->HasCheat(BotCheatMask::food);
     std::vector<Player*> group;
     bool groupLoaded = false;
+    // Kept when someone uses it, or when an enchanter of the group will disenchant it.
     auto wantedByGroup = [&](Item* item)
     {
         if (!groupLoaded)
@@ -277,7 +278,8 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
             group = GroupBots(bot, 0.f);
             groupLoaded = true;
         }
-        return WantedByGroup(DescribeForGroup(botAI, item, group));
+        ShareItem const described = DescribeForGroup(botAI, item, group);
+        return WantedByGroup(described) || described.groupCanDisenchant;
     };
 
     ForEachBagItem(bot,
@@ -304,7 +306,9 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
 
                        if (usage == ITEM_USAGE_VENDOR)
                        {
-                           junk.push_back(item);
+                           // Bound: only its holder could disenchant it.
+                           if (!CanDisenchant(bot, proto))
+                               junk.push_back(item);
                            return;
                        }
                        if (usage == ITEM_USAGE_AH && item->CanBeTraded() && !wantedByGroup(item))

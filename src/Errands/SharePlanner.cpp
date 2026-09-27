@@ -89,6 +89,10 @@ ShareDecision PlanShare(ShareSnapshot const& snap, ShareState& state, ShareConfi
             return Result(state, item.id, snap.master, "offer to master", true);
         if (ShareReceiver const* r = BestReceiver(item, state))
             return Result(state, item.id, r->guid, "give");
+        // Nobody uses it: an enchanter turns it into dust and essences.
+        if (item.disenchanter && !item.holderCanDisenchant && item.usage != ShareUsage::Quest &&
+            !WantsToEquip(item.usage) && !state.blacklistedAt.count({item.id, item.disenchanter}))
+            return Result(state, item.id, item.disenchanter, "give to disenchant");
     }
 
     return Result(state, 0, 0, "nothing to share");

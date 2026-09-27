@@ -60,6 +60,9 @@ struct ShareItem
     std::vector<ShareReceiver> receivers;
     float masterGain = 0.f;       // upgrade for the master (0: none, consumables never)
     bool masterDeclined = false;  // the master refused this item recently
+    uint64_t disenchanter = 0;        // nearby enchanter bot able to disenchant it (0: none)
+    bool holderCanDisenchant = false;  // the holder disenchants it itself
+    bool groupCanDisenchant = false;   // some enchanter of the group could (selling keeps it)
 };
 
 struct ShareSnapshot
