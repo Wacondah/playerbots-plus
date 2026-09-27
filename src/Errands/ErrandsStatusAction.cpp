@@ -5,6 +5,7 @@
 #include "ErrandsStatusAction.h"
 
 #include "ChatCommands.h"
+#include "CityErrandAction.h"
 #include "ErrandsValues.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -21,6 +22,8 @@ bool ErrandsStatusAction::Execute(Event event)
     if (ParseErrandsSwitch("errands " + event.getParam()) != ErrandsSwitch::None)
         return true;
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
+    if (event.getParam() == "city")
+        return RequestCity(data);
     ActiveErrand const& active = data.state.active;
 
     std::ostringstream out;
@@ -57,10 +60,37 @@ bool ErrandsStatusAction::Execute(Event event)
         else if (data.craftDecision.action == CraftAction::Shop)
             out << " | shopping: " << data.shopping.reason;
     }
+    if (data.city.Active())
+    {
+        Creature* stop = nullptr;
+        auto const range =
+            bot->GetMap()->GetCreatureBySpawnIdStore().equal_range(ObjectGuid::LowType(data.city.current));
+        if (range.first != range.second)
+            stop = range.first->second;
+        out << " | city: to " << (stop ? stop->GetName() : "?") << " (" << data.city.done.size() + 1 << "/"
+            << data.city.stopsPlanned << ")";
+    }
+    else if (!data.city.lastReason.empty() && data.city.lastReason != "city: -")
+        out << " | " << data.city.lastReason;
     if (data.offer.Active())
         out << " | offering item " << data.offer.entry << (data.offer.placed ? " (in trade)" : "");
 
     botAI->TellMaster(out.str());
+    return true;
+}
+
+bool ErrandsStatusAction::RequestCity(ErrandsData& data)
+{
+    int32 const stops = CityErrandAction(botAI).CountStops();
+    if (stops < 0)
+        botAI->TellMaster("city: not in a capital");
+    else if (!stops)
+        botAI->TellMaster("city: nothing to do");
+    else
+    {
+        data.cityRequested = true;
+        botAI->TellMaster("city: going (" + std::to_string(stops) + " stops)");
+    }
     return true;
 }
 }  // namespace PlayerbotsPlus

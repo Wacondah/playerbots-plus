@@ -24,6 +24,8 @@ constexpr float BagsRelevance = 2.1f;
 constexpr float OfferRelevance = 1.97f;
 // After share, so materials reach the right crafter first; before hunting.
 constexpr float CraftRelevance = 1.93f;
+// A capital trip outranks errands and follow: the leash is released meanwhile.
+constexpr float CityRelevance = 2.05f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -39,6 +41,7 @@ public:
         triggers.push_back(new TriggerNode("errands", {NextAction("errands status", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("professions", {NextAction("professions", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("errands tick", {NextAction("offer to master", OfferRelevance)}));
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("city errand", CityRelevance)}));
     }
 };
 

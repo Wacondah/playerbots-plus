@@ -33,6 +33,9 @@ void ModuleConfig::Load()
         sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.ReserveCopperPer10Levels", 10000);
     shoppingMaxCopper = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.MaxShoppingCopper", 5000);
     shoppingMaxCrafts = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.MaxShoppingCrafts", 20);
+    cityAuto = sConfigMgr->GetOption<bool>("PlayerbotsPlus.City.Auto", true);
+    cityTimeoutMs = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.City.Timeout", 180000);
+    cityCooldownMs = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.City.Cooldown", 600000);
 }
 
 ModuleConfig& Config()

@@ -9,13 +9,22 @@
 
 namespace PlayerbotsPlus
 {
-// Reply to the "errands" whisper: current errand and last planner reason.
+struct ErrandsData;
+}
+
+namespace PlayerbotsPlus
+{
+// Reply to the "errands" whisper: current errand and last planner reason;
+// "errands city" starts a capital trip.
 class ErrandsStatusAction : public Action
 {
 public:
     ErrandsStatusAction(PlayerbotAI* botAI) : Action(botAI, "errands status") {}
 
     bool Execute(Event event) override;
+
+private:
+    bool RequestCity(ErrandsData& data);
 };
 }  // namespace PlayerbotsPlus
 

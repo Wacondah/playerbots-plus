@@ -6,6 +6,7 @@
 
 #include "ChatCommandTrigger.h"
 #include "CraftDeclinedValue.h"
+#include "CityErrandAction.h"
 #include "CraftItemAction.h"
 #include "DKAiObjectContext.h"
 #include "DruidAiObjectContext.h"
@@ -67,6 +68,7 @@ public:
     PlusActionContext()
     {
         creators["run errand"] = [](PlayerbotAI* ai) -> Action* { return new RunErrandAction(ai); };
+        creators["city errand"] = [](PlayerbotAI* ai) -> Action* { return new CityErrandAction(ai); };
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };
         creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };

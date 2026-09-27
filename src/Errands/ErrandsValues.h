@@ -6,6 +6,7 @@
 #define PLAYERBOTS_PLUS_ERRANDS_VALUES_H
 
 #include "BagPlanner.h"
+#include "CityPlanner.h"
 #include "CraftPlanner.h"
 #include "ErrandPlanner.h"
 #include "HuntPlanner.h"
@@ -66,6 +67,13 @@ struct ErrandsData
     uint32 shoppingSpell = 0;
     uint32 shoppingProduct = 0;
     uint32 shoppingToldSpell = 0;  // "I need a vendor for" said once per approved recipe
+    CityState city;
+    CityDecision cityDecision;
+    bool cityRequested = false;  // "errands city" whispered
+    std::vector<CityStop> cityStops;  // this bot's stops in the current capital
+    uint32 cityNeeds = 0;
+    uint32 cityZone = 0;
+    uint32 cityStopsAt = 0;  // when cityStops was computed
 
     bool OfferBusy() const { return offer.Active() || pendingOfferProduct; }
     bool OfferDeclined(uint32 entry, uint32 now) const
@@ -75,11 +83,12 @@ struct ErrandsData
     }
 };
 
-// This tick's errands decision is "nothing to do": the leash holds and no errand is left.
+// This tick's errands decision is "nothing to do": the leash holds, no errand is left and
+// no city trip runs.
 inline bool ErrandsIdle(ErrandsData const& data, uint32 now)
 {
-    return data.decision.type == DecisionType::Idle && data.decision.reason == "nothing to do" &&
-           !Elapsed(now, data.decidedAt, FreshDecisionMs);
+    return !data.city.Active() && data.decision.type == DecisionType::Idle &&
+           data.decision.reason == "nothing to do" && !Elapsed(now, data.decidedAt, FreshDecisionMs);
 }
 
 class ErrandsDataValue : public ManualSetValue<ErrandsData&>

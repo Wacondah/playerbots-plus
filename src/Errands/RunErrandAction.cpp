@@ -34,6 +34,8 @@ std::vector<uint32> const& RunErrandAction::Assigned()
 bool RunErrandAction::isUseful()
 {
     ErrandsData& data = Data();
+    if (data.city.Active())
+        return false;  // the city trip drives the bot
     uint32 const now = getMSTime();
     Snapshot const snap = BuildSnapshot(data, now);
     data.decision = Plan(snap, data.state, Config().planner, now);

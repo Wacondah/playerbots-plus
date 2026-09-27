@@ -5,6 +5,7 @@
 #ifndef PLAYERBOTS_PLUS_SHOPPING_H
 #define PLAYERBOTS_PLUS_SHOPPING_H
 
+#include "Define.h"
 #include "ShoppingPlanner.h"
 
 class Creature;

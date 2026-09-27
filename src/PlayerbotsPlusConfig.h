@@ -28,6 +28,9 @@ struct ModuleConfig
     uint32_t shoppingReservePer10Levels = 10000;
     uint32_t shoppingMaxCopper = 5000;
     uint32_t shoppingMaxCrafts = 20;
+    bool cityAuto = true;
+    uint32_t cityTimeoutMs = 180000;
+    uint32_t cityCooldownMs = 600000;
 
     void Load();
 };
