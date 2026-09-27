@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Selling: crafted materials none of the holder's professions uses (copper tube, bolts)
+  are no longer kept because of an upstream cache bug; gatherers still keep raw materials.
+
 ## 0.5.0 — 2026-09-27
 
 - Assigned professions: `professions` command; errands trains them and buys their tools.

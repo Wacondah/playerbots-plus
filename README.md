@@ -11,7 +11,8 @@ you, then follow you again:
 - turn in completed quests, accept available ones (organising a full quest log);
 - repair when an item drops below 30 % durability;
 - sell grey items, bound items the bot no longer uses, and tradeable items no bot of
-  the group wants, up to blue quality (`MaxSellQuality`); food and drink no recipe makes,
+  the group wants (crafting materials included, unless one of its own professions
+  consumes them or it gathers them), up to blue quality (`MaxSellQuality`); food and drink no recipe makes,
   when bots have the `food` cheat (they never eat items; `SellFood`); optionally white
   weapons and armor.
 

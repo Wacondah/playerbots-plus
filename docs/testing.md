@@ -58,6 +58,8 @@ Setup: `/p nc +errands share`, party with different classes and professions.
 | V6 | Equipped items | never sold |
 | V7 | Stale bread, small pumpkin, spring water (bots with the `food` cheat) | sold |
 | V8 | Cooked food, or `SellFood = 0`, or `food` cheat off | kept |
+| V9 | Copper tube or bolts held by a non-engineer, no engineer in the group | sold |
+| V10 | Copper ore held by a miner, no smith in the group; mining pick | kept |
 
 ## Errands bags
 

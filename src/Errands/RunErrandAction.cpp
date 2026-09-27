@@ -261,13 +261,34 @@ bool RunErrandAction::HasJunk(ErrandsData& data, uint32 now)
     return data.hasJunk;
 }
 
+namespace
+{
+// Crafting materials only: tools (mining pick, blacksmith hammer...) carry a totem
+// category and stay, whatever upstream thinks of them.
+bool IsMaterial(ItemTemplate const* proto)
+{
+    switch (proto->Class)
+    {
+        case ITEM_CLASS_TRADE_GOODS:
+        case ITEM_CLASS_REAGENT:
+        case ITEM_CLASS_GEM:
+            return !proto->TotemCategory;
+        default:
+            return false;
+    }
+}
+}  // namespace
+
 // Beyond greys/whites: bound junk, uncrafted food the bot never eats, and tradeables
-// no bot of the group would take.
+// no bot of the group would take, including materials upstream wrongly marks as used
+// by the holder's professions.
 std::vector<Item*> RunErrandAction::ExtraJunk()
 {
     std::vector<Item*> junk;
     uint32 const maxQuality = Config().maxSellQuality;
     bool const foodCheat = botAI->HasCheat(BotCheatMask::food);
+    uint32 const gatherFeeds =
+        GatherFeeds(bot->HasSkill(SKILL_MINING), bot->HasSkill(SKILL_HERBALISM), bot->HasSkill(SKILL_SKINNING));
     std::vector<Player*> group;
     bool groupLoaded = false;
     // Kept when someone uses it, or when an enchanter of the group will disenchant it.
@@ -309,6 +330,14 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
                            // Bound: only its holder could disenchant it.
                            if (!CanDisenchant(bot, proto))
                                junk.push_back(item);
+                           return;
+                       }
+                       if (usage == ITEM_USAGE_SKILL && item->CanBeTraded() && IsMaterial(proto) &&
+                           !KeptForOwnSkill(ReagentIndex::UsedBy(proto->ItemId), ReagentIndex::Known(bot),
+                                            gatherFeeds, ReagentIndex::IsCrafted(proto->ItemId)) &&
+                           !wantedByGroup(item))
+                       {
+                           junk.push_back(item);
                            return;
                        }
                        if (usage == ITEM_USAGE_AH && item->CanBeTraded() && !wantedByGroup(item))

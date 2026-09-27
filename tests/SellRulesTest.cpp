@@ -52,3 +52,35 @@ TEST(SellFood, QualityCapPriceQuestAndNonFood)
     potion.isFood = false;
     EXPECT_FALSE(SellableFood(potion, true, true, 3));
 }
+
+TEST(OwnSkill, KeptWhenAKnownProfessionConsumesIt)
+{
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Alchemy, ProfessionBit::Alchemy, 0, false));
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Engineering, ProfessionBit::Engineering, 0, true));
+}
+
+TEST(OwnSkill, CraftedPartsOfAnotherProfessionAreNotKept)
+{
+    // Copper tube held by an alchemist-herbalist.
+    uint32_t const feeds = GatherFeeds(false, true, false);
+    EXPECT_FALSE(KeptForOwnSkill(ProfessionBit::Engineering, ProfessionBit::Alchemy, feeds, true));
+    // Copper bolts held by a miner: crafted, so no longer a raw material.
+    EXPECT_FALSE(KeptForOwnSkill(ProfessionBit::Engineering, 0, GatherFeeds(true, false, false), true));
+}
+
+TEST(OwnSkill, GathererKeepsRawMaterialsOfItsCrafts)
+{
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Blacksmithing, 0, GatherFeeds(true, false, false), false));
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Alchemy, 0, GatherFeeds(false, true, false), false));
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Leatherworking, 0, GatherFeeds(false, false, true), false));
+    EXPECT_FALSE(KeptForOwnSkill(ProfessionBit::Tailoring, 0, GatherFeeds(true, true, true), false));
+}
+
+TEST(OwnSkill, GatherFeedsMirrorsUpstream)
+{
+    EXPECT_EQ(GatherFeeds(true, false, false),
+              ProfessionBit::Blacksmithing | ProfessionBit::Jewelcrafting | ProfessionBit::Engineering);
+    EXPECT_EQ(GatherFeeds(false, true, false), ProfessionBit::Alchemy | ProfessionBit::Inscription);
+    EXPECT_EQ(GatherFeeds(false, false, true), ProfessionBit::Leatherworking);
+    EXPECT_EQ(GatherFeeds(false, false, false), 0u);
+}
