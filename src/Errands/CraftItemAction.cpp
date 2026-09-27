@@ -165,6 +165,7 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
 
     Player* master = RealMaster(botAI);
     std::vector<Player*> group = GroupBots(bot, 0.f);
+    snap.hasMaster = master != nullptr;
     group.push_back(bot);
     std::set<uint32> const& declined = AI_VALUE(std::set<uint32>&, "craft declined");
 
@@ -194,6 +195,8 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
                 if (ItemTemplate const* reagent = sObjectMgr->GetItemTemplate(uint32(spell->Reagent[i])))
                     r.reagentCost += reagent->SellPrice * spell->ReagentCount[i];
         r.skillUp = ItemUsageValue::SpellGivesSkillUp(spellId, bot);
+        r.cooldown = std::max(spell->RecoveryTime, spell->CategoryRecoveryTime) >= LongCooldownMs &&
+                     !bot->HasSpellCooldown(spellId);
 
         // Gear: never a second copy while one waits in the group's bags to be shared.
         bool const gear = IsGear(proto);

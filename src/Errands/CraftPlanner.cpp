@@ -79,6 +79,10 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
     if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.usefulToGroup; }))
         return Pick(state, r, false, "group");
 
+    // Cooldown crafts are valuable: made as soon as they are ready, then offered.
+    if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.cooldown; }))
+        return Pick(state, r, snap.hasMaster, "cooldown");
+
     // Nobody wants the item: its dust and essences feed enchanting skill-ups.
     if (snap.disenchantItem)
     {

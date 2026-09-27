@@ -34,3 +34,47 @@ TEST(QuestShare, OnlyToABotThatCanTakeIt)
         EXPECT_FALSE(ShouldShareQuest(c));
     }
 }
+
+TEST(LootRoll, NeedForGearItWouldWear)
+{
+    LootFacts f;
+    f.gearUpgrade = true;
+    EXPECT_TRUE(ShouldRollNeed(f));
+    f.uniqueHeld = true;
+    EXPECT_FALSE(ShouldRollNeed(f));
+}
+
+TEST(LootRoll, NeedForMaterialsOfItsOwnProfessions)
+{
+    LootFacts f;
+    f.ownMaterial = true;
+    EXPECT_TRUE(ShouldRollNeed(f));
+    EXPECT_FALSE(ShouldRollNeed(LootFacts{}));  // anything else: mod-playerbots decides
+}
+
+TEST(Release, OnlyWhenNobodyCanResurrect)
+{
+    ReleaseFacts f;
+    f.dead = true;
+    f.calmMs = 10000;
+    EXPECT_TRUE(ShouldRelease(f, 10000));
+    f.someoneCanResurrect = true;
+    EXPECT_FALSE(ShouldRelease(f, 10000));
+}
+
+TEST(Release, WaitsForCalmAndNeverInDungeonsOrAsGhost)
+{
+    ReleaseFacts f;
+    f.dead = true;
+    f.calmMs = 9999;
+    EXPECT_FALSE(ShouldRelease(f, 10000));
+    f.calmMs = 10000;
+    for (bool ReleaseFacts::*field : {&ReleaseFacts::ghost, &ReleaseFacts::inDungeon})
+    {
+        ReleaseFacts c = f;
+        c.*field = true;
+        EXPECT_FALSE(ShouldRelease(c, 10000));
+    }
+    f.dead = false;
+    EXPECT_FALSE(ShouldRelease(f, 10000));
+}

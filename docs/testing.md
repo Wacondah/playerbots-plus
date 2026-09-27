@@ -109,8 +109,8 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 
 | # | Scenario | Expected |
 |---|---|---|
-| W1 | `/p errands on` with bots that have no errands strategy | each bot answers `errands: on (hunt, share, bags, craft, levelup, quests)`; `nc ?` lists the seven |
-| W2 | `/p errands off` | each bot answers `errands: off`; the seven are gone, `debug errands` untouched |
+| W1 | `/p errands on` with bots that have no errands strategy | each bot answers `errands: on (hunt, share, bags, craft, levelup, quests, loot, revive)`; `nc ?` lists the eight, `dead ?` shows `errands revive` |
+| W2 | `/p errands off` | each bot answers `errands: off`; the eight and `errands revive` are gone, `debug errands` untouched |
 | W3 | Whisper `errands on` to one bot | only that bot changes |
 
 ## Errands city
@@ -135,3 +135,9 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | L4 | Restart the server, level up | the chosen spec is still used |
 | Q1 | An alt holds a sharable quest another alt can take, group idle | `Shared [quest] with X`; X has it, no quest window for you |
 | Q2 | A quest the other alt already did, or cannot take (level, class) | not shared |
+| R1 | Alt dies in the open, no priest/paladin/shaman alive in the group | 10 s after the fight it releases and runs back |
+| R2 | Same with a living priest (or you as a priest) | it waits to be resurrected |
+| R3 | Death in a dungeon | waits, as before |
+| N1 | Group roll on a green the alt would equip | the alt rolls Need |
+| N2 | Group roll on linen cloth, a tailor in the group | the tailor rolls Need; others follow mod-playerbots |
+| K1 | Alchemist knowing a transmute, reagents in bags | crafts it when ready and opens a trade with you |

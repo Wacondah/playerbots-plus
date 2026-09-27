@@ -16,6 +16,8 @@ namespace PlayerbotsPlus
 constexpr uint32 CraftIntervalMs = 5000;
 // The Disenchant spell.
 constexpr uint32 DisenchantSpell = 13262;
+// Recipes with at least this cooldown (transmutes, mooncloth...) are crafted when ready.
+constexpr uint32 LongCooldownMs = 3600 * 1000;
 
 // Adapter between the core and PlanCraft: lists recipes, asks the master, casts.
 class CraftItemAction : public Action

@@ -239,3 +239,32 @@ TEST(CraftShop, NeitherCastableNorBuyableIsIgnored)
     CraftState state;
     EXPECT_EQ(PlanCraft(Idle({r}), state, CraftConfig{}, T0).action, CraftAction::None);
 }
+
+TEST(CraftCooldown, CooldownCraftGoesBeforeSkillAndIsOffered)
+{
+    RecipeOption skill = Recipe(8, 1);
+    skill.skillUp = true;
+    RecipeOption transmute = Recipe(9, 50);
+    transmute.cooldown = true;
+    CraftSnapshot snap = Idle({skill, transmute});
+    snap.hasMaster = true;
+    CraftState state;
+    CraftDecision d = PlanCraft(snap, state, CraftConfig{}, T0);
+    EXPECT_EQ(d.action, CraftAction::Craft);
+    EXPECT_EQ(d.spell, 9u);
+    EXPECT_TRUE(d.forMaster);
+    EXPECT_EQ(d.reason, "craft for cooldown");
+}
+
+TEST(CraftCooldown, GroupNeedsComeFirstAndNoOfferWithoutMaster)
+{
+    RecipeOption group = Recipe(8, 1);
+    group.usefulToGroup = true;
+    RecipeOption transmute = Recipe(9, 50);
+    transmute.cooldown = true;
+    CraftState state;
+    EXPECT_EQ(PlanCraft(Idle({group, transmute}), state, CraftConfig{}, T0).spell, 8u);
+    CraftDecision d = PlanCraft(Idle({transmute}), state, CraftConfig{}, T0);
+    EXPECT_EQ(d.spell, 9u);
+    EXPECT_FALSE(d.forMaster);
+}

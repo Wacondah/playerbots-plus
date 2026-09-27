@@ -30,6 +30,10 @@ constexpr float CityRelevance = 2.05f;
 constexpr float QuestShareRelevance = 1.96f;
 // A level-up packet is handled at once, like a chat command.
 constexpr float LevelUpRelevance = ChatCommandRelevance;
+// Just above mod-playerbots' "loot roll" (100): its roll then skips what we voted.
+constexpr float LootNeedRelevance = 101.0f;
+// Dead state: above the default dead actions, which wait for a resurrection.
+constexpr float ReleaseRelevance = 50.0f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -138,6 +142,35 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("errands tick", {NextAction("share quests", QuestShareRelevance)}));
+    }
+};
+
+// Rolls need on gear the bot would wear and on materials of its own professions.
+class ErrandsLootStrategy : public Strategy
+{
+public:
+    ErrandsLootStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands loot"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("very often", {NextAction("errands loot roll", LootNeedRelevance)}));
+    }
+};
+
+// Dead state: release the spirit when no living member could resurrect the bot.
+class ErrandsReviveStrategy : public Strategy
+{
+public:
+    ErrandsReviveStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands revive"; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("often", {NextAction("errands release", ReleaseRelevance)}));
     }
 };
 

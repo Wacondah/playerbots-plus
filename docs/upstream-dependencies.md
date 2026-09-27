@@ -34,3 +34,4 @@ start here.
 | core `ObjectMgr::GetAllCreatureData`, `MapMgr::GetZoneId`, `Map::GetCreatureBySpawnIdStore`, `Player::GetReputationPriceDiscount(FactionTemplateEntry const*)` | `CityIndex`, `CityErrandAction`, `Professions` | capital NPCs |
 | action `"equip upgrade"` (`EquipUpgradeAction`) | `ShareItemAction::Execute` | receivers equip shared gear (no item push packet on a direct move) |
 | `PlayerbotFactory::InitTalentsBySpecNo`, `InitTalentsTree`, `InitPetTalents`; `sPlayerbotAIConfig.premadeSpecName`; `AiFactory::GetPlayerSpecTabs`; trigger `"levelup"` | `LevelUpAction`, `PlayerbotsPlusScript` | talents on level-up |
+| `Group::GetRolls`, `Roll::playerVote`, `Group::CountRollVote`; action `"release"`; triggers `"very often"`, `"often"` | `AltCareActions` | need rolls, release when nobody can resurrect |

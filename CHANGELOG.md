@@ -5,6 +5,12 @@
 - `errands levelup`: alts spend their talent points on level-up, following the spec picked
   with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
 - `errands quests`: alts share quests with each other (never with the master).
+- `errands loot`: alts roll need on gear they would wear and on materials of their own
+  professions (mod-playerbots' `LootNeedRollLevel = 1` turned every need into greed).
+- `errands revive` (dead state): a dead alt releases once the group is out of combat and
+  nobody alive can resurrect it; it still waits in dungeons and raids.
+- Craft: long-cooldown recipes (transmutes, mooncloth...) are crafted when ready and
+  offered to the master.
 - Hunt scans mobs once a second and checks line of sight last (CPU).
 - Buying reagents keeps the reserve even after training at the same visit.
 

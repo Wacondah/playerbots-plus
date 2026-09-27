@@ -12,7 +12,7 @@ namespace PlayerbotsPlus
 namespace
 {
 char const* const Strategies[] = {"errands",       "errands hunt",    "errands share", "errands bags",
-                                  "errands craft", "errands levelup", "errands quests"};
+                                  "errands craft", "errands levelup", "errands quests", "errands loot"};
 }  // namespace
 
 ErrandsSwitch ParseErrandsSwitch(std::string const& message)
@@ -54,5 +54,10 @@ std::string ErrandsStrategies(bool on)
     for (char const* name : Strategies)
         list += std::string(list.empty() ? "" : ",") + (on ? "+" : "-") + name;
     return list;
+}
+
+std::string ErrandsDeadStrategies(bool on)
+{
+    return on ? "+errands revive" : "-errands revive";
 }
 }  // namespace PlayerbotsPlus

@@ -19,4 +19,15 @@ bool ShouldShareQuest(QuestShareCheck const& check)
 {
     return check.sharable && check.targetIsBot && check.inRange && check.targetCanTake;
 }
+
+bool ShouldRollNeed(LootFacts const& facts)
+{
+    return (facts.gearUpgrade && !facts.uniqueHeld) || facts.ownMaterial;
+}
+
+bool ShouldRelease(ReleaseFacts const& facts, uint32_t calmDelayMs)
+{
+    return facts.dead && !facts.ghost && !facts.inDungeon && facts.calmMs >= calmDelayMs &&
+           !facts.someoneCanResurrect;
+}
 }  // namespace PlayerbotsPlus

@@ -4,6 +4,7 @@
 
 #include "PlayerbotsPlusRegistry.h"
 
+#include "AltCareActions.h"
 #include "ChatCommandTrigger.h"
 #include "CraftDeclinedValue.h"
 #include "ChosenSpecValue.h"
@@ -50,6 +51,8 @@ public:
         creators["errands craft"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsCraftStrategy(ai); };
         creators["errands levelup"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsLevelUpStrategy(ai); };
         creators["errands quests"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsQuestsStrategy(ai); };
+        creators["errands loot"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsLootStrategy(ai); };
+        creators["errands revive"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsReviveStrategy(ai); };
     }
 };
 
@@ -76,6 +79,8 @@ public:
         creators["city errand"] = [](PlayerbotAI* ai) -> Action* { return new CityErrandAction(ai); };
         creators["errands levelup"] = [](PlayerbotAI* ai) -> Action* { return new LevelUpAction(ai); };
         creators["share quests"] = [](PlayerbotAI* ai) -> Action* { return new ShareQuestsAction(ai); };
+        creators["errands loot roll"] = [](PlayerbotAI* ai) -> Action* { return new LootNeedAction(ai); };
+        creators["errands release"] = [](PlayerbotAI* ai) -> Action* { return new ReleaseWhenAloneAction(ai); };
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };
         creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };

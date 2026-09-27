@@ -37,6 +37,7 @@ struct RecipeOption
     bool buyable = false;         // only vendor reagents are missing (primary professions)
     bool gear = false;            // armor, weapon or bag: one craft at a time
     std::vector<ReagentNeed> reagents;
+    bool cooldown = false;        // long cooldown recipe (transmute, mooncloth...), ready now
 };
 
 struct CraftSnapshot
@@ -44,6 +45,7 @@ struct CraftSnapshot
     bool errandsIdle = false;
     std::vector<RecipeOption> recipes;
     uint64_t disenchantItem = 0;  // an item in the bags to disenchant (0: none)
+    bool hasMaster = false;       // a real player to offer cooldown crafts to
 };
 
 struct CraftConfig
@@ -80,7 +82,7 @@ struct CraftDecision
     std::string reason;
 };
 
-// Order: pending answer, approved recipe, ask the master, group needs, disenchant,
+// Order: pending answer, approved recipe, ask the master, group needs, cooldown crafts, disenchant,
 // skill-ups. A buyable pick shops instead of crafting.
 CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfig const& cfg, uint32_t now);
 

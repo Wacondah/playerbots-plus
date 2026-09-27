@@ -26,6 +26,9 @@ std::string ParseTalentsSpec(std::string const& message);
 
 // All the strategies "errands on" enables, as a ChangeStrategy list: "+a,+b" or "-a,-b".
 std::string ErrandsStrategies(bool on);
+
+// Same, for the dead-state engine.
+std::string ErrandsDeadStrategies(bool on);
 }  // namespace PlayerbotsPlus
 
 #endif

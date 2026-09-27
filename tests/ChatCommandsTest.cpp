@@ -20,9 +20,11 @@ TEST(ErrandsSwitch, AnythingElseIsNone)
 TEST(ErrandsSwitch, StrategyLists)
 {
     EXPECT_EQ(ErrandsStrategies(true), "+errands,+errands hunt,+errands share,+errands bags,+errands craft,"
-                                       "+errands levelup,+errands quests");
+                                       "+errands levelup,+errands quests,+errands loot");
     EXPECT_EQ(ErrandsStrategies(false), "-errands,-errands hunt,-errands share,-errands bags,-errands craft,"
-                                        "-errands levelup,-errands quests");
+                                        "-errands levelup,-errands quests,-errands loot");
+    EXPECT_EQ(ErrandsDeadStrategies(true), "+errands revive");
+    EXPECT_EQ(ErrandsDeadStrategies(false), "-errands revive");
 }
 
 TEST(TalentsSpec, NameAfterTheCommand)

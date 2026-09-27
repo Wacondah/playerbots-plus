@@ -88,7 +88,10 @@ bot. Cooking, fishing and first aid are left alone.
 Part of `errands on`. On level-up an alt spends its talent points: in the premade spec you
 picked with `talents spec <name>` (the module remembers it, mod-playerbots forgets it once
 the points are spent), else in the tree it already uses; with neither, it asks you to
-choose. Spells stay with its class trainer. `errands quests`: when the group is idle,
+choose. Spells stay with its class trainer. `errands loot`: in group rolls an alt picks
+Need on gear it would wear and on materials its own professions use. `errands revive`: a
+dead alt releases once the fight is over if nobody alive in the group can resurrect it.
+Long-cooldown crafts (transmutes, mooncloth) are made when ready and offered to you. `errands quests`: when the group is idle,
 alts give each other the sharable quests they can take, never to you (no quest window).
 
 ## Errands city
