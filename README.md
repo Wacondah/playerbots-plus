@@ -13,8 +13,7 @@ you, then follow you again:
 - sell grey items, bound items the bot no longer uses, and tradeable items no bot of
   the group wants, up to blue quality (`MaxSellQuality`); food and drink no recipe makes,
   when bots have the `food` cheat (they never eat items; `SellFood`); optionally white
-  weapons and
-  armor.
+  weapons and armor.
 
 They drop the errand as soon as you move, enter combat or mount, and they obey `stay` and
 `guard`. Nothing happens inside instances unless enabled.
