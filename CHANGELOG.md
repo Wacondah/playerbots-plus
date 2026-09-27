@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 — 2026-09-27
 
 - Errands also sells food and drink no recipe makes, for bots with the `food` cheat
   (`SellFood`, on by default).
