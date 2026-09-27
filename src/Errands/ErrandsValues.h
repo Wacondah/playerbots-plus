@@ -46,6 +46,8 @@ struct ErrandsData
     Decision decision;
     uint32 decidedAt = 0;  // when `decision` was computed
     HuntState hunt;
+    std::vector<Mob> huntMobs;  // last scan, reused between two scans
+    uint32 huntScannedAt = 0;
     Decision huntDecision;
     ShareState share;
     ShareDecision shareDecision;

@@ -10,6 +10,9 @@
 
 namespace PlayerbotsPlus
 {
+// Mobs are rescanned at most this often (line of sight and quest loot checks are costly).
+constexpr uint32 HuntScanIntervalMs = 1000;
+
 // Adapter between the core and PlanHunt. Attack() switches the bot to its
 // combat engine; the group's normal combat reactions take it from there.
 class HuntQuestMobAction : public AttackAction
@@ -22,6 +25,7 @@ public:
 
 private:
     HuntSnapshot BuildSnapshot(ErrandsData& data, uint32 now);
+    std::vector<Mob> ScanMobs(Player* master, std::vector<Player*> const& bots);
     static bool NeededBy(Player* player, Unit* unit);
     uint32 HostilesNear(Unit* unit, GuidVector const& targets);
 };

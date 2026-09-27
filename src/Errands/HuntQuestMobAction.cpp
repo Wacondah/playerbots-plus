@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <unordered_map>
 
 namespace PlayerbotsPlus
 {
@@ -72,31 +73,51 @@ HuntSnapshot HuntQuestMobAction::BuildSnapshot(ErrandsData& data, uint32 now)
     snap.groupReady = ready;
     snap.minGroupLevel = bots.empty() ? 0 : minLevel;
     if (!snap.errandsIdle || !snap.isPuller || !snap.groupReady)
-        return snap;  // no need to scan
+    {
+        data.huntScannedAt = 0;  // after a fight or an errand, scan afresh
+        return snap;
+    }
 
+    if (!data.huntScannedAt || Elapsed(now, data.huntScannedAt, HuntScanIntervalMs))
+    {
+        data.huntMobs = ScanMobs(master, bots);
+        data.huntScannedAt = now;
+    }
+    snap.mobs = data.huntMobs;
+    return snap;
+}
+
+// Only mobs PlanHunt could pick: the cheap disqualifiers run first, line of sight last.
+std::vector<Mob> HuntQuestMobAction::ScanMobs(Player* master, std::vector<Player*> const& bots)
+{
+    std::vector<Mob> mobs;
     float const radius = Config().huntRadius;
     GuidVector const targets = AI_VALUE(GuidVector, "possible targets");
+    std::unordered_map<uint32, bool> neededByEntry;  // a camp holds many mobs of one kind
     for (ObjectGuid const& guid : targets)
     {
         Unit* unit = botAI->GetUnit(guid);
         Creature* creature = unit ? unit->ToCreature() : nullptr;
-        if (!creature || !unit->IsAlive() || master->GetDistance(unit) > radius)
+        if (!creature || !unit->IsAlive() || master->GetDistance(unit) > radius || unit->IsInCombat() ||
+            creature->GetCreatureTemplate()->rank > CREATURE_ELITE_NORMAL ||
+            (creature->hasLootRecipient() && !creature->isTappedBy(bot)) || !bot->IsValidAttackTarget(unit))
             continue;
-        if (!bot->IsValidAttackTarget(unit) || !bot->IsWithinLOSInMap(unit))
+
+        auto [it, fresh] = neededByEntry.try_emplace(unit->GetEntry(), false);
+        if (fresh)
+            it->second = std::any_of(bots.begin(), bots.end(), [unit](Player* p) { return NeededBy(p, unit); });
+        if (!it->second || !bot->IsWithinLOSInMap(unit))
             continue;
 
         Mob m;
         m.id = guid.GetRawValue();
         m.pos = {unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ()};
         m.level = unit->GetLevel();
-        m.elite = creature->GetCreatureTemplate()->rank > CREATURE_ELITE_NORMAL;
-        m.inCombat = unit->IsInCombat();
-        m.tappedByOther = creature->hasLootRecipient() && !creature->isTappedBy(bot);
-        m.needed = std::any_of(bots.begin(), bots.end(), [unit](Player* p) { return NeededBy(p, unit); });
+        m.needed = true;
         m.hostilesNearby = HostilesNear(unit, targets);
-        snap.mobs.push_back(m);
+        mobs.push_back(m);
     }
-    return snap;
+    return mobs;
 }
 
 // Same rules as mod-playerbots' GrindTargetValue::needForQuest (private upstream),
