@@ -106,3 +106,11 @@ TEST(Shopping, BagSlotsCountStacks)
     b.freeSlots = 1;  // 10 threads at most
     EXPECT_EQ(PlanShopping(r, b).crafts, 10u);
 }
+
+TEST(Shopping, AffordableLotsKeepTheReserve)
+{
+    EXPECT_EQ(AffordableLots(10100, 10000, 25, 10), 4u);  // 100 c above the reserve
+    EXPECT_EQ(AffordableLots(20000, 10000, 25, 10), 10u);
+    EXPECT_EQ(AffordableLots(9000, 10000, 25, 10), 0u);  // already under the reserve
+    EXPECT_EQ(AffordableLots(500, 0, 0, 7), 7u);          // free lots
+}

@@ -80,4 +80,12 @@ ShoppingList PlanShopping(RecipeOption const& recipe, ShoppingBudget const& budg
     none.reason = tooExpensive ? "no budget" : "bags full";
     return none;
 }
+
+uint32_t AffordableLots(uint32_t money, uint32_t reserve, uint32_t lotPrice, uint32_t lots)
+{
+    if (!lotPrice)
+        return lots;
+    uint32_t const spendable = money > reserve ? money - reserve : 0;
+    return std::min(lots, spendable / lotPrice);
+}
 }  // namespace PlayerbotsPlus

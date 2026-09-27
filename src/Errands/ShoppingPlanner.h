@@ -47,6 +47,10 @@ uint32_t ShoppingReserve(uint32_t level, uint32_t perTenLevels);
 // As many crafts as the held materials allow (one for gear), lowered until the
 // purchases fit the budget and the free bag slots.
 ShoppingList PlanShopping(RecipeOption const& recipe, ShoppingBudget const& budget);
+
+// Lots of `lotPrice` (at most `lots`) the bot can buy and still keep `reserve`: the list is
+// planned before a visit, and training at that visit may have spent money since.
+uint32_t AffordableLots(uint32_t money, uint32_t reserve, uint32_t lotPrice, uint32_t lots);
 }  // namespace PlayerbotsPlus
 
 #endif

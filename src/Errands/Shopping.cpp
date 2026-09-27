@@ -31,7 +31,7 @@ bool SellsShopping(Creature* npc, ShoppingList const& list)
     return npc && npc->IsVendor() && SellsShoppingEntry(npc->GetEntry(), list);
 }
 
-bool BuyShoppingAt(Player* bot, Creature* npc, ShoppingList const& list)
+bool BuyShoppingAt(Player* bot, Creature* npc, ShoppingList const& list, uint32 reserve)
 {
     VendorItemData const* items = npc && npc->IsVendor() ? npc->GetVendorItems() : nullptr;
     bool bought = false;
@@ -47,11 +47,12 @@ bool BuyShoppingAt(Player* bot, Creature* npc, ShoppingList const& list)
                 continue;
             uint32 const lotSize = std::max<uint32>(proto->BuyCount, 1);
             uint32 const perCall = std::clamp<uint32>(proto->GetMaxStackSize() / lotSize, 1, 255);
-            for (uint32 left = p.lots; left > 0;)
+            uint32 const affordable =
+                AffordableLots(bot->GetMoney(), reserve, Price(bot, npc, proto->BuyPrice), p.lots);
+            for (uint32 left = affordable; left > 0;)
             {
                 uint32 const lots = std::min(left, perCall);
-                if (!bot->HasEnoughMoney(int32(Price(bot, npc, proto->BuyPrice * lots))) ||
-                    !bot->BuyItemFromVendorSlot(npc->GetGUID(), slot, p.item, uint8(lots), NULL_BAG, NULL_SLOT))
+                if (!bot->BuyItemFromVendorSlot(npc->GetGUID(), slot, p.item, uint8(lots), NULL_BAG, NULL_SLOT))
                     return bought;
                 bought = true;
                 left -= lots;

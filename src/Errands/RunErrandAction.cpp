@@ -222,7 +222,8 @@ void RunErrandAction::VisitTarget(WorldObject* object)
     }
 
     // Craft reagents last: they keep the shopping reserve.
-    if (creature->IsVendor() && BuyShoppingAt(bot, creature, Data().shopping))
+    uint32 const reserve = ShoppingReserve(bot->GetLevel(), Config().shoppingReservePer10Levels);
+    if (creature->IsVendor() && BuyShoppingAt(bot, creature, Data().shopping, reserve))
     {
         DebugErrands(botAI, "errands: bought reagents");
         Data().shopping = ShoppingList{};
