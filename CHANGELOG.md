@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — 2026-09-27
 
 - `errands bags` strategy: alts pass stackables around so each keeps a free bag slot.
 
