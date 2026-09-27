@@ -19,6 +19,22 @@ TEST(ErrandsSwitch, AnythingElseIsNone)
 
 TEST(ErrandsSwitch, StrategyLists)
 {
-    EXPECT_EQ(ErrandsStrategies(true), "+errands,+errands hunt,+errands share,+errands bags,+errands craft");
-    EXPECT_EQ(ErrandsStrategies(false), "-errands,-errands hunt,-errands share,-errands bags,-errands craft");
+    EXPECT_EQ(ErrandsStrategies(true), "+errands,+errands hunt,+errands share,+errands bags,+errands craft,"
+                                       "+errands levelup,+errands quests");
+    EXPECT_EQ(ErrandsStrategies(false), "-errands,-errands hunt,-errands share,-errands bags,-errands craft,"
+                                        "-errands levelup,-errands quests");
+}
+
+TEST(TalentsSpec, NameAfterTheCommand)
+{
+    EXPECT_EQ(ParseTalentsSpec("talents spec resto pve"), "resto pve");
+    EXPECT_EQ(ParseTalentsSpec("  Talents Spec holy pve "), "holy pve");  // name kept as typed
+}
+
+TEST(TalentsSpec, OtherCommandsGiveNothing)
+{
+    EXPECT_EQ(ParseTalentsSpec("talents spec list"), "");
+    EXPECT_EQ(ParseTalentsSpec("talents spec "), "");
+    EXPECT_EQ(ParseTalentsSpec("talents autopick"), "");
+    EXPECT_EQ(ParseTalentsSpec("errands on"), "");
 }

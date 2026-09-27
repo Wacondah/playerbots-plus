@@ -20,6 +20,10 @@ enum class ErrandsSwitch
 // "errands on" / "errands off" (case and surrounding spaces ignored).
 ErrandsSwitch ParseErrandsSwitch(std::string const& message);
 
+// "talents spec <name>" (the mod-playerbots command): the premade spec name as typed,
+// empty for anything else ("talents spec list" included).
+std::string ParseTalentsSpec(std::string const& message);
+
 // All the strategies "errands on" enables, as a ChangeStrategy list: "+a,+b" or "-a,-b".
 std::string ErrandsStrategies(bool on);
 }  // namespace PlayerbotsPlus
