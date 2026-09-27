@@ -2,7 +2,11 @@
  * This file is part of mod-playerbots-plus. Released under GNU GPL v2 or later.
  */
 
+#include "ChatCommands.h"
+#include "Group.h"
 #include "Log.h"
+#include "PlayerbotRepository.h"
+#include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
 #include "PlayerbotsPlusRegistry.h"
 #include "ReagentIndex.h"
@@ -35,7 +39,52 @@ public:
     }
 };
 
+// "errands on" / "errands off" from a master, whispered to one bot or in party chat.
+// Handled here rather than by a bot strategy, so it also reaches bots with no errands
+// strategy yet. The message still goes through (true), as any chat line.
+class PlayerbotsPlusPlayerScript : public PlayerScript
+{
+public:
+    PlayerbotsPlusPlayerScript()
+        : PlayerScript("PlayerbotsPlusPlayerScript",
+                       {PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_CAN_PLAYER_USE_GROUP_CHAT})
+    {
+    }
+
+    using PlayerScript::OnPlayerCanUseChat;  // keep the other overloads visible
+
+    bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 /*lang*/, std::string& msg, Player* receiver) override
+    {
+        if (type == CHAT_MSG_WHISPER && Config().enabled)
+            Apply(player, receiver, ParseErrandsSwitch(msg));
+        return true;
+    }
+
+    bool OnPlayerCanUseChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Group* group) override
+    {
+        ErrandsSwitch const command = ParseErrandsSwitch(msg);
+        if (command == ErrandsSwitch::None || !group || !Config().enabled)
+            return true;
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+            Apply(player, ref->GetSource(), command);
+        return true;
+    }
+
+private:
+    static void Apply(Player* master, Player* bot, ErrandsSwitch command)
+    {
+        PlayerbotAI* botAI = bot ? GET_PLAYERBOT_AI(bot) : nullptr;
+        if (command == ErrandsSwitch::None || !botAI || botAI->GetMaster() != master)
+            return;
+        bool const on = command == ErrandsSwitch::On;
+        botAI->ChangeStrategy(ErrandsStrategies(on), BOT_STATE_NON_COMBAT);
+        PlayerbotRepository::instance().Save(botAI);
+        botAI->TellMaster(on ? "errands: on (hunt, share, bags, craft)" : "errands: off");
+    }
+};
+
 void AddPlayerbotsPlusScripts()
 {
     new PlayerbotsPlusWorldScript();
+    new PlayerbotsPlusPlayerScript();
 }

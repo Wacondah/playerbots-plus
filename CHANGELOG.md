@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Assigned professions: `professions` command; errands trains them and buys their tools.
+- `errands on` / `errands off`: enable or disable all errands strategies at once.
 - `errands craft` strategy: craft for the master (asked first), the party, then skill-ups.
 - Share offers upgrades to the master first, through a trade window.
 - Disenchanting: enchanters with `errands craft` disenchant what nobody wants (up to

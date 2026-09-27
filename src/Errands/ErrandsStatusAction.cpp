@@ -4,6 +4,7 @@
 
 #include "ErrandsStatusAction.h"
 
+#include "ChatCommands.h"
 #include "ErrandsValues.h"
 #include "ObjectAccessor.h"
 #include "Playerbots.h"
@@ -13,8 +14,11 @@
 
 namespace PlayerbotsPlus
 {
-bool ErrandsStatusAction::Execute(Event /*event*/)
+bool ErrandsStatusAction::Execute(Event event)
 {
+    // "errands on/off" is handled by the module's chat hook, not a status request.
+    if (ParseErrandsSwitch("errands " + event.getParam()) != ErrandsSwitch::None)
+        return true;
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
     ActiveErrand const& active = data.state.active;
 

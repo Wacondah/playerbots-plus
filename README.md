@@ -103,6 +103,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 
 | Command | Effect |
 |---|---|
+| `errands on` / `errands off` | enable / disable all errands strategies at once (party chat: `/p errands on` for every bot); works on bots with nothing enabled yet |
 | `nc +errands` / `nc -errands` | enable / disable errands |
 | `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
 | `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |

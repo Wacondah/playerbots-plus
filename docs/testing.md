@@ -97,3 +97,11 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | C6 | A BoE green upgrade for you in a bot's bags (`errands share`) | offered to you before any bot |
 | C7 | Enchanter with `errands craft`, a BoE green nobody wants in another alt's bags | handed to the enchanter (share), disenchanted; not sold |
 | C8 | Soulbound replaced quest reward on the enchanter | disenchanted instead of sold |
+
+## Switch
+
+| # | Scenario | Expected |
+|---|---|---|
+| W1 | `/p errands on` with bots that have no errands strategy | each bot answers `errands: on (hunt, share, bags, craft)`; `nc ?` lists the five |
+| W2 | `/p errands off` | each bot answers `errands: off`; the five are gone, `debug errands` untouched |
+| W3 | Whisper `errands on` to one bot | only that bot changes |
