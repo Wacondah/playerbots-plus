@@ -12,9 +12,10 @@ you, then follow you again:
 - repair when an item drops below 30 % durability;
 - sell grey items, bound items the bot no longer uses, and tradeable items no bot of
   the group wants (crafting materials included, unless one of its own professions
-  consumes them or it gathers them), up to blue quality (`MaxSellQuality`); food and drink no recipe makes,
-  when bots have the `food` cheat (they never eat items; `SellFood`); optionally white
-  weapons and armor.
+  consumes them or it gathers them), up to blue quality (`MaxSellQuality`); food and
+  drink no recipe makes, when bots have the `food` cheat (they never eat items;
+  `SellFood`); optionally white weapons and armor;
+- train at a class trainer of their class (spells and ranks they can afford).
 
 They drop the errand as soon as you move, enter combat or mount, and they obey `stay` and
 `guard`. Nothing happens inside instances unless enabled.
@@ -72,7 +73,7 @@ spending at most `Craft.MaxShoppingCopper` per visit and never its reserve
 "I need a vendor for [item]" when it must shop first.
 Nothing else, never at random. `craft no` is remembered.
 
-&
+## Assigned professions
 
 Part of errands. Whisper `professions mining tailoring` to an alt (one or two primary
 professions, English names): within the errands radius it learns only those at their
@@ -82,7 +83,22 @@ virtuoso inking set). If it lacks an assigned profession and has no free slot, i
 its least-trained unassigned one, at that trainer only. The assignment is saved with the
 bot. Cooking, fishing and first aid are left alone.
 
-&
+## Errands city
+
+Part of errands. When you stand still for a few seconds in a capital (Stormwind,
+Ironforge, Darnassus, the Exodar, Orgrimmar, Undercity, Thunder Bluff, Silvermoon,
+Shattrath, Dalaran), bots leave the leash to run their errands across the city, then come
+back: class training (every spell and rank they can afford), training of their assigned
+professions, missing profession tools, and vendor reagents for crafting. They keep going
+while you walk around the city and come back at once if you leave it, take a flight or
+portal, enter combat or an instance. A trip lasts at most 3 minutes (`City.Timeout`) and
+is not repeated with unchanged needs for 10 minutes (`City.Cooldown`). `City.Auto = 0`
+keeps them home until you whisper `errands city`.
+
+Outside capitals, a class trainer of the bot's class within the errands radius is a
+normal errand too.
+
+## Install
 
 Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
 
@@ -113,6 +129,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `errands on` / `errands off` | enable / disable all errands strategies at once (party chat: `/p errands on` for every bot); works on bots with nothing enabled yet |
 | `nc +errands` / `nc -errands` | enable / disable errands |
 | `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
+| `errands city` | start a capital trip now (party chat: `/p errands city`); answers `city: going (n stops)` or `city: nothing to do` |
 | `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |
 | `nc +errands share` | enable sharing (party chat: `/p nc +errands share`) |
 | `nc +errands bags` | keep a free bag slot on every alt (party chat: `/p nc +errands bags`) |

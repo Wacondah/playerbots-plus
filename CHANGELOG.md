@@ -6,6 +6,10 @@
   are no longer kept because of an upstream cache bug; gatherers still keep raw materials.
 - Craft buys missing vendor reagents (primary professions) at a vendor within the errands
   radius, within `Craft.MaxShoppingCopper` per visit and above a level-based reserve.
+- Errands city: in a capital, bots leave the leash to train (class, professions), buy tools
+  and craft reagents across the city, then come back (`City.Auto`, `errands city`).
+- Class training at a class trainer within the errands radius.
+- README: restored the "Assigned professions" and "Install" headings lost in 0.5.0.
 
 ## 0.5.0 — 2026-09-27
 

@@ -29,3 +29,6 @@ start here.
 | trade opcodes `CMSG_INITIATE_TRADE`, `CMSG_SET_TRADE_ITEM`; bot-side accept in `TradeStatusAction` | `OfferToMasterAction` | offers to the master |
 | `PlayerbotAI::CastSpell`, `CanCastSpell`, `ItemUsageValue::SpellGivesSkillUp` | `CraftItemAction` | crafting |
 | core `ObjectMgr::GetNpcVendorItemList`, `Player::BuyItemFromVendorSlot`, `Player::HasItemTotemCategory` | `ReagentIndex`, `Shopping`, `CraftItemAction` | vendor reagents |
+| `NewRpgBaseAction::MoveFarTo`, `WorldPosition` | `CityErrandAction` | long walks across a capital |
+| core `Trainer::Trainer` (class trainers, `IsTrainerValidForPlayer`, `CanTeachSpell`, `TeachSpell`) | `Professions` | class training |
+| core `ObjectMgr::GetAllCreatureData`, `MapMgr::GetZoneId`, `Map::GetCreatureBySpawnIdStore`, `Player::GetReputationPriceDiscount(FactionTemplateEntry const*)` | `CityIndex`, `CityErrandAction`, `Professions` | capital NPCs |

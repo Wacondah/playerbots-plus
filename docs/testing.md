@@ -111,3 +111,15 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | W1 | `/p errands on` with bots that have no errands strategy | each bot answers `errands: on (hunt, share, bags, craft)`; `nc ?` lists the five |
 | W2 | `/p errands off` | each bot answers `errands: off`; the five are gone, `debug errands` untouched |
 | W3 | Whisper `errands on` to one bot | only that bot changes |
+
+## Errands city
+
+| # | Scenario | Expected |
+|---|---|---|
+| Y1 | Stop at Stormwind's gate with a priest that has ranks to learn | walks to the Cathedral, learns, comes back |
+| Y2 | Tailor with linen and no thread, vendor across town | buys thread, comes back, crafts |
+| Y3 | Leave the city mid-trip | bots abort and follow |
+| Y4 | `errands city` with nothing to do | `city: nothing to do` |
+| Y5 | `City.Auto = 0` | nothing until `errands city` |
+| Y6 | Class trainer within 20 yd in Goldshire | trains as a normal errand |
+| Y7 | Walk around inside the city during a trip | bots continue |
