@@ -33,7 +33,7 @@ bool ShareItemAction::Execute(Event /*event*/)
 {
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
     ShareDecision const decision = data.shareDecision;
-    Item* item = FindItem(decision.item);
+    Item* item = FindBagItem(bot, decision.item);
     if (item && decision.toMaster)
     {
         StartOffer(data, item, getMSTime());  // through a trade window the master accepts
@@ -45,9 +45,7 @@ bool ShareItemAction::Execute(Event /*event*/)
 
     // Formatted before the move: a merged stack no longer exists afterwards.
     std::string const what = chat->FormatItem(item->GetTemplate(), item->GetCount());
-    uint32 const itemClass = item->GetTemplate()->Class;
-    bool const gear =
-        itemClass == ITEM_CLASS_ARMOR || itemClass == ITEM_CLASS_WEAPON || itemClass == ITEM_CLASS_CONTAINER;
+    bool const gear = IsGear(item->GetTemplate());
     if (!GiveItemTo(bot, item, receiver))
     {
         MarkShareFailed(data.share, decision.item, decision.receiver, getMSTime());
@@ -76,26 +74,12 @@ ShareSnapshot ShareItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
                    [&](Item* item)
                    {
                        ItemTemplate const* proto = item->GetTemplate();
-                       bool const gear = proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON ||
-                                         proto->Class == ITEM_CLASS_CONTAINER;
-                       if (!item->CanBeTraded() || (!gear && !ReagentIndex::UsedBy(proto->ItemId)))
+                       if (!item->CanBeTraded() || (!IsGear(proto) && !ReagentIndex::UsedBy(proto->ItemId)))
                            return;
                        ShareItem described = DescribeForGroup(botAI, item, receivers);
                        described.masterDeclined = data.OfferDeclined(proto->ItemId, now);
                        snap.items.push_back(std::move(described));
                    });
     return snap;
-}
-
-Item* ShareItemAction::FindItem(uint64_t guid)
-{
-    Item* found = nullptr;
-    ForEachBagItem(bot,
-                   [&](Item* item)
-                   {
-                       if (item->GetGUID().GetRawValue() == guid)
-                           found = item;
-                   });
-    return found;
 }
 }  // namespace PlayerbotsPlus

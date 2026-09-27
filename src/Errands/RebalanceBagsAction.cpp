@@ -35,13 +35,7 @@ bool RebalanceBagsAction::Execute(Event /*event*/)
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
     BagMove const move = data.bagMove;
     Player* receiver = ObjectAccessor::FindPlayer(ObjectGuid(move.receiver));
-    Item* item = nullptr;
-    ForEachBagItem(bot,
-                   [&](Item* i)
-                   {
-                       if (i->GetGUID().GetRawValue() == move.item)
-                           item = i;
-                   });
+    Item* item = FindBagItem(bot, move.item);
     if (!item || !receiver)
         return false;
 

@@ -5,6 +5,8 @@
 #include "CityIndex.h"
 
 #include "Log.h"
+#include "Creature.h"
+#include "Map.h"
 #include "MapMgr.h"
 #include "ObjectMgr.h"
 
@@ -64,5 +66,16 @@ std::vector<CityIndex::Spawn> const& CityIndex::SpawnsIn(uint32 zone, uint32 map
     }
     LOG_INFO("server.loading", ">> playerbots-plus: city index {}: {} NPCs", zone, it->second.size());
     return it->second;
+}
+
+Creature* CityIndex::LiveCreature(Map* map, uint64 spawnId)
+{
+    if (!map || !spawnId)
+        return nullptr;
+    auto const range = map->GetCreatureBySpawnIdStore().equal_range(ObjectGuid::LowType(spawnId));
+    for (auto it = range.first; it != range.second; ++it)
+        if (it->second->IsInWorld())
+            return it->second;
+    return nullptr;
 }
 }  // namespace PlayerbotsPlus

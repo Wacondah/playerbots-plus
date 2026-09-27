@@ -39,7 +39,7 @@ bool CityErrandAction::Execute(Event /*event*/)
 {
     ErrandsData& data = Data();
     CityDecision const d = data.cityDecision;
-    Creature* creature = LiveCreature(d.stop);
+    Creature* creature = CityIndex::LiveCreature(bot->GetMap(), d.stop);
 
     if (d.step == CityStep::Visit && creature)
     {
@@ -103,7 +103,7 @@ CitySnapshot CityErrandAction::BuildCitySnapshot(ErrandsData& data, uint32 now)
 
     if (data.city.current)
     {
-        Creature* creature = LiveCreature(data.city.current);
+        Creature* creature = CityIndex::LiveCreature(bot->GetMap(), data.city.current);
         bool const alive = creature && creature->IsAlive();
         snap.atStop = alive && IsWithinInteractionDist(creature);
         if (CityIndex::Spawn const* spawn = SpawnOf(snap.zone, data.city.current))
@@ -159,17 +159,6 @@ CityIndex::Spawn const* CityErrandAction::SpawnOf(uint32 zone, uint64 spawnId)
     for (CityIndex::Spawn const& spawn : CityIndex::SpawnsIn(zone))
         if (spawn.spawnId == spawnId)
             return &spawn;
-    return nullptr;
-}
-
-Creature* CityErrandAction::LiveCreature(uint64 spawnId)
-{
-    if (!spawnId || !bot->GetMap())
-        return nullptr;
-    auto const range = bot->GetMap()->GetCreatureBySpawnIdStore().equal_range(ObjectGuid::LowType(spawnId));
-    for (auto it = range.first; it != range.second; ++it)
-        if (it->second->IsInWorld())
-            return it->second;
     return nullptr;
 }
 }  // namespace PlayerbotsPlus

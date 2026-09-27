@@ -26,7 +26,6 @@ public:
 
 private:
     ShareSnapshot BuildSnapshot(ErrandsData& data, uint32 now);
-    Item* FindItem(uint64_t guid);
 };
 }  // namespace PlayerbotsPlus
 

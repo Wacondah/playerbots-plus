@@ -30,6 +30,12 @@ void ForEachBagItem(Player* bot, Fn fn)
                     fn(item);
 }
 
+// The item with this instance GUID in the bot's bags, nullptr if it is gone.
+Item* FindBagItem(Player* bot, uint64 guid);
+
+// Armor, weapon or bag: equipped rather than consumed.
+bool IsGear(ItemTemplate const* proto);
+
 // Other living bots of the bot's group on its map; maxDistance 0 means any distance.
 std::vector<Player*> GroupBots(Player* bot, float maxDistance);
 

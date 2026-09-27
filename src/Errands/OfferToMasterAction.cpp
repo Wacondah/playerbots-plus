@@ -46,7 +46,7 @@ bool OfferToMasterAction::Execute(Event /*event*/)
         return false;
     }
 
-    Item* item = FindItem(data.offer.item);
+    Item* item = FindBagItem(bot, data.offer.item);
     if (!item)
     {
         // Gone from the bags: the trade went through.
@@ -86,18 +86,6 @@ bool OfferToMasterAction::Execute(Event /*event*/)
     if (!bot->GetTrader())
         Decline(data, now, "trade cancelled");
     return false;
-}
-
-Item* OfferToMasterAction::FindItem(uint64_t guid)
-{
-    Item* found = nullptr;
-    ForEachBagItem(bot,
-                   [&](Item* i)
-                   {
-                       if (i->GetGUID().GetRawValue() == guid)
-                           found = i;
-                   });
-    return found;
 }
 
 Item* OfferToMasterAction::FindEntry(uint32 entry)

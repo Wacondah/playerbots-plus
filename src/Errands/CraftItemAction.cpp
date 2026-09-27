@@ -103,13 +103,7 @@ bool CraftItemAction::Execute(Event /*event*/)
     CraftDecision const d = data.craftDecision;
     if (d.action == CraftAction::Disenchant)
     {
-        Item* target = nullptr;
-        ForEachBagItem(bot,
-                       [&](Item* item)
-                       {
-                           if (item->GetGUID().GetRawValue() == d.item)
-                               target = item;
-                       });
+        Item* target = FindBagItem(bot, d.item);
         if (!target)
             return false;
         std::string const what = chat->FormatItem(target->GetTemplate());
@@ -202,8 +196,7 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         r.skillUp = ItemUsageValue::SpellGivesSkillUp(spellId, bot);
 
         // Gear: never a second copy while one waits in the group's bags to be shared.
-        bool const gear = proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON ||
-                          proto->Class == ITEM_CLASS_CONTAINER;
+        bool const gear = IsGear(proto);
         bool const copyWaiting = gear && CountInBags(group, product) > 0;
         r.gear = gear;
         for (Player* member : group)
@@ -219,7 +212,7 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
     }
 
     // First item nobody wants (bound: only the bot's own use counts) to disenchant.
-    std::vector<Player*> const others = GroupBots(bot, 0.f);
+    std::vector<Player*> const others(group.begin(), group.end() - 1);  // without the bot
     ForEachBagItem(bot,
                    [&](Item* item)
                    {

@@ -29,7 +29,6 @@ public:
     bool Execute(Event event) override;
 
 private:
-    Item* FindItem(uint64_t guid);
     Item* FindEntry(uint32 entry);
     void Decline(ErrandsData& data, uint32 now, char const* why);
 };

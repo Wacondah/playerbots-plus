@@ -46,6 +46,24 @@ float GainFor(Player* receiver, Item* item)
 }
 }  // namespace
 
+Item* FindBagItem(Player* bot, uint64 guid)
+{
+    Item* found = nullptr;
+    ForEachBagItem(bot,
+                   [&](Item* item)
+                   {
+                       if (!found && item->GetGUID().GetRawValue() == guid)
+                           found = item;
+                   });
+    return found;
+}
+
+bool IsGear(ItemTemplate const* proto)
+{
+    return proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON ||
+           proto->Class == ITEM_CLASS_CONTAINER;
+}
+
 std::vector<Player*> GroupBots(Player* bot, float maxDistance)
 {
     std::vector<Player*> bots;

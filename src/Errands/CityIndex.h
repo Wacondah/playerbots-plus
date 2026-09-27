@@ -9,6 +9,9 @@
 
 #include <vector>
 
+class Creature;
+class Map;
+
 // Trainers and vendors of each capital, from the creature spawns.
 namespace PlayerbotsPlus
 {
@@ -30,6 +33,8 @@ bool IsCapital(uint32 zone);
 std::vector<Spawn> const& SpawnsIn(uint32 zone, uint32 map, float x, float y);
 // Already built: the zone's spawns (empty otherwise).
 std::vector<Spawn> const& SpawnsIn(uint32 zone);
+// The spawn's creature when its grid is loaded, nullptr otherwise.
+Creature* LiveCreature(Map* map, uint64 spawnId);
 }  // namespace CityIndex
 }  // namespace PlayerbotsPlus
 

@@ -62,11 +62,7 @@ bool ErrandsStatusAction::Execute(Event event)
     }
     if (data.city.Active())
     {
-        Creature* stop = nullptr;
-        auto const range =
-            bot->GetMap()->GetCreatureBySpawnIdStore().equal_range(ObjectGuid::LowType(data.city.current));
-        if (range.first != range.second)
-            stop = range.first->second;
+        Creature* stop = CityIndex::LiveCreature(bot->GetMap(), data.city.current);
         out << " | city: to " << (stop ? stop->GetName() : "?") << " (" << data.city.done.size() + 1 << "/"
             << data.city.stopsPlanned << ")";
     }
