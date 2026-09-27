@@ -12,6 +12,8 @@
 #include "ObjectAccessor.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
+#include "Professions.h"
+#include "ProfessionsValue.h"
 #include "ReagentIndex.h"
 #include "SellAction.h"
 #include "SellRules.h"
@@ -21,6 +23,11 @@ namespace PlayerbotsPlus
 ErrandsData& RunErrandAction::Data()
 {
     return AI_VALUE(ErrandsData&, "errands data");
+}
+
+std::vector<uint32> const& RunErrandAction::Assigned()
+{
+    return AI_VALUE(ProfessionsData&, "assigned professions").skills;
 }
 
 bool RunErrandAction::isUseful()
@@ -113,7 +120,7 @@ void RunErrandAction::Scan(ErrandsData& data, Player* master, uint32 now)
         if (!object || !object->IsInWorld() || master->GetDistance(object) > radius)
             return;
         Candidate const c = Describe(object);
-        if (c.canTurnIn || c.canAccept || c.canRepair || c.canSell)
+        if (c.canTurnIn || c.canAccept || c.canRepair || c.canSell || c.canTrain || c.canSellTool)
             data.candidates.push_back(c);
     };
 
@@ -158,6 +165,12 @@ Candidate RunErrandAction::Describe(WorldObject* object)
     {
         c.canRepair = creature->HasNpcFlag(UNIT_NPC_FLAG_REPAIR);
         c.canSell = creature->HasNpcFlag(UNIT_NPC_FLAG_VENDOR);
+        std::vector<uint32> const& assigned = Assigned();
+        if (!assigned.empty())
+        {
+            c.canTrain = creature->IsTrainer() && CanTrainAt(bot, creature, assigned);
+            c.canSellTool = c.canSell && MissingToolAt(bot, creature, assigned);
+        }
     }
     return c;
 }
@@ -188,6 +201,16 @@ void RunErrandAction::VisitTarget(WorldObject* object)
         SellAction sell(botAI);
         for (Item* item : ExtraJunk())
             sell.Sell(item);
+    }
+
+    // Last: repairs are paid first, and selling funds training and tools.
+    std::vector<uint32> const& assigned = Assigned();
+    if (!assigned.empty())
+    {
+        if (creature->IsTrainer())
+            TrainAt(bot, creature, assigned);
+        if (creature->IsVendor())
+            BuyToolsAt(bot, creature, assigned);
     }
 }
 

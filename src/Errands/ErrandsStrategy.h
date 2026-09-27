@@ -33,6 +33,7 @@ public:
     {
         triggers.push_back(new TriggerNode("errands tick", {NextAction("run errand", RunErrandRelevance)}));
         triggers.push_back(new TriggerNode("errands", {NextAction("errands status", ChatCommandRelevance)}));
+        triggers.push_back(new TriggerNode("professions", {NextAction("professions", ChatCommandRelevance)}));
     }
 };
 

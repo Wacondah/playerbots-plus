@@ -71,3 +71,16 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | B4 | Full bot with quest items | quest items never move |
 | B5 | Everyone full | one `bags full, nothing to rebalance`, again only after space comes back |
 | B6 | Master keeps walking | rebalancing still happens (out of combat) |
+
+## Assigned professions
+
+| # | Scenario | Expected |
+|---|---|---|
+| P1 | `professions mining tailoring` near both trainers, bot without professions | learns apprentice mining and tailoring |
+| P2 | Level/skill allow a higher rank or new recipes | learned at the next trainer visit |
+| P3 | General goods vendor in camp, no mining pick | buys one |
+| P4 | Bot knowing skinning + herbalism, assigned mining + tailoring | forgets the least-trained one at the mining trainer, learns mining; then the other at the tailoring trainer |
+| P5 | `professions reset` | asks for confirmation; `professions reset confirm` within 30 s forgets both |
+| P6 | Server restart | `professions` still shows the assignment |
+| P7 | No assignment | nothing learned, bought or forgotten |
+| P8 | `professions mining tailoring alchemy` / `professions cooking` | error reply, assignment unchanged |

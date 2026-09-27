@@ -32,8 +32,9 @@ strategies (`playerbots_db_store`), so it survives restarts. Saved right after a
 
 ## Errands
 
-Two new errand kinds, after `Sell` (repairs come first, so gold for repairs is spent
-first):
+Two new errand kinds, after `Sell`. Within a visit the bot repairs, then sells, then
+trains and buys tools: repairs are paid first and selling funds the rest. (Kinds are
+picked in that order too.)
 
 - **Train**, at a tradeskill trainer within the radius teaching an assigned profession,
   when the bot can learn something there now (rank or recipe it can afford), or when it

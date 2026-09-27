@@ -27,6 +27,7 @@ public:
 
 private:
     ErrandsData& Data();
+    std::vector<uint32> const& Assigned();
     Snapshot BuildSnapshot(ErrandsData& data, uint32 now);
     void Scan(ErrandsData& data, Player* master, uint32 now);
     Candidate Describe(WorldObject* object);

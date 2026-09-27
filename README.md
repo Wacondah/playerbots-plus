@@ -49,7 +49,17 @@ a free slot of an alt that still keeps one free (`Bags.MinFreeSlots`). Quest ite
 water, potions and ammo the bot uses never move, and a material never goes to an alt
 whose professions rank it lower. When the whole party is full, the bot tells you once.
 
-## Install
+## Assigned professions
+
+Part of errands. Whisper `professions mining tailoring` to an alt (one or two primary
+professions, English names): within the errands radius it learns only those at their
+trainers (ranks and recipes it can afford, after repairing and selling) and buys their
+tools (mining pick, skinning knife, blacksmith hammer, arclight spanner, jeweler's kit,
+virtuoso inking set). If it lacks an assigned profession and has no free slot, it forgets
+its least-trained unassigned one, at that trainer only. The assignment is saved with the
+bot. Cooking, fishing and first aid are left alone.
+
+&
 
 Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
 
@@ -82,6 +92,8 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |
 | `nc +errands share` | enable sharing (party chat: `/p nc +errands share`) |
 | `nc +errands bags` | keep a free bag slot on every alt (party chat: `/p nc +errands bags`) |
+| `professions <p1> [p2]` / `professions` / `professions clear` | assign, show, remove assigned professions |
+| `professions reset` then `professions reset confirm` | forget both primary professions now (assignment kept) |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
 
 ## Configuration

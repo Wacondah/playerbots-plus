@@ -25,3 +25,4 @@ start here.
 | upstream usages `ITEM_USAGE_VENDOR` / `ITEM_USAGE_AH` | `RunErrandAction::ExtraJunk` | what may be sold |
 | `SellAction::Sell(Item*)` | `RunErrandAction::VisitTarget` | selling one item |
 | `BotCheatMask::food` (`PlayerbotAI::HasCheat`) | `RunErrandAction::ExtraJunk` | food is sold only when bots never eat items |
+| value `Save`/`Load` + `PlayerbotRepository::Save` (`playerbots_db_store`) | `ProfessionsValue`, `ProfessionsAction` | assignment persistence |

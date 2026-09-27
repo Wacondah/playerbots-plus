@@ -16,6 +16,8 @@
 #include "MageAiObjectContext.h"
 #include "PaladinAiObjectContext.h"
 #include "PriestAiObjectContext.h"
+#include "ProfessionsAction.h"
+#include "ProfessionsValue.h"
 #include "RebalanceBagsAction.h"
 #include "RogueAiObjectContext.h"
 #include "RunErrandAction.h"
@@ -49,6 +51,7 @@ public:
         creators["errands tick"] = [](PlayerbotAI* ai) -> Trigger* { return new ErrandsTickTrigger(ai); };
         creators["bags tick"] = [](PlayerbotAI* ai) -> Trigger* { return new BagsTickTrigger(ai); };
         creators["errands"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "errands"); };
+        creators["professions"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "professions"); };
     }
 };
 
@@ -62,6 +65,7 @@ public:
         creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
         creators["rebalance bags"] = [](PlayerbotAI* ai) -> Action* { return new RebalanceBagsAction(ai); };
+        creators["professions"] = [](PlayerbotAI* ai) -> Action* { return new ProfessionsAction(ai); };
     }
 };
 
@@ -71,6 +75,7 @@ public:
     PlusValueContext()
     {
         creators["errands data"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ErrandsDataValue(ai); };
+        creators["assigned professions"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ProfessionsValue(ai); };
     }
 };
 
