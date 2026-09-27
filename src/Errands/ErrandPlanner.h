@@ -36,7 +36,9 @@ enum class ErrandKind : uint8_t
     TurnIn,
     Accept,
     Repair,
-    Sell
+    Sell,
+    Train,
+    BuyTool
 };
 
 char const* ToString(ErrandKind kind);
@@ -49,6 +51,8 @@ struct Candidate
     bool canAccept = false;
     bool canRepair = false;
     bool canSell = false;
+    bool canTrain = false;     // tradeskill trainer teaching an assigned profession
+    bool canSellTool = false;  // vendor selling a missing tool of an assigned profession
 };
 
 struct Snapshot

@@ -317,3 +317,42 @@ TEST(Lifecycle, TimeWrapIsHandled)
     Plan(snap, state, cfg, nearWrap);
     EXPECT_EQ(Plan(snap, state, cfg, nearWrap + cfg.idleDelayMs).type, DecisionType::Start);
 }
+
+TEST(Pick, TrainAndBuyToolComeAfterSell)
+{
+    Snapshot snap = Ready();
+    snap.hasJunk = true;
+    Candidate vendor = Npc(1, 3.f);
+    vendor.canSell = true;
+    Candidate trainer = Npc(2, 2.f);
+    trainer.canTrain = true;
+    Candidate toolVendor = Npc(3, 1.f);
+    toolVendor.canSellTool = true;
+
+    snap.candidates = {toolVendor, trainer, vendor};
+    ErrandState s1;
+    EXPECT_EQ(PlanAfterIdle(snap, s1, PlannerConfig{}).kind, ErrandKind::Sell);
+
+    snap.candidates = {toolVendor, trainer};
+    ErrandState s2;
+    EXPECT_EQ(PlanAfterIdle(snap, s2, PlannerConfig{}).kind, ErrandKind::Train);
+
+    snap.candidates = {toolVendor};
+    ErrandState s3;
+    Decision d = PlanAfterIdle(snap, s3, PlannerConfig{});
+    EXPECT_EQ(d.kind, ErrandKind::BuyTool);
+    EXPECT_EQ(d.reason, "start buy tool");
+}
+
+TEST(Pick, TrainerRestsAfterVisit)
+{
+    Snapshot snap = Ready();
+    Candidate trainer = Npc(1, 3.f);
+    trainer.canTrain = true;
+    snap.candidates = {trainer};
+    PlannerConfig cfg;
+    ErrandState state;
+    state.visits[1] = Visit{0, T0};
+    EXPECT_EQ(PlanAfterIdle(snap, state, cfg).reason, "nothing to do");
+    EXPECT_EQ(Plan(snap, state, cfg, T0 + cfg.blacklistMs).kind, ErrandKind::Train);
+}
