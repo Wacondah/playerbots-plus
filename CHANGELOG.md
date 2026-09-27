@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `errands bags` strategy: alts pass stackables around so each keeps a free bag slot.
+
 ## 0.2.0 — 2026-09-27
 
 - `errands hunt` strategy: one elected bot pulls a quest mob near the idle master.

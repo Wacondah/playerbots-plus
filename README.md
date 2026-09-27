@@ -39,6 +39,15 @@ the party within 10 yd:
 
 Bound items, quest items and equipped items never move.
 
+## Errands bags
+
+Optional: `nc +errands bags` (party: `/p nc +errands bags`). Out of combat, even while
+you keep walking, an alt with no free bag slot gives stackable items to an alt within
+10 yd: into a partial stack of the same item first (costs the receiver no slot), else into
+a free slot of an alt that still keeps one free (`Bags.MinFreeSlots`). Quest items, food,
+water, potions and ammo the bot uses never move, and a material never goes to an alt
+whose professions rank it lower. When the whole party is full, the bot tells you once.
+
 ## Install
 
 Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
@@ -71,6 +80,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
 | `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |
 | `nc +errands share` | enable sharing (party chat: `/p nc +errands share`) |
+| `nc +errands bags` | keep a free bag slot on every alt (party chat: `/p nc +errands bags`) |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
 
 ## Configuration

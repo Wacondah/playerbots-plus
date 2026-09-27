@@ -56,3 +56,16 @@ Setup: `/p nc +errands share`, party with different classes and professions.
 | V4 | `MaxSellQuality = 2`, useless blue | kept |
 | V5 | Linen, tailor in the group / no tailor nor first aid | kept / sold |
 | V6 | Equipped items | never sold |
+
+## Errands bags
+
+Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
+
+| # | Scenario | Expected |
+|---|---|---|
+| B1 | Full bot with linen, another bot with a partial linen stack | linen merges into that stack |
+| B2 | Full bot, another bot with several free slots | a stack moves to the bot with most room |
+| B3 | Full mage with its water | water stays |
+| B4 | Full bot with quest items | quest items never move |
+| B5 | Everyone full | one `bags full, nothing to rebalance`, again only after space comes back |
+| B6 | Master keeps walking | rebalancing still happens (out of combat) |
