@@ -94,6 +94,8 @@ ErrandKind BestKind(Candidate const& c, Snapshot const& snap, ErrandState const&
         return ErrandKind::Sell;
     if (vendorRested && c.canTrain)
         return ErrandKind::Train;
+    if (vendorRested && c.canSellReagent)
+        return ErrandKind::BuyReagents;
     if (vendorRested && c.canSellTool)
         return ErrandKind::BuyTool;
     return ErrandKind::None;
@@ -172,6 +174,7 @@ char const* ToString(ErrandKind kind)
         case ErrandKind::Repair: return "repair";
         case ErrandKind::Sell: return "sell";
         case ErrandKind::Train: return "train";
+        case ErrandKind::BuyReagents: return "buy reagents";
         case ErrandKind::BuyTool: return "buy tool";
         default: return "none";
     }
