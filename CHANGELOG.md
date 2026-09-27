@@ -4,6 +4,8 @@
 
 - Selling: crafted materials none of the holder's professions uses (copper tube, bolts)
   are no longer kept because of an upstream cache bug; gatherers still keep raw materials.
+- Craft buys missing vendor reagents (primary professions) at a vendor within the errands
+  radius, within `Craft.MaxShoppingCopper` per visit and above a level-based reserve.
 
 ## 0.5.0 — 2026-09-27
 

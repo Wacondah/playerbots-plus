@@ -99,6 +99,10 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | C6 | A BoE green upgrade for you in a bot's bags (`errands share`) | offered to you before any bot |
 | C7 | Enchanter with `errands craft`, a BoE green nobody wants in another alt's bags | handed to the enchanter (share), disenchanted; not sold |
 | C8 | Soulbound replaced quest reward on the enchanter | disenchanted instead of sold |
+| C9 | Tailor with linen, no coarse thread, vendor in camp | buys thread, then crafts |
+| C10 | Bot under the reserve | buys nothing, status `shopping: no budget` |
+| C11 | Cook without salt | never buys |
+| C12 | `craft yes` on a buyable bag | `I need a vendor for [thread]`, buys, crafts, offers |
 
 ## Switch
 

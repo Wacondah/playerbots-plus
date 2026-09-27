@@ -22,9 +22,10 @@ start here.
 | value `"item usage"` of other bots (`ITEM_USAGE_EQUIP/REPLACE/QUEST`) | `ShareItemAction` | who can use an item |
 | `StatsWeightCalculator::CalculateItem` | `ShareItemAction` | upgrade gain |
 | item move as in `GiveItemAction` (`MoveItemFromInventory`/`MoveItemToInventory`) | `ShareItemAction::Execute` | transfer |
-| upstream usages `ITEM_USAGE_VENDOR` / `ITEM_USAGE_AH` | `RunErrandAction::ExtraJunk` | what may be sold |
+| upstream usages `ITEM_USAGE_VENDOR` / `ITEM_USAGE_AH` / `ITEM_USAGE_SKILL` | `RunErrandAction::ExtraJunk` | what may be sold |
 | `SellAction::Sell(Item*)` | `RunErrandAction::VisitTarget` | selling one item |
 | `BotCheatMask::food` (`PlayerbotAI::HasCheat`) | `RunErrandAction::ExtraJunk` | food is sold only when bots never eat items |
 | value `Save`/`Load` + `PlayerbotRepository::Save` (`playerbots_db_store`) | `ProfessionsValue`, `ProfessionsAction` | assignment persistence |
 | trade opcodes `CMSG_INITIATE_TRADE`, `CMSG_SET_TRADE_ITEM`; bot-side accept in `TradeStatusAction` | `OfferToMasterAction` | offers to the master |
 | `PlayerbotAI::CastSpell`, `CanCastSpell`, `ItemUsageValue::SpellGivesSkillUp` | `CraftItemAction` | crafting |
+| core `ObjectMgr::GetNpcVendorItemList`, `Player::BuyItemFromVendorSlot`, `Player::HasItemTotemCategory` | `ReagentIndex`, `Shopping`, `CraftItemAction` | vendor reagents |

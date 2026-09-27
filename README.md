@@ -64,6 +64,12 @@ bags, bandages, potions), then recipes that raise its skill, cheapest materials 
 An enchanter with `errands craft` also disenchants weapons and armor nobody in the party
 (you included) wants, up to blue (`Craft.MaxDisenchantQuality`), before crafting for skill.
 With `errands share`, other alts hand such items to it; selling keeps them for it.
+For primary professions, a missing reagent that vendors sell (thread, dyes, flux, vials)
+does not stop a recipe: the bot buys it at a vendor within the errands radius, for as many
+crafts as its other materials allow (one for gear, at most `Craft.MaxShoppingCrafts`),
+spending at most `Craft.MaxShoppingCopper` per visit and never its reserve
+(`Craft.ReserveCopperPer10Levels` per 10 levels). After `craft yes` it tells you
+"I need a vendor for [item]" when it must shop first.
 Nothing else, never at random. `craft no` is remembered.
 
 &
