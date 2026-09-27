@@ -56,6 +56,8 @@ Setup: `/p nc +errands share`, party with different classes and professions.
 | V4 | `MaxSellQuality = 2`, useless blue | kept |
 | V5 | Linen, tailor in the group / no tailor nor first aid | kept / sold |
 | V6 | Equipped items | never sold |
+| V7 | Stale bread, small pumpkin, spring water (bots with the `food` cheat) | sold |
+| V8 | Cooked food, or `SellFood = 0`, or `food` cheat off | kept |
 
 ## Errands bags
 

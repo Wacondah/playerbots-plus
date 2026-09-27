@@ -19,6 +19,7 @@ namespace ReagentIndex
 void Build();
 uint32 UsedBy(uint32 itemId);
 uint32 Known(Player* player);  // ProfessionBit mask of the player's professions
+bool IsCrafted(uint32 itemId);  // produced by a profession recipe (e.g. cooked food)
 }  // namespace ReagentIndex
 }  // namespace PlayerbotsPlus
 

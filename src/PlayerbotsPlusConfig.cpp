@@ -21,6 +21,7 @@ void ModuleConfig::Load()
     planner.inInstances = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.InInstances", false);
     repairThreshold = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.RepairThreshold", 30);
     sellWhite = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.SellWhite", false);
+    sellFood = sConfigMgr->GetOption<bool>("PlayerbotsPlus.Errands.SellFood", true);
     maxSellQuality = std::min<uint32>(sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Errands.MaxSellQuality", 3), 4);
     huntMaxLevelAbove = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Hunt.MaxLevelAbove", 2);
     huntRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.Radius", 45.0f);

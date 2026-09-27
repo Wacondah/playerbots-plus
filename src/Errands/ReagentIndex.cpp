@@ -11,6 +11,7 @@
 #include "SpellMgr.h"
 
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace PlayerbotsPlus
@@ -32,6 +33,12 @@ std::unordered_map<uint32, uint32>& Index()
     return index;
 }
 
+std::unordered_set<uint32>& Crafted()
+{
+    static std::unordered_set<uint32> crafted;
+    return crafted;
+}
+
 uint32 BitFor(uint32 skill)
 {
     for (auto const& [id, bit] : Professions)
@@ -44,7 +51,9 @@ uint32 BitFor(uint32 skill)
 void ReagentIndex::Build()
 {
     auto& index = Index();
+    auto& crafted = Crafted();
     index.clear();
+    crafted.clear();
     for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
     {
         SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(i);
@@ -57,7 +66,15 @@ void ReagentIndex::Build()
         for (int32 reagent : spell->Reagent)
             if (reagent > 0)
                 index[uint32(reagent)] |= bit;
+        for (SpellEffectInfo const& effect : spell->Effects)
+            if (effect.Effect == SPELL_EFFECT_CREATE_ITEM && effect.ItemType)
+                crafted.insert(effect.ItemType);
     }
+}
+
+bool ReagentIndex::IsCrafted(uint32 itemId)
+{
+    return Crafted().count(itemId) > 0;
 }
 
 uint32 ReagentIndex::UsedBy(uint32 itemId)

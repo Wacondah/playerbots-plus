@@ -12,7 +12,9 @@
 #include "ObjectAccessor.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
+#include "ReagentIndex.h"
 #include "SellAction.h"
+#include "SellRules.h"
 
 namespace PlayerbotsPlus
 {
@@ -236,13 +238,24 @@ bool RunErrandAction::HasJunk(ErrandsData& data, uint32 now)
     return data.hasJunk;
 }
 
-// Beyond greys/whites: bound junk, and tradeables no bot of the group would take.
+// Beyond greys/whites: bound junk, uncrafted food the bot never eats, and tradeables
+// no bot of the group would take.
 std::vector<Item*> RunErrandAction::ExtraJunk()
 {
     std::vector<Item*> junk;
     uint32 const maxQuality = Config().maxSellQuality;
+    bool const foodCheat = botAI->HasCheat(BotCheatMask::food);
     std::vector<Player*> group;
     bool groupLoaded = false;
+    auto wantedByGroup = [&](Item* item)
+    {
+        if (!groupLoaded)
+        {
+            group = GroupBots(bot, 0.f);
+            groupLoaded = true;
+        }
+        return WantedByGroup(DescribeForGroup(botAI, item, group));
+    };
 
     ForEachBagItem(bot,
                    [&](Item* item)
@@ -251,19 +264,27 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
                        if (!proto->SellPrice || proto->Quality == ITEM_QUALITY_POOR || proto->Quality > maxQuality)
                            return;
                        ItemUsage const usage = AI_VALUE2(ItemUsage, "item usage", int32(proto->ItemId));
+
+                       FoodItem food;
+                       food.isFood = proto->Class == ITEM_CLASS_CONSUMABLE && proto->SubClass == ITEM_SUBCLASS_FOOD;
+                       food.crafted = ReagentIndex::IsCrafted(proto->ItemId);
+                       food.quest = usage == ITEM_USAGE_QUEST;
+                       food.hasSellPrice = proto->SellPrice > 0;
+                       food.quality = proto->Quality;
+                       if (SellableFood(food, foodCheat, Config().sellFood, maxQuality))
+                       {
+                           // Some food is also a cooking reagent: a cook of the group keeps priority.
+                           if (!item->CanBeTraded() || !wantedByGroup(item))
+                               junk.push_back(item);
+                           return;
+                       }
+
                        if (usage == ITEM_USAGE_VENDOR)
                        {
                            junk.push_back(item);
                            return;
                        }
-                       if (usage != ITEM_USAGE_AH || !item->CanBeTraded())
-                           return;
-                       if (!groupLoaded)
-                       {
-                           group = GroupBots(bot, 0.f);
-                           groupLoaded = true;
-                       }
-                       if (!WantedByGroup(DescribeForGroup(botAI, item, group)))
+                       if (usage == ITEM_USAGE_AH && item->CanBeTraded() && !wantedByGroup(item))
                            junk.push_back(item);
                    });
     return junk;

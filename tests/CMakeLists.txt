@@ -12,7 +12,9 @@ add_executable(planner_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/HuntPlanner.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/SharePlanner.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/BagPlanner.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/SellRules.cpp
     BagPlannerTest.cpp
+    SellRulesTest.cpp
     ErrandPlannerTest.cpp
     HuntPlannerTest.cpp
     SharePlannerTest.cpp)

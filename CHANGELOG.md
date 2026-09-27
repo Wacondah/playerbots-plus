@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Errands also sells food and drink no recipe makes, for bots with the `food` cheat
+  (`SellFood`, on by default).
+
 ## 0.3.0 — 2026-09-27
 
 - `errands bags` strategy: alts pass stackables around so each keeps a free bag slot.

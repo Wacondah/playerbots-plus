@@ -27,6 +27,9 @@ PlayerbotsPlus.Enable = 1
 #                                            bot nor the group has a use for the
 #                                            item: 0 grey, 1 white, 2 green,
 #                                            3 blue, 4 epic.                      Default: 3
+#    PlayerbotsPlus.Errands.SellFood         Also sell food and drink no recipe
+#                                            makes, for bots with the "food" cheat
+#                                            (they never eat items).              Default: 1
 #    PlayerbotsPlus.Errands.InInstances      Allow errands in dungeons/raids/BGs. Default: 0
 
 PlayerbotsPlus.Errands.Radius = 20
@@ -36,6 +39,7 @@ PlayerbotsPlus.Errands.Blacklist = 60000
 PlayerbotsPlus.Errands.RepairThreshold = 30
 PlayerbotsPlus.Errands.SellWhite = 0
 PlayerbotsPlus.Errands.MaxSellQuality = 3
+PlayerbotsPlus.Errands.SellFood = 1
 PlayerbotsPlus.Errands.InInstances = 0
 
 ###################################################################################################
