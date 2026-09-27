@@ -13,9 +13,9 @@
 
 namespace PlayerbotsPlus
 {
-bool SellsShopping(Creature* npc, ShoppingList const& list)
+bool SellsShoppingEntry(uint32 entry, ShoppingList const& list)
 {
-    VendorItemData const* items = npc && npc->IsVendor() ? npc->GetVendorItems() : nullptr;
+    VendorItemData const* items = sObjectMgr->GetNpcVendorItemList(entry);
     if (!items || !list.Any())
         return false;
     for (uint32 slot = 0; slot < items->GetItemCount(); ++slot)
@@ -24,6 +24,11 @@ bool SellsShopping(Creature* npc, ShoppingList const& list)
                 if (item->item == p.item && !item->maxcount)
                     return true;
     return false;
+}
+
+bool SellsShopping(Creature* npc, ShoppingList const& list)
+{
+    return npc && npc->IsVendor() && SellsShoppingEntry(npc->GetEntry(), list);
 }
 
 bool BuyShoppingAt(Player* bot, Creature* npc, ShoppingList const& list)

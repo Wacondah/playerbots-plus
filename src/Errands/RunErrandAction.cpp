@@ -122,7 +122,7 @@ void RunErrandAction::Scan(ErrandsData& data, Player* master, uint32 now)
             return;
         Candidate const c = Describe(object);
         if (c.canTurnIn || c.canAccept || c.canRepair || c.canSell || c.canTrain || c.canSellTool ||
-            c.canSellReagent)
+            c.canSellReagent || c.canTrainClass)
             data.candidates.push_back(c);
     };
 
@@ -168,6 +168,7 @@ Candidate RunErrandAction::Describe(WorldObject* object)
         c.canRepair = creature->HasNpcFlag(UNIT_NPC_FLAG_REPAIR);
         c.canSell = creature->HasNpcFlag(UNIT_NPC_FLAG_VENDOR);
         c.canSellReagent = c.canSell && SellsShopping(creature, Data().shopping);
+        c.canTrainClass = creature->IsTrainer() && CanTrainClassAt(bot, creature);
         std::vector<uint32> const& assigned = Assigned();
         if (!assigned.empty())
         {
@@ -206,15 +207,9 @@ void RunErrandAction::VisitTarget(WorldObject* object)
             sell.Sell(item);
     }
 
-    // Craft reagents after sales, before tools (both need the money).
-    if (creature->IsVendor() && BuyShoppingAt(bot, creature, Data().shopping))
-    {
-        DebugErrands(botAI, "errands: bought reagents");
-        Data().shopping = ShoppingList{};
-        Data().lastCraftScanAt = 0;  // craft at the next tick
-    }
-
-    // Last: repairs are paid first, and selling funds training and tools.
+    // Then spending, most important first: repairs were paid, selling funded the rest.
+    if (creature->IsTrainer())
+        TrainClassAt(bot, creature);
     std::vector<uint32> const& assigned = Assigned();
     if (!assigned.empty())
     {
@@ -222,6 +217,14 @@ void RunErrandAction::VisitTarget(WorldObject* object)
             TrainAt(bot, creature, assigned);
         if (creature->IsVendor())
             BuyToolsAt(bot, creature, assigned);
+    }
+
+    // Craft reagents last: they keep the shopping reserve.
+    if (creature->IsVendor() && BuyShoppingAt(bot, creature, Data().shopping))
+    {
+        DebugErrands(botAI, "errands: bought reagents");
+        Data().shopping = ShoppingList{};
+        Data().lastCraftScanAt = 0;  // craft at the next tick
     }
 }
 
