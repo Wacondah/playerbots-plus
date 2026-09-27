@@ -6,6 +6,7 @@
 
 #include "ChatCommandTrigger.h"
 #include "CraftDeclinedValue.h"
+#include "ChosenSpecValue.h"
 #include "CityErrandAction.h"
 #include "CraftItemAction.h"
 #include "DKAiObjectContext.h"
@@ -16,6 +17,7 @@
 #include "ErrandsValues.h"
 #include "HunterAiObjectContext.h"
 #include "HuntQuestMobAction.h"
+#include "LevelUpAction.h"
 #include "MageAiObjectContext.h"
 #include "OfferToMasterAction.h"
 #include "PaladinAiObjectContext.h"
@@ -27,6 +29,7 @@
 #include "RunErrandAction.h"
 #include "ShamanAiObjectContext.h"
 #include "ShareItemAction.h"
+#include "ShareQuestsAction.h"
 #include "WarlockAiObjectContext.h"
 #include "WarriorAiObjectContext.h"
 
@@ -45,6 +48,8 @@ public:
         creators["errands share"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsShareStrategy(ai); };
         creators["errands bags"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsBagsStrategy(ai); };
         creators["errands craft"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsCraftStrategy(ai); };
+        creators["errands levelup"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsLevelUpStrategy(ai); };
+        creators["errands quests"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsQuestsStrategy(ai); };
     }
 };
 
@@ -69,6 +74,8 @@ public:
     {
         creators["run errand"] = [](PlayerbotAI* ai) -> Action* { return new RunErrandAction(ai); };
         creators["city errand"] = [](PlayerbotAI* ai) -> Action* { return new CityErrandAction(ai); };
+        creators["errands levelup"] = [](PlayerbotAI* ai) -> Action* { return new LevelUpAction(ai); };
+        creators["share quests"] = [](PlayerbotAI* ai) -> Action* { return new ShareQuestsAction(ai); };
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };
         creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
@@ -89,6 +96,7 @@ public:
         creators["errands data"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ErrandsDataValue(ai); };
         creators["assigned professions"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ProfessionsValue(ai); };
         creators["craft declined"] = [](PlayerbotAI* ai) -> UntypedValue* { return new CraftDeclinedValue(ai); };
+        creators["chosen spec"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ChosenSpecValue(ai); };
     }
 };
 

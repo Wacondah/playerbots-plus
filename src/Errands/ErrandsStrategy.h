@@ -26,6 +26,10 @@ constexpr float OfferRelevance = 1.97f;
 constexpr float CraftRelevance = 1.93f;
 // A capital trip outranks errands and follow: the leash is released meanwhile.
 constexpr float CityRelevance = 2.05f;
+// Between share and offers: sharing quests is instant.
+constexpr float QuestShareRelevance = 1.96f;
+// A level-up packet is handled at once, like a chat command.
+constexpr float LevelUpRelevance = ChatCommandRelevance;
 
 class ErrandsStrategy : public Strategy
 {
@@ -104,6 +108,36 @@ public:
         triggers.push_back(new TriggerNode("errands tick", {NextAction("craft item", CraftRelevance)}));
         triggers.push_back(new TriggerNode("craft yes", {NextAction("craft yes", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("craft no", {NextAction("craft no", ChatCommandRelevance)}));
+    }
+};
+
+// Spends the talent points gained on level-up (the spec picked with "talents spec").
+class ErrandsLevelUpStrategy : public Strategy
+{
+public:
+    ErrandsLevelUpStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands levelup"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("levelup", {NextAction("errands levelup", LevelUpRelevance)}));
+    }
+};
+
+// Gives the other alts of the group the quests they can take (never the master).
+class ErrandsQuestsStrategy : public Strategy
+{
+public:
+    ErrandsQuestsStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands quests"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("share quests", QuestShareRelevance)}));
     }
 };
 

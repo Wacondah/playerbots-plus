@@ -83,6 +83,14 @@ virtuoso inking set). If it lacks an assigned profession and has no free slot, i
 its least-trained unassigned one, at that trainer only. The assignment is saved with the
 bot. Cooking, fishing and first aid are left alone.
 
+## Level-up and quest sharing
+
+Part of `errands on`. On level-up an alt spends its talent points: in the premade spec you
+picked with `talents spec <name>` (the module remembers it, mod-playerbots forgets it once
+the points are spent), else in the tree it already uses; with neither, it asks you to
+choose. Spells stay with its class trainer. `errands quests`: when the group is idle,
+alts give each other the sharable quests they can take, never to you (no quest window).
+
 ## Errands city
 
 Part of errands. When you stand still for a few seconds in a capital (Stormwind,

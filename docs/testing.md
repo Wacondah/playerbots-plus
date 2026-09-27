@@ -109,8 +109,8 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 
 | # | Scenario | Expected |
 |---|---|---|
-| W1 | `/p errands on` with bots that have no errands strategy | each bot answers `errands: on (hunt, share, bags, craft)`; `nc ?` lists the five |
-| W2 | `/p errands off` | each bot answers `errands: off`; the five are gone, `debug errands` untouched |
+| W1 | `/p errands on` with bots that have no errands strategy | each bot answers `errands: on (hunt, share, bags, craft, levelup, quests)`; `nc ?` lists the seven |
+| W2 | `/p errands off` | each bot answers `errands: off`; the seven are gone, `debug errands` untouched |
 | W3 | Whisper `errands on` to one bot | only that bot changes |
 
 ## Errands city
@@ -124,3 +124,14 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | Y5 | `City.Auto = 0` | nothing until `errands city` |
 | Y6 | Class trainer within 20 yd in Goldshire | trains as a normal errand |
 | Y7 | Walk around inside the city during a trip | bots continue |
+
+## Level-up and quest sharing
+
+| # | Scenario | Expected |
+|---|---|---|
+| L1 | `talents spec holy pve` at level 9, then level 10 | the point goes into the holy pve template |
+| L2 | Level-up of an alt with points in one tree and no chosen spec | the new point follows that tree |
+| L3 | Level 10 with no talents and no chosen spec | whispers `Choose my spec: …`, spends nothing |
+| L4 | Restart the server, level up | the chosen spec is still used |
+| Q1 | An alt holds a sharable quest another alt can take, group idle | `Shared [quest] with X`; X has it, no quest window for you |
+| Q2 | A quest the other alt already did, or cannot take (level, class) | not shared |

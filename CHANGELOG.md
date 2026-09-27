@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- `errands levelup`: alts spend their talent points on level-up, following the spec picked
+  with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
+- `errands quests`: alts share quests with each other (never with the master).
+- Hunt scans mobs once a second and checks line of sight last (CPU).
+- Buying reagents keeps the reserve even after training at the same visit.
+
 ## 0.6.0 — 2026-09-27
 
 - Selling: crafted materials none of the holder's professions uses (copper tube, bolts)

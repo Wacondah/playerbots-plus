@@ -4,6 +4,7 @@
 
 #include "ChatCommands.h"
 #include "Group.h"
+#include "LevelUpAction.h"
 #include "Log.h"
 #include "PlayerbotRepository.h"
 #include "Playerbots.h"
@@ -56,21 +57,38 @@ public:
     bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 /*lang*/, std::string& msg, Player* receiver) override
     {
         if (type == CHAT_MSG_WHISPER && Config().enabled)
+        {
             Apply(player, receiver, ParseErrandsSwitch(msg));
+            RememberSpec(player, receiver, ParseTalentsSpec(msg));
+        }
         return true;
     }
 
     bool OnPlayerCanUseChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Group* group) override
     {
         ErrandsSwitch const command = ParseErrandsSwitch(msg);
-        if (command == ErrandsSwitch::None || !group || !Config().enabled)
+        std::string const spec = ParseTalentsSpec(msg);
+        if ((command == ErrandsSwitch::None && spec.empty()) || !group || !Config().enabled)
             return true;
         for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+        {
             Apply(player, ref->GetSource(), command);
+            RememberSpec(player, ref->GetSource(), spec);
+        }
         return true;
     }
 
 private:
+    // "talents spec <name>": mod-playerbots applies it now, the module keeps it for level-ups.
+    static void RememberSpec(Player* master, Player* bot, std::string const& spec)
+    {
+        PlayerbotAI* botAI = bot ? GET_PLAYERBOT_AI(bot) : nullptr;
+        if (spec.empty() || !botAI || botAI->GetMaster() != master || PremadeSpecNo(bot, spec) < 0)
+            return;
+        botAI->GetAiObjectContext()->GetValue<std::string&>("chosen spec")->Get() = spec;
+        PlayerbotRepository::instance().Save(botAI);
+    }
+
     static void Apply(Player* master, Player* bot, ErrandsSwitch command)
     {
         PlayerbotAI* botAI = bot ? GET_PLAYERBOT_AI(bot) : nullptr;
@@ -79,7 +97,7 @@ private:
         bool const on = command == ErrandsSwitch::On;
         botAI->ChangeStrategy(ErrandsStrategies(on), BOT_STATE_NON_COMBAT);
         PlayerbotRepository::instance().Save(botAI);
-        botAI->TellMaster(on ? "errands: on (hunt, share, bags, craft)" : "errands: off");
+        botAI->TellMaster(on ? "errands: on (hunt, share, bags, craft, levelup, quests)" : "errands: off");
     }
 };
 
