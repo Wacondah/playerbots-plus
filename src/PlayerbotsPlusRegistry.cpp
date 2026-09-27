@@ -5,6 +5,8 @@
 #include "PlayerbotsPlusRegistry.h"
 
 #include "ChatCommandTrigger.h"
+#include "CraftDeclinedValue.h"
+#include "CraftItemAction.h"
 #include "DKAiObjectContext.h"
 #include "DruidAiObjectContext.h"
 #include "ErrandsStatusAction.h"
@@ -14,6 +16,7 @@
 #include "HunterAiObjectContext.h"
 #include "HuntQuestMobAction.h"
 #include "MageAiObjectContext.h"
+#include "OfferToMasterAction.h"
 #include "PaladinAiObjectContext.h"
 #include "PriestAiObjectContext.h"
 #include "ProfessionsAction.h"
@@ -40,6 +43,7 @@ public:
         creators["errands hunt"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsHuntStrategy(ai); };
         creators["errands share"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsShareStrategy(ai); };
         creators["errands bags"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsBagsStrategy(ai); };
+        creators["errands craft"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsCraftStrategy(ai); };
     }
 };
 
@@ -52,6 +56,8 @@ public:
         creators["bags tick"] = [](PlayerbotAI* ai) -> Trigger* { return new BagsTickTrigger(ai); };
         creators["errands"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "errands"); };
         creators["professions"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "professions"); };
+        creators["craft yes"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "craft yes"); };
+        creators["craft no"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "craft no"); };
     }
 };
 
@@ -66,6 +72,10 @@ public:
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
         creators["rebalance bags"] = [](PlayerbotAI* ai) -> Action* { return new RebalanceBagsAction(ai); };
         creators["professions"] = [](PlayerbotAI* ai) -> Action* { return new ProfessionsAction(ai); };
+        creators["offer to master"] = [](PlayerbotAI* ai) -> Action* { return new OfferToMasterAction(ai); };
+        creators["craft item"] = [](PlayerbotAI* ai) -> Action* { return new CraftItemAction(ai); };
+        creators["craft yes"] = [](PlayerbotAI* ai) -> Action* { return new CraftAnswerAction(ai, true); };
+        creators["craft no"] = [](PlayerbotAI* ai) -> Action* { return new CraftAnswerAction(ai, false); };
     }
 };
 
@@ -76,6 +86,7 @@ public:
     {
         creators["errands data"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ErrandsDataValue(ai); };
         creators["assigned professions"] = [](PlayerbotAI* ai) -> UntypedValue* { return new ProfessionsValue(ai); };
+        creators["craft declined"] = [](PlayerbotAI* ai) -> UntypedValue* { return new CraftDeclinedValue(ai); };
     }
 };
 

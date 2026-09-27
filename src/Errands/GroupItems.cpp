@@ -10,6 +10,8 @@
 #include "ReagentIndex.h"
 #include "StatsWeightCalculator.h"
 
+#include <algorithm>
+
 namespace PlayerbotsPlus
 {
 namespace
@@ -71,6 +73,7 @@ ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player
     s.id = item->GetGUID().GetRawValue();
     s.usage = ToShareUsage(UsageFor(holderAI->GetBot(), itemId));
     s.tier = TierFor(usedBy, ReagentIndex::Known(holderAI->GetBot()));
+    s.masterGain = MasterGain(RealMaster(holderAI), item->GetTemplate(), item->GetItemRandomPropertyId());
     for (Player* other : others)
     {
         ShareReceiver r;
@@ -82,6 +85,56 @@ ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player
         s.receivers.push_back(r);
     }
     return s;
+}
+
+float MasterGain(Player* master, ItemTemplate const* proto, int32 randomProperty)
+{
+    if (!master || !proto || master->CanUseItem(proto) != EQUIP_ERR_OK)
+        return 0.f;
+
+    if (proto->Class == ITEM_CLASS_CONTAINER)
+    {
+        if (proto->SubClass != ITEM_SUBCLASS_CONTAINER)
+            return 0.f;
+        uint32 smallest = proto->ContainerSlots;
+        for (uint8 bagSlot = INVENTORY_SLOT_BAG_START; bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot)
+        {
+            Bag* bag = master->GetBagByPos(bagSlot);
+            uint32 const size = bag ? bag->GetBagSize() : 0;  // an empty bag slot counts as size 0
+            smallest = std::min(smallest, size);
+        }
+        return float(proto->ContainerSlots - smallest);
+    }
+
+    if (proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON)
+        return 0.f;
+    uint8 const slot = master->FindEquipSlot(proto, NULL_SLOT, true);
+    if (slot == NULL_SLOT)
+        return 0.f;
+    StatsWeightCalculator calc(master);
+    Item* current = master->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    float const currentScore =
+        current ? calc.CalculateItem(current->GetEntry(), current->GetItemRandomPropertyId()) : 0.f;
+    return std::max(0.f, calc.CalculateItem(proto->ItemId, randomProperty) - currentScore);
+}
+
+Player* RealMaster(PlayerbotAI* botAI)
+{
+    Player* master = botAI->GetMaster();
+    return master && master->IsInWorld() && !GET_PLAYERBOT_AI(master) ? master : nullptr;
+}
+
+uint32 CountInBags(std::vector<Player*> const& players, uint32 entry)
+{
+    uint32 count = 0;
+    for (Player* player : players)
+        ForEachBagItem(player,
+                       [&](Item* item)
+                       {
+                           if (item->GetEntry() == entry)
+                               count += item->GetCount();
+                       });
+    return count;
 }
 
 uint32 FreeSlots(Player* player)

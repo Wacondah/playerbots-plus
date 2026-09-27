@@ -40,6 +40,10 @@ the party within 10 yd:
 
 Bound items, quest items and equipped items never move.
 
+You come first: a tradeable item that would be an upgrade for you (gear, or a bag larger
+than your smallest one) is offered to you through a trade window ("I have [item] for
+you, accept the trade"). Cancel the trade and that item is not offered again for 30 min.
+
 ## Errands bags
 
 Optional: `nc +errands bags` (party: `/p nc +errands bags`). Out of combat, even while
@@ -49,7 +53,16 @@ a free slot of an alt that still keeps one free (`Bags.MinFreeSlots`). Quest ite
 water, potions and ammo the bot uses never move, and a material never goes to an alt
 whose professions rank it lower. When the whole party is full, the bot tells you once.
 
-## Assigned professions
+## Errands craft
+
+Optional, on top of errands: `nc +errands craft` (party: `/p nc +errands craft`). When
+you stand still and no errand is left, a bot crafts on purpose with the materials in its
+bags: first it asks you about upgrades for you ("I can craft [item] for you. Whisper
+'craft yes' or 'craft no'."), then crafts what the party can use (gear upgrades, bigger
+bags, bandages, potions), then recipes that raise its skill, cheapest materials first.
+Nothing else, never at random. `craft no` is remembered.
+
+&
 
 Part of errands. Whisper `professions mining tailoring` to an alt (one or two primary
 professions, English names): within the errands radius it learns only those at their
@@ -94,6 +107,8 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `nc +errands bags` | keep a free bag slot on every alt (party chat: `/p nc +errands bags`) |
 | `professions <p1> [p2]` / `professions` / `professions clear` | assign, show, remove assigned professions |
 | `professions reset` then `professions reset confirm` | forget both primary professions now (assignment kept) |
+| `nc +errands craft` | enable crafting (party chat: `/p nc +errands craft`) |
+| `craft yes` / `craft no` | answer a crafting offer |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
 
 ## Configuration

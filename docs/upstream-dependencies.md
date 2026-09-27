@@ -26,3 +26,5 @@ start here.
 | `SellAction::Sell(Item*)` | `RunErrandAction::VisitTarget` | selling one item |
 | `BotCheatMask::food` (`PlayerbotAI::HasCheat`) | `RunErrandAction::ExtraJunk` | food is sold only when bots never eat items |
 | value `Save`/`Load` + `PlayerbotRepository::Save` (`playerbots_db_store`) | `ProfessionsValue`, `ProfessionsAction` | assignment persistence |
+| trade opcodes `CMSG_INITIATE_TRADE`, `CMSG_SET_TRADE_ITEM`; bot-side accept in `TradeStatusAction` | `OfferToMasterAction` | offers to the master |
+| `PlayerbotAI::CastSpell`, `CanCastSpell`, `ItemUsageValue::SpellGivesSkillUp` | `CraftItemAction` | crafting |

@@ -84,3 +84,14 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | P6 | Server restart | `professions` still shows the assignment |
 | P7 | No assignment | nothing learned, bought or forgotten |
 | P8 | `professions mining tailoring alchemy` / `professions cooking` | error reply, assignment unchanged |
+
+## Errands craft and offers to the master
+
+| # | Scenario | Expected |
+|---|---|---|
+| C1 | Tailor with linen, `nc +errands craft`, you have a small bag | asks "I can craft [Linen Bag] for you"; `craft yes` → crafts, trade window opens, bag lands after you accept |
+| C2 | Cancel that trade | not offered again for 30 min |
+| C3 | `craft no` | never asked again for that item, also after a restart |
+| C4 | Bandages useful to the party (first aid) | crafted without asking |
+| C5 | Recipes still orange/yellow, nothing useful | crafts for skill, cheapest materials first; stops when recipes turn grey |
+| C6 | A BoE green upgrade for you in a bot's bags (`errands share`) | offered to you before any bot |

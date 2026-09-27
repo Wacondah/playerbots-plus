@@ -20,6 +20,10 @@ constexpr float HuntRelevance = 1.9f;
 constexpr float ShareRelevance = 1.95f;
 // The move is instant, so it may go before an errand.
 constexpr float BagsRelevance = 2.1f;
+// Offers to the master progress before new share decisions.
+constexpr float OfferRelevance = 1.97f;
+// After share, so materials reach the right crafter first; before hunting.
+constexpr float CraftRelevance = 1.93f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -34,6 +38,7 @@ public:
         triggers.push_back(new TriggerNode("errands tick", {NextAction("run errand", RunErrandRelevance)}));
         triggers.push_back(new TriggerNode("errands", {NextAction("errands status", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("professions", {NextAction("professions", ChatCommandRelevance)}));
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("offer to master", OfferRelevance)}));
     }
 };
 
@@ -79,6 +84,23 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("bags tick", {NextAction("rebalance bags", BagsRelevance)}));
+    }
+};
+
+// Opt-in on top of "errands": craft for the master (asking), the group, then skill-ups.
+class ErrandsCraftStrategy : public Strategy
+{
+public:
+    ErrandsCraftStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands craft"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("craft item", CraftRelevance)}));
+        triggers.push_back(new TriggerNode("craft yes", {NextAction("craft yes", ChatCommandRelevance)}));
+        triggers.push_back(new TriggerNode("craft no", {NextAction("craft no", ChatCommandRelevance)}));
     }
 };
 

@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Assigned professions: `professions` command; errands trains them and buys their tools.
+- `errands craft` strategy: craft for the master (asked first), the party, then skill-ups.
+- Share offers upgrades to the master first, through a trade window.
 
 ## 0.4.0 — 2026-09-27
 

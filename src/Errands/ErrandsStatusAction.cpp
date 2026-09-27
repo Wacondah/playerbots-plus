@@ -37,6 +37,10 @@ bool ErrandsStatusAction::Execute(Event /*event*/)
         out << " | share: " << (data.share.lastReason.empty() ? "-" : data.share.lastReason);
     if (botAI->HasStrategy("errands bags", BotState::BOT_STATE_NON_COMBAT))
         out << " | bags: " << (data.bags.lastReason.empty() ? "-" : data.bags.lastReason);
+    if (botAI->HasStrategy("errands craft", BotState::BOT_STATE_NON_COMBAT))
+        out << " | craft: " << (data.craft.lastReason.empty() ? "-" : data.craft.lastReason);
+    if (data.offer.Active())
+        out << " | offering item " << data.offer.entry << (data.offer.placed ? " (in trade)" : "");
 
     botAI->TellMaster(out.str());
     return true;

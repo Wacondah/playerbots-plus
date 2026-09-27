@@ -33,6 +33,12 @@ std::unordered_map<uint32, uint32>& Index()
     return index;
 }
 
+std::unordered_map<uint32, uint32>& Recipes()
+{
+    static std::unordered_map<uint32, uint32> recipes;  // spell -> skill
+    return recipes;
+}
+
 std::unordered_set<uint32>& Crafted()
 {
     static std::unordered_set<uint32> crafted;
@@ -54,12 +60,14 @@ void ReagentIndex::Build()
     auto& crafted = Crafted();
     index.clear();
     crafted.clear();
+    Recipes().clear();
     for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
     {
         SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(i);
         uint32 const bit = entry ? BitFor(entry->SkillLine) : 0;
         if (!bit)
             continue;
+        Recipes()[entry->Spell] = entry->SkillLine;
         SpellInfo const* spell = sSpellMgr->GetSpellInfo(entry->Spell);
         if (!spell)
             continue;
@@ -70,6 +78,12 @@ void ReagentIndex::Build()
             if (effect.Effect == SPELL_EFFECT_CREATE_ITEM && effect.ItemType)
                 crafted.insert(effect.ItemType);
     }
+}
+
+uint32 ReagentIndex::RecipeSkill(uint32 spellId)
+{
+    auto const it = Recipes().find(spellId);
+    return it == Recipes().end() ? 0 : it->second;
 }
 
 bool ReagentIndex::IsCrafted(uint32 itemId)

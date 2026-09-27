@@ -12,6 +12,7 @@
 #include <vector>
 
 class PlayerbotAI;
+struct ItemTemplate;
 
 namespace PlayerbotsPlus
 {
@@ -34,6 +35,16 @@ std::vector<Player*> GroupBots(Player* bot, float maxDistance);
 
 // What the item means to its holder and to each of `others` (usage, tier, gain, held).
 ShareItem DescribeForGroup(PlayerbotAI* holderAI, Item* item, std::vector<Player*> const& others);
+
+// How much better the item would be for a real player: extra slots for a bag larger
+// than their smallest one, score gain for gear. 0 for consumables or anything unusable.
+float MasterGain(Player* master, ItemTemplate const* proto, int32 randomProperty);
+
+// The bot's master when it is a real player, else nullptr.
+Player* RealMaster(PlayerbotAI* botAI);
+
+// Copies of the item in the bags (not equipped) of these players.
+uint32 CountInBags(std::vector<Player*> const& players, uint32 entry);
 
 // Empty slots in the backpack and regular bags (profession bags excluded).
 uint32 FreeSlots(Player* player);
