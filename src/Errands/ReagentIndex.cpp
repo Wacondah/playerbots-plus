@@ -5,6 +5,7 @@
 #include "ReagentIndex.h"
 
 #include "DBCStores.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "SharePlanner.h"
 #include "SpellInfo.h"
@@ -39,6 +40,12 @@ std::unordered_map<uint32, uint32>& Recipes()
     return recipes;
 }
 
+std::unordered_set<uint32>& VendorItems()
+{
+    static std::unordered_set<uint32> items;  // sold without a supply limit
+    return items;
+}
+
 std::unordered_set<uint32>& Crafted()
 {
     static std::unordered_set<uint32> crafted;
@@ -61,6 +68,14 @@ void ReagentIndex::Build()
     index.clear();
     crafted.clear();
     Recipes().clear();
+    auto& vendor = VendorItems();
+    vendor.clear();
+    for (auto const& [entry, creature] : *sObjectMgr->GetCreatureTemplates())
+        if (VendorItemData const* items = sObjectMgr->GetNpcVendorItemList(entry))
+            for (uint32 slot = 0; slot < items->GetItemCount(); ++slot)
+                if (VendorItem const* item = items->GetItem(slot))
+                    if (!item->maxcount)
+                        vendor.insert(item->item);
     for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
     {
         SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(i);
@@ -84,6 +99,11 @@ uint32 ReagentIndex::RecipeSkill(uint32 spellId)
 {
     auto const it = Recipes().find(spellId);
     return it == Recipes().end() ? 0 : it->second;
+}
+
+bool ReagentIndex::VendorSells(uint32 itemId)
+{
+    return VendorItems().count(itemId) > 0;
 }
 
 bool ReagentIndex::IsCrafted(uint32 itemId)

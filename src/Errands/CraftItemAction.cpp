@@ -10,10 +10,14 @@
 #include "ItemUsageValue.h"
 #include "ObjectMgr.h"
 #include "PlayerbotRepository.h"
+#include "PlayerbotsPlusConfig.h"
 #include "Playerbots.h"
+#include "ProfessionCatalog.h"
 #include "ReagentIndex.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+
+#include <algorithm>
 
 namespace PlayerbotsPlus
 {
@@ -49,13 +53,48 @@ bool CraftItemAction::isUseful()
         return false;
     data.lastCraftScanAt = now;
 
-    data.craftDecision = PlanCraft(BuildSnapshot(data, now), data.craft, CraftConfig{}, now);
+    CraftSnapshot const snap = BuildSnapshot(data, now);
+    data.craftDecision = PlanCraft(snap, data.craft, CraftConfig{}, now);
     CraftDecision const& d = data.craftDecision;
     if (d.action == CraftAction::Ask)
         if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(d.product))
             botAI->TellMaster("I can craft " + chat->FormatItem(proto) +
                               " for you. Whisper 'craft yes' or 'craft no'.");
+    UpdateShopping(data, snap);
+    // Shop: the "buy reagents" errand does the buying.
     return d.action == CraftAction::Craft || d.action == CraftAction::Disenchant;
+}
+
+void CraftItemAction::UpdateShopping(ErrandsData& data, CraftSnapshot const& snap)
+{
+    CraftDecision const& d = data.craftDecision;
+    if (d.action != CraftAction::Shop)
+    {
+        data.shopping = ShoppingList{};
+        data.shoppingSpell = data.shoppingProduct = 0;
+        return;
+    }
+
+    for (RecipeOption const& r : snap.recipes)
+        if (r.spell == d.spell)
+        {
+            ShoppingBudget budget;
+            budget.money = bot->GetMoney();
+            budget.reserve = ShoppingReserve(bot->GetLevel(), Config().shoppingReservePer10Levels);
+            budget.cap = Config().shoppingMaxCopper;
+            budget.maxCrafts = Config().shoppingMaxCrafts;
+            budget.freeSlots = FreeSlots(bot);
+            data.shopping = PlanShopping(r, budget);
+        }
+    data.shoppingSpell = d.spell;
+    data.shoppingProduct = d.product;
+
+    if (d.forMaster && data.shopping.Any() && data.shoppingToldSpell != d.spell)
+    {
+        data.shoppingToldSpell = d.spell;
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(data.shopping.purchases.front().item))
+            botAI->TellMaster("I need a vendor for " + chat->FormatItem(proto));
+    }
 }
 
 bool CraftItemAction::Execute(Event /*event*/)
@@ -90,10 +129,37 @@ bool CraftItemAction::Execute(Event /*event*/)
     return true;
 }
 
-bool CraftItemAction::HasReagents(SpellInfo const* spell)
+bool CraftItemAction::Reagents(SpellInfo const* spell, std::vector<ReagentNeed>& needs)
 {
+    bool all = true;
     for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
-        if (spell->Reagent[i] > 0 && !bot->HasItemCount(uint32(spell->Reagent[i]), spell->ReagentCount[i], false))
+    {
+        if (spell->Reagent[i] <= 0)
+            continue;
+        ReagentNeed n;
+        n.item = uint32(spell->Reagent[i]);
+        n.perCraft = spell->ReagentCount[i];
+        n.held = bot->GetItemCount(n.item, false);
+        n.vendor = ReagentIndex::VendorSells(n.item);
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(n.item))
+        {
+            n.lotPrice = proto->BuyPrice;
+            n.lotSize = std::max<uint32>(proto->BuyCount, 1);
+            n.maxStack = std::max<uint32>(proto->GetMaxStackSize(), 1);
+        }
+        all = all && n.held >= n.perCraft;
+        needs.push_back(n);
+    }
+    return all;
+}
+
+bool CraftItemAction::HasTools(SpellInfo const* spell)
+{
+    for (uint32 totem : spell->Totem)
+        if (totem && !bot->HasItemCount(totem, 1, false))
+            return false;
+    for (uint32 category : spell->TotemCategory)
+        if (category && !bot->HasItemTotemCategory(category))
             return false;
     return true;
 }
@@ -115,14 +181,19 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         SpellInfo const* spell = sSpellMgr->GetSpellInfo(spellId);
         uint32 const product = spell ? ProductOf(spell) : 0;
         ItemTemplate const* proto = product ? sObjectMgr->GetItemTemplate(product) : nullptr;
-        if (!proto || !HasReagents(spell))
+        if (!proto)
             continue;
 
         RecipeOption r;
         r.spell = spellId;
         r.product = product;
-        r.castable = botAI->CanCastSpell(spellId, bot, true);
-        if (!r.castable)
+        bool const allHeld = Reagents(spell, r.reagents);
+        r.castable = allHeld && botAI->CanCastSpell(spellId, bot, true);
+        // Only vendor reagents missing; primary professions only (no cooking salt runs).
+        r.buyable = !allHeld && FindProfession(ReagentIndex::RecipeSkill(spellId)) && HasTools(spell) &&
+                    std::all_of(r.reagents.begin(), r.reagents.end(),
+                                [](ReagentNeed const& n) { return n.held >= n.perCraft || n.vendor; });
+        if (!r.castable && !r.buyable)
             continue;
         for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
             if (spell->Reagent[i] > 0)
@@ -134,6 +205,7 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         bool const gear = proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON ||
                           proto->Class == ITEM_CLASS_CONTAINER;
         bool const copyWaiting = gear && CountInBags(group, product) > 0;
+        r.gear = gear;
         for (Player* member : group)
         {
             ItemUsage const usage = UsageOf(member, product);

@@ -50,11 +50,6 @@ bool Assigned(std::vector<uint32> const& assigned, uint32 skill)
     return std::find(assigned.begin(), assigned.end(), skill) != assigned.end();
 }
 
-uint32 Price(Player* bot, Creature* npc, uint32 cost)
-{
-    return uint32(cost * bot->GetReputationPriceDiscount(npc));
-}
-
 bool CanLearnSomething(Player* bot, Creature* npc, Trainer::Trainer* trainer)
 {
     for (Trainer::Spell const& spell : trainer->GetSpells())
@@ -70,6 +65,11 @@ uint32 ToForget(Player* bot, std::vector<uint32> const& assigned, uint32 skill)
                               bot->GetFreePrimaryProfessionPoints(), skill);
 }
 }  // namespace
+
+uint32 Price(Player* bot, Creature* npc, uint32 cost)
+{
+    return uint32(cost * bot->GetReputationPriceDiscount(npc));
+}
 
 uint32 TrainerSkill(Creature* npc)
 {

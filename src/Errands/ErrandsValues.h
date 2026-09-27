@@ -10,6 +10,7 @@
 #include "ErrandPlanner.h"
 #include "HuntPlanner.h"
 #include "SharePlanner.h"
+#include "ShoppingPlanner.h"
 #include "Value.h"
 
 #include <unordered_map>
@@ -61,6 +62,10 @@ struct ErrandsData
     uint32 lastCraftScanAt = 0;
     uint32 pendingOfferProduct = 0;  // crafted for the master, offered once it is in the bags
     uint32 pendingOfferSince = 0;
+    ShoppingList shopping;  // vendor reagents for the recipe craft picked
+    uint32 shoppingSpell = 0;
+    uint32 shoppingProduct = 0;
+    uint32 shoppingToldSpell = 0;  // "I need a vendor for" said once per approved recipe
 
     bool OfferBusy() const { return offer.Active() || pendingOfferProduct; }
     bool OfferDeclined(uint32 entry, uint32 now) const

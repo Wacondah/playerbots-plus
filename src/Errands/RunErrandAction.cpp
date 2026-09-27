@@ -17,6 +17,7 @@
 #include "ReagentIndex.h"
 #include "SellAction.h"
 #include "SellRules.h"
+#include "Shopping.h"
 
 namespace PlayerbotsPlus
 {
@@ -120,7 +121,8 @@ void RunErrandAction::Scan(ErrandsData& data, Player* master, uint32 now)
         if (!object || !object->IsInWorld() || master->GetDistance(object) > radius)
             return;
         Candidate const c = Describe(object);
-        if (c.canTurnIn || c.canAccept || c.canRepair || c.canSell || c.canTrain || c.canSellTool)
+        if (c.canTurnIn || c.canAccept || c.canRepair || c.canSell || c.canTrain || c.canSellTool ||
+            c.canSellReagent)
             data.candidates.push_back(c);
     };
 
@@ -165,6 +167,7 @@ Candidate RunErrandAction::Describe(WorldObject* object)
     {
         c.canRepair = creature->HasNpcFlag(UNIT_NPC_FLAG_REPAIR);
         c.canSell = creature->HasNpcFlag(UNIT_NPC_FLAG_VENDOR);
+        c.canSellReagent = c.canSell && SellsShopping(creature, Data().shopping);
         std::vector<uint32> const& assigned = Assigned();
         if (!assigned.empty())
         {
@@ -201,6 +204,14 @@ void RunErrandAction::VisitTarget(WorldObject* object)
         SellAction sell(botAI);
         for (Item* item : ExtraJunk())
             sell.Sell(item);
+    }
+
+    // Craft reagents after sales, before tools (both need the money).
+    if (creature->IsVendor() && BuyShoppingAt(bot, creature, Data().shopping))
+    {
+        DebugErrands(botAI, "errands: bought reagents");
+        Data().shopping = ShoppingList{};
+        Data().lastCraftScanAt = 0;  // craft at the next tick
     }
 
     // Last: repairs are paid first, and selling funds training and tools.

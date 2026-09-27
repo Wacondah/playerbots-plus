@@ -29,6 +29,10 @@ void ModuleConfig::Load()
     huntRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.Radius", 45.0f);
     huntPackRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.PackRadius", 8.0f);
     bagsMinFreeSlots = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Bags.MinFreeSlots", 1);
+    shoppingReservePer10Levels =
+        sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.ReserveCopperPer10Levels", 10000);
+    shoppingMaxCopper = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.MaxShoppingCopper", 5000);
+    shoppingMaxCrafts = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.MaxShoppingCrafts", 20);
 }
 
 ModuleConfig& Config()

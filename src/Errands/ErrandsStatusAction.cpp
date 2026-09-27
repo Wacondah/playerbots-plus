@@ -7,6 +7,7 @@
 #include "ChatCommands.h"
 #include "ErrandsValues.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
 
@@ -42,7 +43,20 @@ bool ErrandsStatusAction::Execute(Event event)
     if (botAI->HasStrategy("errands bags", BotState::BOT_STATE_NON_COMBAT))
         out << " | bags: " << (data.bags.lastReason.empty() ? "-" : data.bags.lastReason);
     if (botAI->HasStrategy("errands craft", BotState::BOT_STATE_NON_COMBAT))
+    {
         out << " | craft: " << (data.craft.lastReason.empty() ? "-" : data.craft.lastReason);
+        if (data.shopping.Any())
+        {
+            out << " | shopping:";
+            for (Purchase const& p : data.shopping.purchases)
+                if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(p.item))
+                    out << " " << p.count << "x " << chat->FormatItem(proto);
+            if (ItemTemplate const* product = sObjectMgr->GetItemTemplate(data.shoppingProduct))
+                out << " for " << data.shopping.crafts << "x " << chat->FormatItem(product);
+        }
+        else if (data.craftDecision.action == CraftAction::Shop)
+            out << " | shopping: " << data.shopping.reason;
+    }
     if (data.offer.Active())
         out << " | offering item " << data.offer.entry << (data.offer.placed ? " (in trade)" : "");
 

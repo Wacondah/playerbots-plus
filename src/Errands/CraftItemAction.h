@@ -28,7 +28,10 @@ public:
 
 private:
     CraftSnapshot BuildSnapshot(ErrandsData& data, uint32 now);
-    bool HasReagents(SpellInfo const* spell);
+    // Fills `needs` from the spell's reagents; true when all are in the bags.
+    bool Reagents(SpellInfo const* spell, std::vector<ReagentNeed>& needs);
+    bool HasTools(SpellInfo const* spell);
+    void UpdateShopping(ErrandsData& data, CraftSnapshot const& snap);
 };
 
 // "craft yes" / "craft no": the master's answer to the pending question.

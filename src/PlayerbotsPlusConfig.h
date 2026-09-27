@@ -25,6 +25,9 @@ struct ModuleConfig
     float huntRadius = 45.f;
     float huntPackRadius = 8.f;
     uint32_t bagsMinFreeSlots = 1;
+    uint32_t shoppingReservePer10Levels = 10000;
+    uint32_t shoppingMaxCopper = 5000;
+    uint32_t shoppingMaxCrafts = 20;
 
     void Load();
 };

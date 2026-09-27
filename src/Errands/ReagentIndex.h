@@ -21,6 +21,7 @@ uint32 UsedBy(uint32 itemId);
 uint32 Known(Player* player);  // ProfessionBit mask of the player's professions
 bool IsCrafted(uint32 itemId);  // produced by a profession recipe (e.g. cooked food)
 uint32 RecipeSkill(uint32 spellId);  // profession of a recipe spell, 0 if none
+bool VendorSells(uint32 itemId);      // some vendor sells it without a supply limit
 }  // namespace ReagentIndex
 }  // namespace PlayerbotsPlus
 

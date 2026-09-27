@@ -77,3 +77,15 @@ PlayerbotsPlus.Bags.MinFreeSlots = 1
 #                                               wants the item: 2 green, 3 blue, 4 epic. Default: 3
 
 PlayerbotsPlus.Craft.MaxDisenchantQuality = 3
+
+#    PlayerbotsPlus.Craft.ReserveCopperPer10Levels  Money a crafter never spends on vendor
+#                                                   reagents, per 10 levels (copper).
+#                                                   Default: 10000 (1 gold)
+#    PlayerbotsPlus.Craft.MaxShoppingCopper         Most a crafter spends on vendor reagents
+#                                                   per vendor visit (copper). Default: 5000
+#    PlayerbotsPlus.Craft.MaxShoppingCrafts         Most crafts it buys reagents for at once.
+#                                                   Default: 20
+
+PlayerbotsPlus.Craft.ReserveCopperPer10Levels = 10000
+PlayerbotsPlus.Craft.MaxShoppingCopper = 5000
+PlayerbotsPlus.Craft.MaxShoppingCrafts = 20

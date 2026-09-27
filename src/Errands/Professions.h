@@ -16,6 +16,9 @@ class Player;
 // Core side of assigned professions: trainers, forgetting, tools.
 namespace PlayerbotsPlus
 {
+// Vendor or trainer price after the reputation discount.
+uint32 Price(Player* bot, Creature* npc, uint32 cost);
+
 // Profession taught by a tradeskill trainer, 0 if the creature is not one.
 uint32 TrainerSkill(Creature* npc);
 
