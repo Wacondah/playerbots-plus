@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 — 2026-09-27
 
 - Assigned professions: `professions` command; errands trains them and buys their tools.
 - `errands on` / `errands off`: enable or disable all errands strategies at once.
