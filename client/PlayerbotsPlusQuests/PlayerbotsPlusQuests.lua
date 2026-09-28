@@ -110,9 +110,10 @@ local function OnAddonMessage(prefix, msg, _, sender)
         return
     end
     local m = members[sender]
-    if not m or not m.building then
+    if not m then
         return
     end
+    m.building = m.building or {}  -- also answers we did not ask for (a manual "questlog")
     if msg == "END" then
         m.quests, m.building, m.waiting, m.noAnswer = m.building, nil, false, false
         Render()
