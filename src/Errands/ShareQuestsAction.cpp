@@ -47,7 +47,8 @@ bool ShareQuestsAction::Execute(Event /*event*/)
             shared = true;
         }
     }
-    DebugErrands(botAI, shared ? "quests: shared" : "quests: nothing to share");
+    if (shared)
+        DebugErrands(botAI, "quests: shared");  // silent otherwise: it runs every 30 s
     return shared;
 }
 }  // namespace PlayerbotsPlus
