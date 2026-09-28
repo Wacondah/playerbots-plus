@@ -7,6 +7,7 @@
 
 #include "Bag.h"
 #include "Player.h"
+#include "FutureGear.h"
 #include "SharePlanner.h"
 
 #include <vector>
@@ -35,6 +36,15 @@ Item* FindBagItem(Player* bot, uint64 guid);
 
 // Armor, weapon or bag: equipped rather than consumed.
 bool IsGear(ItemTemplate const* proto);
+
+// Green+ armor or weapon only the bot's level keeps it from wearing (within
+// Gear.MaxLevelAhead), scored against what it wears in that slot group; false otherwise.
+bool DescribeFutureGear(Player* bot, ItemTemplate const* proto, int32 randomProperty, uint64 id,
+                        FutureItem& out);
+
+// Future gear the bot keeps in its bags (the best per slot group).
+std::vector<FutureItem> KeptFutureGear(Player* bot);
+std::set<uint64> KeptFutureGearIds(Player* bot);
 
 // How many of the item the player's quests still to turn in require (0: none), whatever
 // mod-playerbots' item usage says (Goretusk Liver is also a cooking reagent).

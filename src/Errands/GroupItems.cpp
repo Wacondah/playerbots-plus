@@ -65,6 +65,98 @@ bool IsGear(ItemTemplate const* proto)
            proto->Class == ITEM_CLASS_CONTAINER;
 }
 
+namespace
+{
+// Equipment slots a piece of that inventory type goes to (two for rings, trinkets and
+// one-hand weapons of a dual wielder); empty for anything else.
+std::vector<uint8> SlotsFor(Player* bot, ItemTemplate const* proto)
+{
+    switch (proto->InventoryType)
+    {
+        case INVTYPE_HEAD: return {EQUIPMENT_SLOT_HEAD};
+        case INVTYPE_NECK: return {EQUIPMENT_SLOT_NECK};
+        case INVTYPE_SHOULDERS: return {EQUIPMENT_SLOT_SHOULDERS};
+        case INVTYPE_CHEST:
+        case INVTYPE_ROBE: return {EQUIPMENT_SLOT_CHEST};
+        case INVTYPE_WAIST: return {EQUIPMENT_SLOT_WAIST};
+        case INVTYPE_LEGS: return {EQUIPMENT_SLOT_LEGS};
+        case INVTYPE_FEET: return {EQUIPMENT_SLOT_FEET};
+        case INVTYPE_WRISTS: return {EQUIPMENT_SLOT_WRISTS};
+        case INVTYPE_HANDS: return {EQUIPMENT_SLOT_HANDS};
+        case INVTYPE_FINGER: return {EQUIPMENT_SLOT_FINGER1, EQUIPMENT_SLOT_FINGER2};
+        case INVTYPE_TRINKET: return {EQUIPMENT_SLOT_TRINKET1, EQUIPMENT_SLOT_TRINKET2};
+        case INVTYPE_CLOAK: return {EQUIPMENT_SLOT_BACK};
+        case INVTYPE_WEAPON:
+            if (bot->CanDualWield())
+                return {EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND};
+            return {EQUIPMENT_SLOT_MAINHAND};
+        case INVTYPE_2HWEAPON:
+        case INVTYPE_WEAPONMAINHAND: return {EQUIPMENT_SLOT_MAINHAND};
+        case INVTYPE_SHIELD:
+        case INVTYPE_WEAPONOFFHAND:
+        case INVTYPE_HOLDABLE: return {EQUIPMENT_SLOT_OFFHAND};
+        case INVTYPE_RANGED:
+        case INVTYPE_RANGEDRIGHT:
+        case INVTYPE_THROWN:
+        case INVTYPE_RELIC: return {EQUIPMENT_SLOT_RANGED};
+        default: return {};
+    }
+}
+}  // namespace
+
+bool DescribeFutureGear(Player* bot, ItemTemplate const* proto, int32 randomProperty, uint64 id, FutureItem& out)
+{
+    if (!proto || proto->Quality < ITEM_QUALITY_UNCOMMON ||
+        (proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON) ||
+        bot->CanUseItem(proto) != EQUIP_ERR_CANT_EQUIP_LEVEL_I ||  // the level check comes last
+        !WithinLevelAhead(bot->GetLevel(), proto->RequiredLevel, Config().gearMaxLevelAhead))
+        return false;
+    std::vector<uint8> const slots = SlotsFor(bot, proto);
+    if (slots.empty())
+        return false;
+
+    StatsWeightCalculator calc(bot);
+    out.id = id;
+    out.group = slots.front();
+    out.capacity = uint32(slots.size());
+    out.score = calc.CalculateItem(proto->ItemId, randomProperty);
+    out.worn = -1.f;
+    for (uint8 slot : slots)
+    {
+        Item* worn = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        float const score = worn ? calc.CalculateItem(worn->GetEntry(), worn->GetItemRandomPropertyId()) : 0.f;
+        out.worn = out.worn < 0.f ? score : std::min(out.worn, score);
+    }
+    return true;
+}
+
+std::vector<FutureItem> KeptFutureGear(Player* bot)
+{
+    std::vector<FutureItem> all;
+    ForEachBagItem(bot,
+                   [&](Item* item)
+                   {
+                       FutureItem f;
+                       if (DescribeFutureGear(bot, item->GetTemplate(), item->GetItemRandomPropertyId(),
+                                              item->GetGUID().GetRawValue(), f))
+                           all.push_back(f);
+                   });
+    std::set<uint64_t> const kept = KeepFutureGear(all);
+    std::vector<FutureItem> out;
+    for (FutureItem const& f : all)
+        if (kept.count(f.id))
+            out.push_back(f);
+    return out;
+}
+
+std::set<uint64> KeptFutureGearIds(Player* bot)
+{
+    std::set<uint64> ids;
+    for (FutureItem const& f : KeptFutureGear(bot))
+        ids.insert(f.id);
+    return ids;
+}
+
 uint32 QuestItemNeed(Player* player, uint32 entry)
 {
     uint32 needed = 0;

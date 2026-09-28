@@ -28,6 +28,7 @@ struct ModuleConfig
     uint32_t shoppingReservePer10Levels = 10000;
     uint32_t shoppingMaxCopper = 5000;
     uint32_t shoppingMaxCrafts = 20;
+    uint32_t gearMaxLevelAhead = 0;  // future gear kept up to this many levels ahead (0: no limit)
     bool cityAuto = true;
     uint32_t cityTimeoutMs = 180000;
     uint32_t cityCooldownMs = 600000;

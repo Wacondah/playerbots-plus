@@ -216,10 +216,12 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
 
     // First item nobody wants (bound: only the bot's own use counts) to disenchant.
     std::vector<Player*> const others(group.begin(), group.end() - 1);  // without the bot
+    std::set<uint64> const future = KeptFutureGearIds(bot);
     ForEachBagItem(bot,
                    [&](Item* item)
                    {
-                       if (snap.disenchantItem || !CanDisenchant(bot, item->GetTemplate()))
+                       if (snap.disenchantItem || !CanDisenchant(bot, item->GetTemplate()) ||
+                           future.count(item->GetGUID().GetRawValue()))
                            return;
                        ShareItem const described = DescribeForGroup(botAI, item, others);
                        bool const wanted = item->CanBeTraded()

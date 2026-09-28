@@ -78,13 +78,15 @@ ShareSnapshot ShareItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
     if (receivers.empty() && !master)
         return snap;
     snap.master = master ? master->GetGUID().GetRawValue() : 0;
+    std::set<uint64> const future = KeptFutureGearIds(bot);  // kept for when the level allows
 
     ForEachBagItem(bot,
                    [&](Item* item)
                    {
                        ItemTemplate const* proto = item->GetTemplate();
                        if (!item->CanBeTraded() || (!IsGear(proto) && !ReagentIndex::UsedBy(proto->ItemId)) ||
-                           QuestNeededByGroup(bot, proto->ItemId))  // handled by PlanQuestItems
+                           QuestNeededByGroup(bot, proto->ItemId) ||  // handled by PlanQuestItems
+                           future.count(item->GetGUID().GetRawValue()))
                            return;
                        ShareItem described = DescribeForGroup(botAI, item, receivers);
                        described.masterDeclined = data.OfferDeclined(proto->ItemId, now);

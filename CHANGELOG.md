@@ -5,6 +5,9 @@
 - `errands levelup`: alts spend their talent points on level-up, following the spec picked
   with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
 - `errands quests`: alts share quests with each other (never with the master).
+- Future gear: green+ gear an alt cannot wear yet only because of its level is kept when it
+  beats what it wears (the best per slot; others go to share, disenchanting, selling), gets
+  need rolls, and is equipped on level-up (`Gear.MaxLevelAhead`, 0: no limit).
 - Client addon `PlayerbotsPlusQuests` (`client/`, `/pq`): every quest of the party with each
   member's progress, fed by the new `questlog` bot command (addon whispers, prefix `PPQ`).
 - Quest items (even ones also used by a profession, like Goretusk Liver): an alt keeps what

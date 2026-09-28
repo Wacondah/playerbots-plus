@@ -303,6 +303,7 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
 {
     std::vector<Item*> junk;
     uint32 const maxQuality = Config().maxSellQuality;
+    std::set<uint64> const future = KeptFutureGearIds(bot);  // waits for the bot's level
     bool const foodCheat = botAI->HasCheat(BotCheatMask::food);
     uint32 const gatherFeeds =
         GatherFeeds(bot->HasSkill(SKILL_MINING), bot->HasSkill(SKILL_HERBALISM), bot->HasSkill(SKILL_SKINNING));
@@ -327,6 +328,8 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
                        if (!proto->SellPrice || proto->Quality == ITEM_QUALITY_POOR || proto->Quality > maxQuality)
                            return;
                        if (QuestNeededByGroup(bot, proto->ItemId))
+                           return;
+                       if (future.count(item->GetGUID().GetRawValue()))
                            return;
                        ItemUsage const usage = AI_VALUE2(ItemUsage, "item usage", int32(proto->ItemId));
 

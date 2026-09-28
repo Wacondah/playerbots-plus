@@ -6,6 +6,7 @@
 
 #include "ErrandsValues.h"
 #include "Group.h"
+#include "GroupItems.h"
 #include "ItemUsageValue.h"
 #include "LevelUpRules.h"
 #include "ObjectMgr.h"
@@ -31,6 +32,7 @@ bool LootNeedAction::Execute(Event /*event*/)
 
     uint32 const gatherFeeds =
         GatherFeeds(bot->HasSkill(SKILL_MINING), bot->HasSkill(SKILL_HERBALISM), bot->HasSkill(SKILL_SKINNING));
+    std::vector<FutureItem> const heldFuture = KeptFutureGear(bot);
     bool voted = false;
     for (Roll* roll : group->GetRolls())
     {
@@ -47,6 +49,9 @@ bool LootNeedAction::Execute(Event /*event*/)
         LootFacts facts;
         facts.gearUpgrade = (proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) &&
                             (usage == ITEM_USAGE_EQUIP || usage == ITEM_USAGE_REPLACE);
+        FutureItem future;  // too high a level for now, but better than what it wears and keeps
+        if (!facts.gearUpgrade && DescribeFutureGear(bot, proto, int32(roll->itemRandomPropId), 0, future))
+            facts.gearUpgrade = WouldKeep(future, heldFuture);
         facts.uniqueHeld = proto->HasFlag(ITEM_FLAG_UNIQUE_EQUIPPABLE) && bot->GetItemCount(proto->ItemId, true);
         facts.ownMaterial = KeptForOwnSkill(ReagentIndex::UsedBy(proto->ItemId), ReagentIndex::Known(bot),
                                             gatherFeeds, ReagentIndex::IsCrafted(proto->ItemId));

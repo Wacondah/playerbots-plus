@@ -103,3 +103,12 @@ PlayerbotsPlus.Craft.MaxShoppingCrafts = 20
 PlayerbotsPlus.City.Auto = 1
 PlayerbotsPlus.City.Timeout = 180000
 PlayerbotsPlus.City.Cooldown = 600000
+
+###################################################################################################
+# FUTURE GEAR
+#
+#    PlayerbotsPlus.Gear.MaxLevelAhead  An alt keeps green+ gear its level does not allow yet
+#                                       (and rolls need on it) when it beats what it wears,
+#                                       up to this many levels ahead. 0: no limit. Default: 0
+
+PlayerbotsPlus.Gear.MaxLevelAhead = 0

@@ -157,3 +157,12 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | P2 | Kill or loot for a quest while the window is open | counts update within 10 s |
 | P3 | Collapse "Quêtes des alts", reload UI | stays collapsed; window position and size kept |
 | P4 | A real player in the party | shown as `(pas de réponse)`, no error |
+
+## Future gear
+
+| # | Scenario | Expected |
+|---|---|---|
+| F1 | A level-16 green leg piece, better than the worn one, looted by a level-13 alt | kept, not sold nor shared nor disenchanted |
+| F2 | Two such leg pieces | the better one kept, the other shared / disenchanted / sold |
+| F3 | Group roll on such a piece | the alt rolls Need |
+| F4 | The alt reaches level 16 | it equips the piece |
