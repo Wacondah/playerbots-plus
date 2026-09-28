@@ -3,6 +3,7 @@
  */
 
 #include "ChatCommands.h"
+#include "Event.h"
 #include "Group.h"
 #include "LevelUpAction.h"
 #include "Log.h"
@@ -54,8 +55,13 @@ public:
 
     using PlayerScript::OnPlayerCanUseChat;  // keep the other overloads visible
 
-    bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 /*lang*/, std::string& msg, Player* receiver) override
+    bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 lang, std::string& msg, Player* receiver) override
     {
+        if (type == CHAT_MSG_WHISPER && lang == LANG_ADDON)
+        {
+            AnswerQuestLog(player, receiver, msg);
+            return true;
+        }
         if (type == CHAT_MSG_WHISPER && Config().enabled)
         {
             Apply(player, receiver, ParseErrandsSwitch(msg));
@@ -79,7 +85,17 @@ public:
     }
 
 private:
-    // "talents spec <name>": mod-playerbots applies it now, the module keeps it for level-ups.
+    // The PlayerbotsPlusQuests addon asks with "BOT\t#a questlog": answered here, the
+    // addon message never reaching mod-playerbots' command parsing.
+    static void AnswerQuestLog(Player* master, Player* bot, std::string const& msg)
+    {
+        PlayerbotAI* botAI = bot ? GET_PLAYERBOT_AI(bot) : nullptr;
+        if (!Config().enabled || !botAI || botAI->GetMaster() != master || msg != "BOT\t#a questlog")
+            return;
+        botAI->DoSpecificAction("questlog", Event("addon", "", master), true);
+    }
+
+    // "talents spec <name>"): mod-playerbots applies it now, the module keeps it for level-ups.
     static void RememberSpec(Player* master, Player* bot, std::string const& spec)
     {
         PlayerbotAI* botAI = bot ? GET_PLAYERBOT_AI(bot) : nullptr;
