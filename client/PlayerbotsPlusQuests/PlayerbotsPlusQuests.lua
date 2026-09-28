@@ -164,7 +164,7 @@ local function MemberLines(lines, who, quest, dim)
 end
 
 local function MemberState(name, m)
-    if m.noAnswer then
+    if m.noAnswer and not next(m.quests) then  -- keep the last known progress otherwise
         return "    " .. name .. "  |cff808080" .. L.noAnswer .. "|r"
     end
     if m.waiting and not next(m.quests) then
