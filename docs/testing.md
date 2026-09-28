@@ -148,3 +148,12 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | S8 | Brogan has 11 Goretusk Livers for 8, Kyra 5 for 8 (same quest) | Brogan gives Kyra 3 (`… (quest)`), keeps 8; `bags` never moves Brogan's livers |
 | S10 | Quest complete but not turned in (15/15), another alt at 6/15 | keeps its 15, nothing passes around |
 | S9 | An alt holds livers no quest of its own needs, another alt needs them | all go to the one that needs them; none sold |
+
+## Party quest window
+
+| # | Scenario | Expected |
+|---|---|---|
+| P1 | `/pq` in a party of alts | your quests, each with every member's progress; alt-only quests greyed below |
+| P2 | Kill or loot for a quest while the window is open | counts update within 10 s |
+| P3 | Collapse "Quêtes des alts", reload UI | stays collapsed; window position and size kept |
+| P4 | A real player in the party | shown as `(pas de réponse)`, no error |

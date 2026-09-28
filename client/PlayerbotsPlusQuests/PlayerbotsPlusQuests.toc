@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: Playerbots Plus Quests
+## Notes: Quest progress of your party's altbots (mod-playerbots-plus). /pq
+## Author: mod-playerbots-plus
+## Version: 0.1.0
+## SavedVariables: PlayerbotsPlusQuestsDB
+
+PlayerbotsPlusQuests.lua

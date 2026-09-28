@@ -101,6 +101,14 @@ dead alt releases once the fight is over if nobody alive in the group can resurr
 Long-cooldown crafts (transmutes, mooncloth) are made when ready and offered to you. `errands quests`: when the group is idle,
 alts give each other the sharable quests they can take, never to you (no quest window).
 
+## Party quest window (client addon)
+
+`client/PlayerbotsPlusQuests` is a 3.3.5 addon: link or copy it into `Interface/AddOns`,
+then `/pq` or its minimap button opens a window listing your quests with every party
+member's progress (`Kyra 6/15 Red Leather Bandana`, `to turn in`), then the quests only
+alts have. It asks each alt with the addon message `BOT\t#a questlog`; the module answers
+with `PPQ` addon whispers, to the bot's master only.
+
 ## Errands city
 
 Part of errands. When you stand still for a few seconds in a capital (Stormwind,

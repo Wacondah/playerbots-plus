@@ -5,6 +5,8 @@
 - `errands levelup`: alts spend their talent points on level-up, following the spec picked
   with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
 - `errands quests`: alts share quests with each other (never with the master).
+- Client addon `PlayerbotsPlusQuests` (`client/`, `/pq`): every quest of the party with each
+  member's progress, fed by the new `questlog` bot command (addon whispers, prefix `PPQ`).
 - Quest items (even ones also used by a profession, like Goretusk Liver): an alt keeps what
   its quests need, `bags` never moves them, selling never sells them, and `share` hands a
   surplus to the alt missing the most for the same quest.

@@ -36,3 +36,4 @@ start here.
 | `PlayerbotFactory::InitTalentsBySpecNo`, `InitTalentsTree`, `InitPetTalents`; `sPlayerbotAIConfig.premadeSpecName`; `AiFactory::GetPlayerSpecTabs`; trigger `"levelup"` | `LevelUpAction`, `PlayerbotsPlusScript` | talents on level-up |
 | `Group::GetRolls`, `Roll::playerVote`, `Group::CountRollVote`; action `"release"`; triggers `"very often"`, `"often"` | `AltCareActions` | need rolls, release when nobody can resurrect |
 | `PlayerbotAI::ResetStrategies`, `GetStrategies`, `IsTank`/`IsHeal`; strategy `"threat"`; `AiFactory::GetPlayerSpecTab(s)` | `RoleAction` | role command |
+| `BOT\t` addon-message commands and `#a` reply routing (`PlayerbotAI::HandleCommand`) | `QuestLogAction`, addon | questlog protocol |
