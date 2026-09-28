@@ -19,6 +19,7 @@ add_executable(planner_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/CityPlanner.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/LevelUpRules.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/RoleRules.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/QuestItems.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/ChatCommands.cpp
     BagPlannerTest.cpp
     SellRulesTest.cpp
@@ -28,6 +29,7 @@ add_executable(planner_tests
     CityPlannerTest.cpp
     LevelUpRulesTest.cpp
     RoleRulesTest.cpp
+    QuestItemsTest.cpp
     ChatCommandsTest.cpp
     ErrandPlannerTest.cpp
     HuntPlannerTest.cpp
