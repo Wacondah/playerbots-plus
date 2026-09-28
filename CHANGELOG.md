@@ -5,6 +5,9 @@
 - `errands levelup`: alts spend their talent points on level-up, following the spec picked
   with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
 - `errands quests`: alts share quests with each other (never with the master).
+- Quest items (even ones also used by a profession, like Goretusk Liver): an alt keeps what
+  its quests need, `bags` never moves them, selling never sells them, and `share` hands a
+  surplus to the alt missing the most for the same quest.
 - `role tank|heal|dps [spec]`: talents of the fitting tree (remembered for level-ups),
   that role's combat strategies, `threat` for dps; non-combat strategies are kept
   (mod-playerbots' `talents spec` resets them all).

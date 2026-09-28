@@ -36,6 +36,13 @@ Item* FindBagItem(Player* bot, uint64 guid);
 // Armor, weapon or bag: equipped rather than consumed.
 bool IsGear(ItemTemplate const* proto);
 
+// How many of the item the player's incomplete quests require (0: none), whatever
+// mod-playerbots' item usage says (Goretusk Liver is also a cooking reagent).
+uint32 QuestItemNeed(Player* player, uint32 entry);
+
+// The bot or another bot of its group needs the item for a quest.
+bool QuestNeededByGroup(Player* bot, uint32 entry);
+
 // Other living bots of the bot's group on its map; maxDistance 0 means any distance.
 std::vector<Player*> GroupBots(Player* bot, float maxDistance);
 

@@ -326,6 +326,8 @@ std::vector<Item*> RunErrandAction::ExtraJunk()
                        ItemTemplate const* proto = item->GetTemplate();
                        if (!proto->SellPrice || proto->Quality == ITEM_QUALITY_POOR || proto->Quality > maxQuality)
                            return;
+                       if (QuestNeededByGroup(bot, proto->ItemId))
+                           return;
                        ItemUsage const usage = AI_VALUE2(ItemUsage, "item usage", int32(proto->ItemId));
 
                        FoodItem food;

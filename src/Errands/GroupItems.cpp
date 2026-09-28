@@ -6,6 +6,7 @@
 
 #include "Group.h"
 #include "ItemUsageValue.h"
+#include "ObjectMgr.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
 #include "ReagentIndex.h"
@@ -62,6 +63,30 @@ bool IsGear(ItemTemplate const* proto)
 {
     return proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON ||
            proto->Class == ITEM_CLASS_CONTAINER;
+}
+
+uint32 QuestItemNeed(Player* player, uint32 entry)
+{
+    uint32 needed = 0;
+    for (auto const& [questId, status] : player->getQuestStatusMap())
+    {
+        Quest const* quest =
+            status.Status == QUEST_STATUS_INCOMPLETE ? sObjectMgr->GetQuestTemplate(questId) : nullptr;
+        for (uint8 i = 0; quest && i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+            if (quest->RequiredItemId[i] == entry)
+                needed += quest->RequiredItemCount[i];
+    }
+    return needed;
+}
+
+bool QuestNeededByGroup(Player* bot, uint32 entry)
+{
+    if (QuestItemNeed(bot, entry))
+        return true;
+    for (Player* mate : GroupBots(bot, 0.f))
+        if (QuestItemNeed(mate, entry))
+            return true;
+    return false;
 }
 
 std::vector<Player*> GroupBots(Player* bot, float maxDistance)

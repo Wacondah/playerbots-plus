@@ -10,6 +10,7 @@
 #include "CraftPlanner.h"
 #include "ErrandPlanner.h"
 #include "HuntPlanner.h"
+#include "QuestItems.h"
 #include "SharePlanner.h"
 #include "ShoppingPlanner.h"
 #include "Value.h"
@@ -52,6 +53,8 @@ struct ErrandsData
     ShareState share;
     ShareDecision shareDecision;
     uint32 lastShareScanAt = 0;
+    uint32 questItemEntry = 0;  // share: quest item surplus to hand over first
+    QuestTransfer questTransfer;
     bool hasJunk = false;  // cached: evaluating junk asks every group bot about every item
     bool junkChecked = false;
     uint32 junkCheckedAt = 0;

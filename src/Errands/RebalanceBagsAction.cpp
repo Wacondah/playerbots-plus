@@ -52,6 +52,8 @@ bool RebalanceBagsAction::Movable(Item* item)
 {
     if (!item->CanBeTraded())
         return false;
+    if (QuestItemNeed(bot, item->GetEntry()))  // its quests need it: a stack cannot be split here
+        return false;
     switch (AI_VALUE2(ItemUsage, "item usage", int32(item->GetEntry())))
     {
         case ITEM_USAGE_QUEST:

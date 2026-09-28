@@ -26,6 +26,8 @@ public:
 
 private:
     ShareSnapshot BuildSnapshot(ErrandsData& data, uint32 now);
+    bool PlanQuestItems(ErrandsData& data);
+    bool GiveQuestItems(ErrandsData& data);
 };
 }  // namespace PlayerbotsPlus
 
