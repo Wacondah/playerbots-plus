@@ -70,8 +70,9 @@ uint32 QuestItemNeed(Player* player, uint32 entry)
     uint32 needed = 0;
     for (auto const& [questId, status] : player->getQuestStatusMap())
     {
-        Quest const* quest =
-            status.Status == QUEST_STATUS_INCOMPLETE ? sObjectMgr->GetQuestTemplate(questId) : nullptr;
+        // Complete but not turned in: the items are taken at turn-in, so they are still needed.
+        bool const open = status.Status == QUEST_STATUS_INCOMPLETE || status.Status == QUEST_STATUS_COMPLETE;
+        Quest const* quest = open ? sObjectMgr->GetQuestTemplate(questId) : nullptr;
         for (uint8 i = 0; quest && i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
             if (quest->RequiredItemId[i] == entry)
                 needed += quest->RequiredItemCount[i];

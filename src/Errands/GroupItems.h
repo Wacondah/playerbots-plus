@@ -36,7 +36,7 @@ Item* FindBagItem(Player* bot, uint64 guid);
 // Armor, weapon or bag: equipped rather than consumed.
 bool IsGear(ItemTemplate const* proto);
 
-// How many of the item the player's incomplete quests require (0: none), whatever
+// How many of the item the player's quests still to turn in require (0: none), whatever
 // mod-playerbots' item usage says (Goretusk Liver is also a cooking reagent).
 uint32 QuestItemNeed(Player* player, uint32 entry);
 

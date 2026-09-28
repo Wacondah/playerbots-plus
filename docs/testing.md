@@ -146,4 +146,5 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | O3 | `role heal` to a rogue | `role: my class cannot heal`, nothing changed |
 | O4 | `role` alone | `role: tank (prot pve)` |
 | S8 | Brogan has 11 Goretusk Livers for 8, Kyra 5 for 8 (same quest) | Brogan gives Kyra 3 (`… (quest)`), keeps 8; `bags` never moves Brogan's livers |
+| S10 | Quest complete but not turned in (15/15), another alt at 6/15 | keeps its 15, nothing passes around |
 | S9 | An alt holds livers no quest of its own needs, another alt needs them | all go to the one that needs them; none sold |
