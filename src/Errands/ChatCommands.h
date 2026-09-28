@@ -29,6 +29,9 @@ std::string ErrandsStrategies(bool on);
 
 // Same, for the dead-state engine.
 std::string ErrandsDeadStrategies(bool on);
+
+// Same, for the combat engine: loot rolls also start mid-fight.
+std::string ErrandsCombatStrategies(bool on);
 }  // namespace PlayerbotsPlus
 
 #endif

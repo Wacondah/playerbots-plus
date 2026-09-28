@@ -25,6 +25,8 @@ TEST(ErrandsSwitch, StrategyLists)
                                         "-errands levelup,-errands quests,-errands loot");
     EXPECT_EQ(ErrandsDeadStrategies(true), "+errands revive");
     EXPECT_EQ(ErrandsDeadStrategies(false), "-errands revive");
+    EXPECT_EQ(ErrandsCombatStrategies(true), "+errands loot");
+    EXPECT_EQ(ErrandsCombatStrategies(false), "-errands loot");
 }
 
 TEST(TalentsSpec, NameAfterTheCommand)

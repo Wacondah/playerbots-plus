@@ -81,6 +81,7 @@ bool RoleAction::Execute(Event event)
 
     std::vector<std::string> const nonCombat = botAI->GetStrategies(BOT_STATE_NON_COMBAT);
     std::vector<std::string> const dead = botAI->GetStrategies(BOT_STATE_DEAD);
+    std::vector<std::string> const combat = botAI->GetStrategies(BOT_STATE_COMBAT);
 
     PlayerbotFactory::InitTalentsBySpecNo(bot, specNo, true);
     PlayerbotFactory(bot, bot->GetLevel()).InitPetTalents();
@@ -88,6 +89,9 @@ bool RoleAction::Execute(Event event)
     Restore(BOT_STATE_NON_COMBAT, nonCombat);
     Restore(BOT_STATE_DEAD, dead);
     botAI->ChangeStrategy(role == Role::Dps ? "+threat" : "-threat", BOT_STATE_COMBAT);
+    for (std::string const& name : combat)  // the module's own combat strategies (errands loot)
+        if (name.rfind("errands", 0) == 0)
+            botAI->ChangeStrategy("+" + name, BOT_STATE_COMBAT);
 
     std::string const& spec = sPlayerbotAIConfig.premadeSpecName[cls][specNo];
     AI_VALUE(std::string&, "chosen spec") = spec;

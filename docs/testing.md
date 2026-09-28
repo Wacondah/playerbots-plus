@@ -138,7 +138,7 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | R1 | Alt dies in the open, no priest/paladin/shaman alive in the group | 10 s after the fight it releases and runs back |
 | R2 | Same with a living priest (or you as a priest) | it waits to be resurrected |
 | R3 | Death in a dungeon | waits, as before |
-| N1 | Group roll on a green the alt would equip | the alt rolls Need |
+| N1 | Group roll on a green the alt would equip, also mid-fight | the alt rolls Need |
 | N2 | Group roll on linen cloth, a tailor in the group | the tailor rolls Need; others follow mod-playerbots |
 | K1 | Alchemist knowing a transmute, reagents in bags | crafts it when ready and opens a trade with you |
 | O1 | `role tank` to a warrior with arms points | talents reset into prot pve, `co ?` shows `tank`, `tank assist`; errands strategies still there |

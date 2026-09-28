@@ -97,6 +97,7 @@ private:
         bool const on = command == ErrandsSwitch::On;
         botAI->ChangeStrategy(ErrandsStrategies(on), BOT_STATE_NON_COMBAT);
         botAI->ChangeStrategy(ErrandsDeadStrategies(on), BOT_STATE_DEAD);
+        botAI->ChangeStrategy(ErrandsCombatStrategies(on), BOT_STATE_COMBAT);
         PlayerbotRepository::instance().Save(botAI);
         botAI->TellMaster(on ? "errands: on (hunt, share, bags, craft, levelup, quests, loot, revive)" : "errands: off");
     }

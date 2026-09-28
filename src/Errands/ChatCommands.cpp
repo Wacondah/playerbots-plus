@@ -60,4 +60,9 @@ std::string ErrandsDeadStrategies(bool on)
 {
     return on ? "+errands revive" : "-errands revive";
 }
+
+std::string ErrandsCombatStrategies(bool on)
+{
+    return on ? "+errands loot" : "-errands loot";
+}
 }  // namespace PlayerbotsPlus

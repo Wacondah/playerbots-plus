@@ -153,7 +153,6 @@ public:
     ErrandsLootStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
 
     std::string const getName() override { return "errands loot"; }
-    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT; }
 
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
