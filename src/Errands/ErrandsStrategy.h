@@ -48,6 +48,7 @@ public:
         triggers.push_back(new TriggerNode("errands tick", {NextAction("run errand", RunErrandRelevance)}));
         triggers.push_back(new TriggerNode("errands", {NextAction("errands status", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("professions", {NextAction("professions", ChatCommandRelevance)}));
+        triggers.push_back(new TriggerNode("role", {NextAction("role", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("errands tick", {NextAction("offer to master", OfferRelevance)}));
         triggers.push_back(new TriggerNode("errands tick", {NextAction("city errand", CityRelevance)}));
     }

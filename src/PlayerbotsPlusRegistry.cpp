@@ -26,6 +26,7 @@
 #include "ProfessionsAction.h"
 #include "ProfessionsValue.h"
 #include "RebalanceBagsAction.h"
+#include "RoleAction.h"
 #include "RogueAiObjectContext.h"
 #include "RunErrandAction.h"
 #include "ShamanAiObjectContext.h"
@@ -65,6 +66,7 @@ public:
         creators["bags tick"] = [](PlayerbotAI* ai) -> Trigger* { return new BagsTickTrigger(ai); };
         creators["errands"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "errands"); };
         creators["professions"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "professions"); };
+        creators["role"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "role"); };
         creators["craft yes"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "craft yes"); };
         creators["craft no"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "craft no"); };
     }
@@ -86,6 +88,7 @@ public:
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
         creators["rebalance bags"] = [](PlayerbotAI* ai) -> Action* { return new RebalanceBagsAction(ai); };
         creators["professions"] = [](PlayerbotAI* ai) -> Action* { return new ProfessionsAction(ai); };
+        creators["role"] = [](PlayerbotAI* ai) -> Action* { return new RoleAction(ai); };
         creators["offer to master"] = [](PlayerbotAI* ai) -> Action* { return new OfferToMasterAction(ai); };
         creators["craft item"] = [](PlayerbotAI* ai) -> Action* { return new CraftItemAction(ai); };
         creators["craft yes"] = [](PlayerbotAI* ai) -> Action* { return new CraftAnswerAction(ai, true); };

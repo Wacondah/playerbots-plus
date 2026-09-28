@@ -35,3 +35,4 @@ start here.
 | action `"equip upgrade"` (`EquipUpgradeAction`) | `ShareItemAction::Execute` | receivers equip shared gear (no item push packet on a direct move) |
 | `PlayerbotFactory::InitTalentsBySpecNo`, `InitTalentsTree`, `InitPetTalents`; `sPlayerbotAIConfig.premadeSpecName`; `AiFactory::GetPlayerSpecTabs`; trigger `"levelup"` | `LevelUpAction`, `PlayerbotsPlusScript` | talents on level-up |
 | `Group::GetRolls`, `Roll::playerVote`, `Group::CountRollVote`; action `"release"`; triggers `"very often"`, `"often"` | `AltCareActions` | need rolls, release when nobody can resurrect |
+| `PlayerbotAI::ResetStrategies`, `GetStrategies`, `IsTank`/`IsHeal`; strategy `"threat"`; `AiFactory::GetPlayerSpecTab(s)` | `RoleAction` | role command |

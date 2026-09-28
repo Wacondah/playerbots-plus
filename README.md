@@ -85,6 +85,13 @@ bot. Cooking, fishing and first aid are left alone.
 
 ## Level-up and quest sharing
 
+Whisper `role tank`, `role heal` or `role dps` (optionally a spec: `role dps combat`) to set
+an alt's role: mod-playerbots picks the role from the tree with the most talent points,
+so at low level a single point decides. `role` respecs into the fitting tree, sets that
+role's combat strategies (tanks get `tank` and `tank assist`), adds `threat` to dps (they
+stop attacking near the tank's threat) and keeps the errands and other non-combat
+strategies, which mod-playerbots' own `talents spec` wipes. `role` alone shows it.
+
 Part of `errands on`. On level-up an alt spends its talent points: in the premade spec you
 picked with `talents spec <name>` (the module remembers it, mod-playerbots forgets it once
 the points are spent), else in the tree it already uses; with neither, it asks you to
@@ -140,6 +147,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `errands on` / `errands off` | enable / disable all errands strategies at once (party chat: `/p errands on` for every bot); works on bots with nothing enabled yet |
 | `nc +errands` / `nc -errands` | enable / disable errands |
 | `errands` | current errand and last reason (e.g. `master moving`, `in instance`) |
+| `role tank\|heal\|dps [spec]` / `role` | set / show the alt's role (talents, combat strategies, `threat` for dps) |
 | `errands city` | start a capital trip now (party chat: `/p errands city`); answers `city: going (n stops)` or `city: nothing to do` |
 | `nc +errands hunt` | enable hunting (party chat: `/p nc +errands hunt`) |
 | `nc +errands share` | enable sharing (party chat: `/p nc +errands share`) |

@@ -141,3 +141,7 @@ Setup: `/p nc +errands bags`, `nc +debug errands` on the bot you fill up.
 | N1 | Group roll on a green the alt would equip | the alt rolls Need |
 | N2 | Group roll on linen cloth, a tailor in the group | the tailor rolls Need; others follow mod-playerbots |
 | K1 | Alchemist knowing a transmute, reagents in bags | crafts it when ready and opens a trade with you |
+| O1 | `role tank` to a warrior with arms points | talents reset into prot pve, `co ?` shows `tank`, `tank assist`; errands strategies still there |
+| O2 | `role dps` to a rogue / mage | `co ?` shows `threat`; stops attacking before pulling aggro off the tank |
+| O3 | `role heal` to a rogue | `role: my class cannot heal`, nothing changed |
+| O4 | `role` alone | `role: tank (prot pve)` |

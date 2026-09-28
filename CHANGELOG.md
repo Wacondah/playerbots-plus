@@ -5,6 +5,9 @@
 - `errands levelup`: alts spend their talent points on level-up, following the spec picked
   with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
 - `errands quests`: alts share quests with each other (never with the master).
+- `role tank|heal|dps [spec]`: talents of the fitting tree (remembered for level-ups),
+  that role's combat strategies, `threat` for dps; non-combat strategies are kept
+  (mod-playerbots' `talents spec` resets them all).
 - `errands loot`: alts roll need on gear they would wear and on materials of their own
   professions (mod-playerbots' `LootNeedRollLevel = 1` turned every need into greed).
 - `errands revive` (dead state): a dead alt releases once the group is out of combat and
