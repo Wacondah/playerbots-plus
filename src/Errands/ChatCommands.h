@@ -17,8 +17,19 @@ enum class ErrandsSwitch
     Off
 };
 
+enum class PullCommand
+{
+    None,
+    Pull,
+    Force,
+    Cancel
+};
+
 // "errands on" / "errands off" (case and surrounding spaces ignored).
 ErrandsSwitch ParseErrandsSwitch(std::string const& message);
+
+// "pull", "pull force", "pull cancel" (case and surrounding spaces ignored).
+PullCommand ParsePullCommand(std::string const& message);
 
 // "talents spec <name>" (the mod-playerbots command): the premade spec name as typed,
 // empty for anything else ("talents spec list" included).

@@ -12,24 +12,40 @@ namespace PlayerbotsPlus
 namespace
 {
 char const* const Strategies[] = {"errands",       "errands hunt",    "errands share", "errands bags",
-                                  "errands craft", "errands levelup", "errands quests", "errands loot"};
-}  // namespace
+                                  "errands craft", "errands levelup", "errands quests", "errands loot",
+                                  "errands pull"};
 
-ErrandsSwitch ParseErrandsSwitch(std::string const& message)
+// Lower case, surrounding spaces removed.
+std::string Normalized(std::string const& message)
 {
     std::string text = message;
     std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return std::tolower(c); });
     size_t const first = text.find_first_not_of(' ');
     size_t const last = text.find_last_not_of(' ');
-    if (first == std::string::npos)
-        return ErrandsSwitch::None;
-    text = text.substr(first, last - first + 1);
+    return first == std::string::npos ? "" : text.substr(first, last - first + 1);
+}
+}  // namespace
 
+ErrandsSwitch ParseErrandsSwitch(std::string const& message)
+{
+    std::string const text = Normalized(message);
     if (text == "errands on")
         return ErrandsSwitch::On;
     if (text == "errands off")
         return ErrandsSwitch::Off;
     return ErrandsSwitch::None;
+}
+
+PullCommand ParsePullCommand(std::string const& message)
+{
+    std::string const text = Normalized(message);
+    if (text == "pull")
+        return PullCommand::Pull;
+    if (text == "pull force")
+        return PullCommand::Force;
+    if (text == "pull cancel")
+        return PullCommand::Cancel;
+    return PullCommand::None;
 }
 
 std::string ParseTalentsSpec(std::string const& message)
@@ -63,6 +79,6 @@ std::string ErrandsDeadStrategies(bool on)
 
 std::string ErrandsCombatStrategies(bool on)
 {
-    return on ? "+errands loot" : "-errands loot";
+    return on ? "+errands loot,+errands pull" : "-errands loot,-errands pull";
 }
 }  // namespace PlayerbotsPlus

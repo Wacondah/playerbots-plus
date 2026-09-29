@@ -20,13 +20,24 @@ TEST(ErrandsSwitch, AnythingElseIsNone)
 TEST(ErrandsSwitch, StrategyLists)
 {
     EXPECT_EQ(ErrandsStrategies(true), "+errands,+errands hunt,+errands share,+errands bags,+errands craft,"
-                                       "+errands levelup,+errands quests,+errands loot");
+                                       "+errands levelup,+errands quests,+errands loot,+errands pull");
     EXPECT_EQ(ErrandsStrategies(false), "-errands,-errands hunt,-errands share,-errands bags,-errands craft,"
-                                        "-errands levelup,-errands quests,-errands loot");
+                                        "-errands levelup,-errands quests,-errands loot,-errands pull");
     EXPECT_EQ(ErrandsDeadStrategies(true), "+errands revive");
     EXPECT_EQ(ErrandsDeadStrategies(false), "-errands revive");
-    EXPECT_EQ(ErrandsCombatStrategies(true), "+errands loot");
-    EXPECT_EQ(ErrandsCombatStrategies(false), "-errands loot");
+    EXPECT_EQ(ErrandsCombatStrategies(true), "+errands loot,+errands pull");
+    EXPECT_EQ(ErrandsCombatStrategies(false), "-errands loot,-errands pull");
+}
+
+TEST(PullCommand, Parse)
+{
+    EXPECT_EQ(ParsePullCommand("pull"), PullCommand::Pull);
+    EXPECT_EQ(ParsePullCommand("  Pull "), PullCommand::Pull);
+    EXPECT_EQ(ParsePullCommand("pull force"), PullCommand::Force);
+    EXPECT_EQ(ParsePullCommand("PULL cancel"), PullCommand::Cancel);
+    EXPECT_EQ(ParsePullCommand("pull rti"), PullCommand::None);  // mod-playerbots' own variant
+    EXPECT_EQ(ParsePullCommand("pulling"), PullCommand::None);
+    EXPECT_EQ(ParsePullCommand(""), PullCommand::None);
 }
 
 TEST(TalentsSpec, NameAfterTheCommand)
