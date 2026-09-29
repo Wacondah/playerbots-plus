@@ -43,7 +43,8 @@ public:
 
 // "errands on" / "errands off" from a master, whispered to one bot or in party chat.
 // Handled here rather than by a bot strategy, so it also reaches bots with no errands
-// strategy yet. The message still goes through (true), as any chat line.
+// strategy yet. The message still goes through (true), as any chat line, except "pull"
+// commands the module handles (swallowed so mod-playerbots does not pull too).
 class PlayerbotsPlusPlayerScript : public PlayerScript
 {
 public:
@@ -64,6 +65,9 @@ public:
         }
         if (type == CHAT_MSG_WHISPER && Config().enabled)
         {
+            PullCommand const pull = ParsePullCommand(msg);
+            if (pull != PullCommand::None && DispatchPull(player, receiver, pull, false))
+                return false;
             Apply(player, receiver, ParseErrandsSwitch(msg));
             RememberSpec(player, receiver, ParseTalentsSpec(msg));
         }
@@ -72,6 +76,15 @@ public:
 
     bool OnPlayerCanUseChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Group* group) override
     {
+        PullCommand const pull = ParsePullCommand(msg);
+        if (pull != PullCommand::None && group && Config().enabled)
+        {
+            bool handled = false;
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+                handled = DispatchPull(player, ref->GetSource(), pull, true) || handled;
+            if (handled)
+                return false;
+        }
         ErrandsSwitch const command = ParseErrandsSwitch(msg);
         std::string const spec = ParseTalentsSpec(msg);
         if ((command == ErrandsSwitch::None && spec.empty()) || !group || !Config().enabled)
@@ -85,6 +98,22 @@ public:
     }
 
 private:
+    // "pull", "pull force", "pull cancel": handled by the module's tank instead of
+    // mod-playerbots' own pull (the chat line is swallowed so both do not run).
+    static bool DispatchPull(Player* master, Player* bot, PullCommand command, bool party)
+    {
+        PlayerbotAI* botAI = bot ? GET_PLAYERBOT_AI(bot) : nullptr;
+        if (!botAI || botAI->GetMaster() != master || !botAI->HasStrategy("errands pull", BOT_STATE_NON_COMBAT))
+            return false;
+        if (party && !PlayerbotAI::IsTank(bot))
+            return false;
+        char const* action = command == PullCommand::Force    ? "errands pull force"
+                             : command == PullCommand::Cancel ? "errands pull cancel"
+                                                              : "errands pull request";
+        botAI->DoSpecificAction(action, Event("pull", party ? "party" : "", master), true);
+        return true;
+    }
+
     // The PlayerbotsPlusQuests addon asks with "BOT\t#a questlog": answered here, the
     // addon message never reaching mod-playerbots' command parsing.
     static void AnswerQuestLog(Player* master, Player* bot, std::string const& msg)
@@ -115,7 +144,7 @@ private:
         botAI->ChangeStrategy(ErrandsDeadStrategies(on), BOT_STATE_DEAD);
         botAI->ChangeStrategy(ErrandsCombatStrategies(on), BOT_STATE_COMBAT);
         PlayerbotRepository::instance().Save(botAI);
-        botAI->TellMaster(on ? "errands: on (hunt, share, bags, craft, levelup, quests, loot, revive)" : "errands: off");
+        botAI->TellMaster(on ? "errands: on (hunt, share, bags, craft, levelup, quests, loot, revive, pull)" : "errands: off");
     }
 };
 

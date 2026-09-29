@@ -124,6 +124,17 @@ keeps them home until you whisper `errands city`.
 Outside capitals, a class trainer of the bot's class within the errands radius is a
 normal errand too.
 
+## Group pull
+
+Part of `errands on`. Select a mob and whisper `pull` to the tank (or `/p pull`), or put
+the skull icon on it out of combat. The tank picks the puller (itself if it can shoot, else
+the closest ranged dps, else itself on foot), a firing spot in range and line of sight whose
+way there and back keeps clear of every other mob's aggro radius, and a hiding spot near
+the group out of the target's sight, so casters come into melee. The rest of the group holds
+still (heals and self-defence allowed) until the tank has the mobs, or 20 s after the shot.
+When no clean route exists, the tank names the mobs that would come and waits 30 s for
+`pull force`. This replaces mod-playerbots' own `pull` for bots with `errands pull`.
+
 ## Install
 
 Requires the Playerbot core fork (`mod-playerbots/azerothcore-wotlk`) and mod-playerbots.
@@ -164,6 +175,8 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `professions reset` then `professions reset confirm` | forget both primary professions now (assignment kept) |
 | `nc +errands craft` | enable crafting (party chat: `/p nc +errands craft`) |
 | `craft yes` / `craft no` | answer a crafting offer |
+| `pull` (target selected) / skull icon out of combat | the tank plans and runs a group pull (party chat: `/p pull`) |
+| `pull force` / `pull cancel` | accept a pull announced with extra mobs / stop the pull and release the group |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
 
 ## Configuration
