@@ -5,6 +5,7 @@
 #ifndef PLAYERBOTS_PLUS_ERRANDS_STRATEGY_H
 #define PLAYERBOTS_PLUS_ERRANDS_STRATEGY_H
 
+#include "PullActions.h"
 #include "Strategy.h"
 
 namespace PlayerbotsPlus
@@ -34,6 +35,8 @@ constexpr float LevelUpRelevance = ChatCommandRelevance;
 constexpr float LootNeedRelevance = 101.0f;
 // Dead state: above the default dead actions, which wait for a resurrection.
 constexpr float ReleaseRelevance = 50.0f;
+// Above mod-playerbots' own pull (105–107) and every combat action: the puller's walk wins.
+constexpr float PullStepRelevance = 108.0f;
 
 class ErrandsStrategy : public Strategy
 {
@@ -172,6 +175,28 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("often", {NextAction("errands release", ReleaseRelevance)}));
+    }
+};
+
+// Group pull: the tank plans, the puller walks and shoots, the others hold.
+class ErrandsPullStrategy : public Strategy
+{
+public:
+    ErrandsPullStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
+    std::string const getName() override { return "errands pull"; }
+    uint32 GetType() const override { return STRATEGY_TYPE_NONCOMBAT | STRATEGY_TYPE_COMBAT; }
+
+    void InitTriggers(std::vector<TriggerNode*>& triggers) override
+    {
+        triggers.push_back(new TriggerNode("errands pull tick", {NextAction("errands pull step", PullStepRelevance)}));
+        triggers.push_back(
+            new TriggerNode("errands pull skull", {NextAction("errands pull skull", ChatCommandRelevance)}));
+    }
+
+    void InitMultipliers(std::vector<Multiplier*>& multipliers) override
+    {
+        multipliers.push_back(new PullHoldMultiplier(botAI));
     }
 };
 

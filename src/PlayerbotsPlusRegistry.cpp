@@ -25,6 +25,7 @@
 #include "PriestAiObjectContext.h"
 #include "ProfessionsAction.h"
 #include "ProfessionsValue.h"
+#include "PullActions.h"
 #include "QuestLogAction.h"
 #include "RebalanceBagsAction.h"
 #include "RoleAction.h"
@@ -55,6 +56,7 @@ public:
         creators["errands quests"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsQuestsStrategy(ai); };
         creators["errands loot"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsLootStrategy(ai); };
         creators["errands revive"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsReviveStrategy(ai); };
+        creators["errands pull"] = [](PlayerbotAI* ai) -> Strategy* { return new ErrandsPullStrategy(ai); };
     }
 };
 
@@ -65,6 +67,8 @@ public:
     {
         creators["errands tick"] = [](PlayerbotAI* ai) -> Trigger* { return new ErrandsTickTrigger(ai); };
         creators["bags tick"] = [](PlayerbotAI* ai) -> Trigger* { return new BagsTickTrigger(ai); };
+        creators["errands pull tick"] = [](PlayerbotAI* ai) -> Trigger* { return new PullTickTrigger(ai); };
+        creators["errands pull skull"] = [](PlayerbotAI* ai) -> Trigger* { return new PullSkullTrigger(ai); };
         creators["errands"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "errands"); };
         creators["professions"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "professions"); };
         creators["role"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "role"); };
@@ -96,6 +100,11 @@ public:
         creators["craft item"] = [](PlayerbotAI* ai) -> Action* { return new CraftItemAction(ai); };
         creators["craft yes"] = [](PlayerbotAI* ai) -> Action* { return new CraftAnswerAction(ai, true); };
         creators["craft no"] = [](PlayerbotAI* ai) -> Action* { return new CraftAnswerAction(ai, false); };
+        creators["errands pull request"] = [](PlayerbotAI* ai) -> Action* { return new PullRequestAction(ai); };
+        creators["errands pull skull"] = [](PlayerbotAI* ai) -> Action* { return new PullSkullAction(ai); };
+        creators["errands pull force"] = [](PlayerbotAI* ai) -> Action* { return new PullForceAction(ai); };
+        creators["errands pull cancel"] = [](PlayerbotAI* ai) -> Action* { return new PullCancelAction(ai); };
+        creators["errands pull step"] = [](PlayerbotAI* ai) -> Action* { return new PullStepAction(ai); };
     }
 };
 
