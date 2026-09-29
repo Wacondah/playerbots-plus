@@ -128,3 +128,57 @@ TEST(PullPlanner, NothingUsable)
     std::vector<ReturnOption> const returns = {Return(0, 0, 0, false, {})};  // unreachable return
     EXPECT_FALSE(ChooseRoute(firing, returns, {}, PullMargin).found);
 }
+
+namespace
+{
+PullerFacts Member(uint64_t id, bool tank, bool healer, bool ranged, bool spell, float distance)
+{
+    PullerFacts f;
+    f.id = id;
+    f.tank = tank;
+    f.healer = healer;
+    f.ranged = ranged;
+    f.hasPullSpell = spell;
+    f.distance = distance;
+    return f;
+}
+
+constexpr uint8_t Warrior = 1, Paladin = 2, Hunter = 3, Rogue = 4, Mage = 8, Druid = 11;
+}  // namespace
+
+TEST(PullPuller, RangedTankFirst)
+{
+    PullerChoice const c = ChoosePuller({Member(1, false, false, true, true, 10), Member(2, true, false, false, true, 30)});
+    EXPECT_TRUE(c.found);
+    EXPECT_EQ(c.id, 2u);
+    EXPECT_FALSE(c.bodyPull);
+}
+
+TEST(PullPuller, ClosestRangedDpsWhenTheTankCannotShoot)
+{
+    PullerChoice const c = ChoosePuller({Member(1, true, false, false, false, 5), Member(2, false, true, true, true, 10),
+                                         Member(3, false, false, true, true, 25), Member(4, false, false, true, true, 20)});
+    EXPECT_EQ(c.id, 4u);  // 2 is the healer
+    EXPECT_FALSE(c.bodyPull);
+}
+
+TEST(PullPuller, BodyPullAsLastResort)
+{
+    PullerChoice const c = ChoosePuller({Member(1, true, false, false, false, 5), Member(2, false, false, false, false, 3)});
+    EXPECT_EQ(c.id, 1u);
+    EXPECT_TRUE(c.bodyPull);
+    EXPECT_FALSE(ChoosePuller({Member(2, false, false, true, true, 3)}).found);  // no tank: nobody pulls
+}
+
+TEST(PullSpells, WeaponThenClassSpells)
+{
+    EXPECT_EQ(PullSpellNames(Warrior, RangedWeapon::Bow), (std::vector<std::string>{"shoot bow", "heroic throw"}));
+    EXPECT_EQ(PullSpellNames(Warrior, RangedWeapon::None), (std::vector<std::string>{"heroic throw"}));
+    EXPECT_EQ(PullSpellNames(Rogue, RangedWeapon::Thrown), (std::vector<std::string>{"throw"}));
+    EXPECT_EQ(PullSpellNames(Mage, RangedWeapon::Wand), (std::vector<std::string>{"frostbolt", "fireball", "shoot"}));
+    EXPECT_EQ(PullSpellNames(Hunter, RangedWeapon::Bow), (std::vector<std::string>{"arcane shot", "auto shot"}));
+    EXPECT_EQ(PullSpellNames(Paladin, RangedWeapon::None),
+              (std::vector<std::string>{"avenger's shield", "hand of reckoning", "exorcism"}));
+    EXPECT_EQ(PullSpellNames(Druid, RangedWeapon::None),
+              (std::vector<std::string>{"faerie fire (feral)", "faerie fire", "wrath"}));
+}

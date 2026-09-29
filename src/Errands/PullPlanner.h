@@ -53,6 +53,33 @@ struct PullRoute
     std::vector<uint64_t> unavoidable;  // come anyway
 };
 
+struct PullerFacts
+{
+    uint64_t id = 0;
+    bool tank = false;
+    bool healer = false;
+    bool ranged = false;
+    bool hasPullSpell = false;  // knows a spell of PullSpellNames
+    float distance = 0.f;       // to the target
+};
+
+struct PullerChoice
+{
+    bool found = false;
+    uint64_t id = 0;
+    bool bodyPull = false;
+};
+
+enum class RangedWeapon : uint8_t
+{
+    None,
+    Bow,
+    Gun,
+    Crossbow,
+    Thrown,
+    Wand
+};
+
 constexpr float PullMargin = 3.0f;
 constexpr size_t PullReturnCandidates = 5;
 
@@ -67,6 +94,13 @@ std::vector<size_t> RankFiring(std::vector<FiringOption> const& firing, std::vec
 // Best go + return: fewest woken, then hidden, then shortest.
 PullRoute ChooseRoute(std::vector<FiringOption> const& firing, std::vector<ReturnOption> const& returns,
                       std::vector<PullMob> const& mobs, float margin);
+
+// The tank if it can shoot, else the closest ranged dps that can, else the tank on foot;
+// nobody without a tank.
+PullerChoice ChoosePuller(std::vector<PullerFacts> const& group);
+
+// Spells (mod-playerbots names) that pull from range, preferred first.
+std::vector<std::string> PullSpellNames(uint8_t cls, RangedWeapon weapon);
 }  // namespace PlayerbotsPlus
 
 #endif

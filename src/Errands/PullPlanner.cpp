@@ -109,4 +109,102 @@ PullRoute ChooseRoute(std::vector<FiringOption> const& firing, std::vector<Retur
         best.unavoidable = Unavoidable(mobs);
     return best;
 }
+
+PullerChoice ChoosePuller(std::vector<PullerFacts> const& group)
+{
+    PullerChoice choice;
+    PullerFacts const* tank = nullptr;
+    PullerFacts const* ranged = nullptr;
+    for (PullerFacts const& m : group)
+    {
+        if (m.tank && !tank)
+            tank = &m;
+        else if (!m.tank && m.ranged && !m.healer && m.hasPullSpell && (!ranged || m.distance < ranged->distance))
+            ranged = &m;
+    }
+    if (!tank)
+        return choice;
+    choice.found = true;
+    if (tank->hasPullSpell)
+        choice.id = tank->id;
+    else if (ranged)
+        choice.id = ranged->id;
+    else
+    {
+        choice.id = tank->id;
+        choice.bodyPull = true;
+    }
+    return choice;
+}
+
+std::vector<std::string> PullSpellNames(uint8_t cls, RangedWeapon weapon)
+{
+    std::vector<std::string> names;
+    bool const weaponUser = cls == 1 || cls == 4;  // warrior, rogue: the weapon comes first
+    auto addWeapon = [&]()
+    {
+        switch (weapon)
+        {
+            case RangedWeapon::Bow:
+                if (weaponUser)
+                    names.push_back("shoot bow");
+                break;
+            case RangedWeapon::Gun:
+                if (weaponUser)
+                    names.push_back("shoot gun");
+                break;
+            case RangedWeapon::Crossbow:
+                if (weaponUser)
+                    names.push_back("shoot crossbow");
+                break;
+            case RangedWeapon::Thrown:
+                if (weaponUser)
+                    names.push_back("throw");
+                break;
+            case RangedWeapon::Wand:
+                if (!weaponUser)
+                    names.push_back("shoot");
+                break;
+            case RangedWeapon::None:
+                break;
+        }
+    };
+    if (weaponUser)
+        addWeapon();
+    switch (cls)
+    {
+        case 1:
+            names.push_back("heroic throw");
+            break;
+        case 2:
+            names.insert(names.end(), {"avenger's shield", "hand of reckoning", "exorcism"});
+            break;
+        case 3:
+            names.insert(names.end(), {"arcane shot", "auto shot"});
+            break;
+        case 5:
+            names.insert(names.end(), {"smite", "shadow word: pain"});
+            break;
+        case 6:
+            names.push_back("icy touch");
+            break;
+        case 7:
+            names.push_back("lightning bolt");
+            break;
+        case 8:
+            names.insert(names.end(), {"frostbolt", "fireball"});
+            break;
+        case 9:
+            names.push_back("shadow bolt");
+            break;
+        case 11:
+            names.insert(names.end(), {"faerie fire (feral)", "faerie fire", "wrath"});
+            break;
+        default:
+            break;
+    }
+    if (!weaponUser)
+        addWeapon();
+    return names;
+}
 }  // namespace PlayerbotsPlus
