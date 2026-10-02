@@ -9,6 +9,7 @@
 #include "ObjectMgr.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
+#include "RandomItemMgr.h"
 #include "ReagentIndex.h"
 #include "StatsWeightCalculator.h"
 
@@ -44,6 +45,17 @@ float GainFor(Player* receiver, Item* item)
     float const currentScore =
         current ? calc.CalculateItem(current->GetEntry(), current->GetItemRandomPropertyId()) : 0.f;
     return score - currentScore;
+}
+
+// mod-playerbots' class rule (the bots' own "item usage" applies it): the class's main
+// armor type at that level (mail for a paladin before 40, plate after), its weapon types.
+bool FitsClass(Player* player, ItemTemplate const* proto, uint32 level)
+{
+    if (proto->Class == ITEM_CLASS_ARMOR)
+        return sRandomItemMgr.CanEquipArmor(proto, player->getClass(), level);
+    if (proto->Class == ITEM_CLASS_WEAPON)
+        return sRandomItemMgr.CanEquipWeapon(proto, player->getClass());
+    return true;
 }
 }  // namespace
 
@@ -109,7 +121,8 @@ bool DescribeFutureGear(Player* bot, ItemTemplate const* proto, int32 randomProp
     if (!proto || proto->Quality < ITEM_QUALITY_UNCOMMON ||
         (proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON) ||
         bot->CanUseItem(proto) != EQUIP_ERR_CANT_EQUIP_LEVEL_I ||  // the level check comes last
-        !WithinLevelAhead(bot->GetLevel(), proto->RequiredLevel, Config().gearMaxLevelAhead))
+        !WithinLevelAhead(bot->GetLevel(), proto->RequiredLevel, Config().gearMaxLevelAhead) ||
+        !FitsClass(bot, proto, std::max<uint32>(bot->GetLevel(), proto->RequiredLevel)))
         return false;
     std::vector<uint8> const slots = SlotsFor(bot, proto);
     if (slots.empty())
@@ -255,7 +268,8 @@ float MasterGain(Player* master, ItemTemplate const* proto, int32 randomProperty
         return float(proto->ContainerSlots - smallest);
     }
 
-    if (proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON)
+    if ((proto->Class != ITEM_CLASS_ARMOR && proto->Class != ITEM_CLASS_WEAPON) ||
+        !FitsClass(master, proto, master->GetLevel()))
         return 0.f;
     uint8 const slot = master->FindEquipSlot(proto, NULL_SLOT, true);
     if (slot == NULL_SLOT)
@@ -264,7 +278,11 @@ float MasterGain(Player* master, ItemTemplate const* proto, int32 randomProperty
     Item* current = master->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
     float const currentScore =
         current ? calc.CalculateItem(current->GetEntry(), current->GetItemRandomPropertyId()) : 0.f;
-    return std::max(0.f, calc.CalculateItem(proto->ItemId, randomProperty) - currentScore);
+    float const score = calc.CalculateItem(proto->ItemId, randomProperty);
+    // Same margin as the bots' own upgrades: a marginal gain is not worth a trade.
+    if (current && score <= currentScore * sPlayerbotAIConfig.equipUpgradeThreshold)
+        return 0.f;
+    return std::max(0.f, score - currentScore);
 }
 
 bool CanDisenchant(Player* player, ItemTemplate const* proto)
