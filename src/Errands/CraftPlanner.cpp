@@ -57,15 +57,24 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
 
     if (state.approvedSpell)
     {
+        bool waitsForStation = false;
         for (RecipeOption const& r : snap.recipes)
-            if (r.spell == state.approvedSpell && (r.castable || r.buyable))
+        {
+            if (r.spell != state.approvedSpell)
+                continue;
+            if (r.castable || r.buyable)
             {
                 if (r.castable)
                     state.approvedSpell = state.approvedProduct = 0;
                 return Pick(state, &r, true, "master");
             }
-        state.approvedSpell = state.approvedProduct = 0;
-        return Result(state, CraftAction::None, nullptr, false, "cannot craft the approved recipe now");
+            waitsForStation = r.atFocus;  // crafted at the next forge or anvil of a capital trip
+        }
+        if (!waitsForStation)
+        {
+            state.approvedSpell = state.approvedProduct = 0;
+            return Result(state, CraftAction::None, nullptr, false, "cannot craft the approved recipe now");
+        }
     }
 
     if (RecipeOption const* r = Cheapest(snap, [](RecipeOption const& o) { return o.usefulToMaster && !o.declined; }))
@@ -95,6 +104,34 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
         return Pick(state, r, false, "skill");
 
     return Result(state, CraftAction::None, nullptr, false, "nothing to craft");
+}
+
+CraftDecision PlanStationCraft(CraftSnapshot const& snap, CraftState& state)
+{
+    auto here = [&](auto wanted)
+    {
+        RecipeOption const* best = nullptr;
+        for (RecipeOption const& r : snap.recipes)
+            if (r.focus && r.castable && wanted(r) && (!best || r.reagentCost < best->reagentCost))
+                best = &r;
+        return best;
+    };
+
+    if (state.approvedSpell)
+        if (RecipeOption const* r = here([&](RecipeOption const& o) { return o.spell == state.approvedSpell; }))
+        {
+            state.approvedSpell = state.approvedProduct = 0;
+            return Result(state, CraftAction::Craft, r, true, "craft for master");
+        }
+    if (RecipeOption const* r = here([](RecipeOption const& o) { return o.smelt; }))
+        return Result(state, CraftAction::Craft, r, false, "craft for smelting");
+    if (RecipeOption const* r = here([](RecipeOption const& o) { return o.usefulToGroup; }))
+        return Result(state, CraftAction::Craft, r, false, "craft for group");
+    if (RecipeOption const* r = here([](RecipeOption const& o) { return o.cooldown; }))
+        return Result(state, CraftAction::Craft, r, snap.hasMaster, "craft for cooldown");
+    if (RecipeOption const* r = here([](RecipeOption const& o) { return o.skillUp; }))
+        return Result(state, CraftAction::Craft, r, false, "craft for skill");
+    return Result(state, CraftAction::None, nullptr, false, "nothing to craft here");
 }
 
 bool AnswerCraft(CraftState& state, bool yes)

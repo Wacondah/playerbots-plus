@@ -38,6 +38,9 @@ struct RecipeOption
     bool gear = false;            // armor, weapon or bag: one craft at a time
     std::vector<ReagentNeed> reagents;
     bool cooldown = false;        // long cooldown recipe (transmute, mooncloth...), ready now
+    uint32_t focus = 0;           // spell focus it needs (1 anvil, 3 forge), 0 for none
+    bool atFocus = false;         // reagents and tools held: only the focus is missing here
+    bool smelt = false;           // smelts raw ore into bars
 };
 
 struct CraftSnapshot
@@ -85,6 +88,10 @@ struct CraftDecision
 // Order: pending answer, approved recipe, ask the master, group needs, cooldown crafts, disenchant,
 // skill-ups. A buyable pick shops instead of crafting.
 CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfig const& cfg, uint32_t now);
+
+// At a forge or an anvil, among the recipes that need one and are castable there: the
+// master's approved recipe, smelting raw ore, group needs, cooldown crafts, skill-ups.
+CraftDecision PlanStationCraft(CraftSnapshot const& snap, CraftState& state);
 
 // The master answered the pending question. False when nothing was asked.
 bool AnswerCraft(CraftState& state, bool yes);

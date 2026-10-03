@@ -268,3 +268,75 @@ TEST(CraftCooldown, GroupNeedsComeFirstAndNoOfferWithoutMaster)
     EXPECT_EQ(d.spell, 9u);
     EXPECT_FALSE(d.forMaster);
 }
+
+namespace
+{
+constexpr uint32_t AnvilFocus = 1, ForgeFocus = 3;
+
+RecipeOption AtStation(uint32_t spell, uint32_t cost, uint32_t focus)
+{
+    RecipeOption r = Recipe(spell, cost);
+    r.focus = focus;
+    return r;
+}
+}  // namespace
+
+TEST(CraftStation, SmeltsRawOreWithoutSkillUp)
+{
+    RecipeOption smelt = AtStation(1, 5, ForgeFocus);
+    smelt.smelt = true;
+    RecipeOption elsewhere = Recipe(2, 1);  // no focus: left to the craft errand
+    elsewhere.skillUp = true;
+    CraftState state;
+    CraftDecision d = PlanStationCraft(Idle({elsewhere, smelt}), state);
+    EXPECT_EQ(d.action, CraftAction::Craft);
+    EXPECT_EQ(d.spell, 1u);
+    EXPECT_EQ(d.reason, "craft for smelting");
+    EXPECT_EQ(PlanStationCraft(Idle({elsewhere}), state).reason, "nothing to craft here");
+}
+
+TEST(CraftStation, ApprovedThenSmeltThenGroupThenSkill)
+{
+    RecipeOption master = AtStation(1, 50, AnvilFocus);
+    RecipeOption smelt = AtStation(2, 5, ForgeFocus);
+    smelt.smelt = true;
+    RecipeOption group = AtStation(3, 1, AnvilFocus);
+    group.usefulToGroup = true;
+    RecipeOption skill = AtStation(4, 1, AnvilFocus);
+    skill.skillUp = true;
+    RecipeOption unwanted = AtStation(5, 1, AnvilFocus);
+    CraftState state;
+    state.approvedSpell = 1;
+    CraftDecision d = PlanStationCraft(Idle({unwanted, skill, group, smelt, master}), state);
+    EXPECT_EQ(d.spell, 1u);
+    EXPECT_TRUE(d.forMaster);
+    EXPECT_EQ(state.approvedSpell, 0u);
+    EXPECT_EQ(PlanStationCraft(Idle({unwanted, skill, group, smelt}), state).spell, 2u);
+    EXPECT_EQ(PlanStationCraft(Idle({unwanted, skill, group}), state).spell, 3u);
+    EXPECT_EQ(PlanStationCraft(Idle({unwanted, skill}), state).spell, 4u);
+    EXPECT_EQ(PlanStationCraft(Idle({unwanted}), state).action, CraftAction::None);
+}
+
+TEST(CraftStation, NotCastableHereIsSkipped)
+{
+    RecipeOption skill = AtStation(1, 1, AnvilFocus);
+    skill.skillUp = true;
+    skill.castable = false;
+    skill.atFocus = true;
+    CraftState state;
+    EXPECT_EQ(PlanStationCraft(Idle({skill}), state).action, CraftAction::None);
+}
+
+TEST(Craft, ApprovedNeedingAStationKeepsTheApproval)
+{
+    RecipeOption master = AtStation(1, 50, AnvilFocus);
+    master.castable = false;
+    master.atFocus = true;
+    RecipeOption group = Recipe(2, 5);
+    group.usefulToGroup = true;
+    CraftState state;
+    state.approvedSpell = 1;
+    CraftDecision d = PlanCraft(Idle({master, group}), state, CraftConfig{}, T0);
+    EXPECT_EQ(d.spell, 2u);
+    EXPECT_EQ(state.approvedSpell, 1u);
+}

@@ -167,3 +167,91 @@ TEST(City, CountStops)
 {
     EXPECT_EQ(CountCityStops(InCity()), 2u);
 }
+
+TEST(CityStation, FocusNeeds)
+{
+    EXPECT_EQ(FocusNeed(1), CityNeed::Anvil);
+    EXPECT_EQ(FocusNeed(3), CityNeed::Forge);
+    EXPECT_EQ(FocusNeed(4), 0u);    // cooking fire
+    EXPECT_EQ(FocusNeed(543), 0u);  // Black Forge
+    EXPECT_EQ(FocusNeed(0), 0u);
+}
+
+TEST(CityStation, StationNeedsFromTheCraftRules)
+{
+    RecipeOption smelt;
+    smelt.spell = 1;
+    smelt.focus = 3;
+    smelt.atFocus = true;
+    smelt.smelt = true;
+    RecipeOption grey;  // nobody wants it, no skill-up
+    grey.spell = 2;
+    grey.focus = 1;
+    grey.atFocus = true;
+    CraftSnapshot snap;
+    snap.recipes = {smelt, grey};
+    CraftState state;
+    EXPECT_EQ(StationNeeds(snap, state), CityNeed::Forge);
+    state.approvedSpell = 2;
+    EXPECT_EQ(StationNeeds(snap, state), CityNeed::Forge | CityNeed::Anvil);
+    RecipeOption plain;  // no focus needed: not a station matter
+    plain.spell = 3;
+    plain.castable = true;
+    plain.skillUp = true;
+    snap.recipes = {plain};
+    EXPECT_EQ(StationNeeds(snap, state), 0u);
+}
+
+TEST(CityStation, IdsNeverCollideWithCreatureSpawns)
+{
+    uint64_t const station = StationStopId(5);
+    EXPECT_NE(station, 5u);
+    EXPECT_TRUE(IsStationStop(station));
+    EXPECT_FALSE(IsStationStop(5));
+    EXPECT_EQ(StationSpawnId(station), 5u);
+}
+
+TEST(CityStation, ForgeBeforeAnvil)
+{
+    CityState state;
+    CitySnapshot s = InCity();
+    s.needs = CityNeed::Forge | CityNeed::Anvil;
+    s.stops = {{StationStopId(1), {5, 0, 0}, CityNeed::Anvil}, {StationStopId(2), {50, 0, 0}, CityNeed::Forge}};
+    EXPECT_EQ(Started(s, state).stop, StationStopId(2));
+    MarkCityVisited(state);
+    EXPECT_EQ(PlanCity(s, state, {}, T0 + 4000).stop, StationStopId(1));
+}
+
+TEST(CityStation, WorkIsMultiTickPausesTheTimeoutAndIsCapped)
+{
+    CityState state;
+    CityConfig cfg;
+    cfg.timeoutMs = 60000;
+    CitySnapshot s = InCity();
+    s.needs = CityNeed::Forge | CityNeed::ClassTraining;
+    s.stops = {{StationStopId(1), {5, 0, 0}, CityNeed::Forge}, {7, {50, 0, 0}, CityNeed::ClassTraining}};
+    Started(s, state, cfg);
+    s.atStop = true;
+    uint32_t const at = T0 + cfg.idleDelayMs + 1000;
+    EXPECT_EQ(PlanCity(s, state, cfg, at).step, CityStep::Visit);
+    // Still working past the trip timeout: the time at the forge does not count.
+    uint32_t const late = T0 + cfg.idleDelayMs + cfg.timeoutMs + 1000;
+    ASSERT_LT(late - at, cfg.workMs);
+    EXPECT_EQ(PlanCity(s, state, cfg, late).step, CityStep::Visit);
+    // Capped: the stop is left for the next one.
+    CityDecision d = PlanCity(s, state, cfg, at + cfg.workMs);
+    EXPECT_EQ(d.step, CityStep::GoTo);
+    EXPECT_EQ(d.stop, 7u);
+    s.atStop = false;
+    EXPECT_EQ(PlanCity(s, state, cfg, at + cfg.workMs + 1000).step, CityStep::GoTo);  // no timeout yet
+}
+
+TEST(CityStation, CreatureStopsAreNotCapped)
+{
+    CityState state;
+    CityConfig cfg;
+    CitySnapshot s = InCity();
+    Started(s, state, cfg);
+    s.atStop = true;
+    EXPECT_EQ(PlanCity(s, state, cfg, T0 + cfg.idleDelayMs + cfg.workMs + 1).step, CityStep::Visit);
+}
