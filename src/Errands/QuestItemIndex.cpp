@@ -38,7 +38,7 @@ void QuestItemIndex::Build()
             Add(quest->RequiredItemId[i], id);
         for (uint8 i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
             Add(quest->ItemDrop[i], id);
-        Add(quest->StartItem, id);  // given when the quest is accepted
+        Add(quest->GetSrcItemId(), id);  // given when the quest is accepted
     }
     // An item that starts a quest (the quest the item names).
     for (auto const& [entry, proto] : *sObjectMgr->GetItemTemplateStore())
