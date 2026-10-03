@@ -68,6 +68,7 @@ struct ErrandsData
     CraftDecision craftDecision;
     uint32 lastCraftScanAt = 0;
     uint32 lastQuestShareAt = 0;
+    uint32 lastQuestCleanAt = 0;
     uint32 calmSince = 0;  // the whole group out of combat since (dead-state release)
     uint32 pendingOfferProduct = 0;  // crafted for the master, offered once it is in the bags
     uint32 pendingOfferSince = 0;

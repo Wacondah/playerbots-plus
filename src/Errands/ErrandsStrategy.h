@@ -103,6 +103,7 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("bags tick", {NextAction("rebalance bags", BagsRelevance)}));
+        triggers.push_back(new TriggerNode("bags tick", {NextAction("clean quest items", BagsRelevance - 0.05f)}));
     }
 };
 

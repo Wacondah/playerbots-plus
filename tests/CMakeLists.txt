@@ -26,6 +26,7 @@ add_executable(planner_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/PullPlanner.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/PullRules.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/GatherPlanner.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/Errands/StaleQuestItem.cpp
     BagPlannerTest.cpp
     SellRulesTest.cpp
     ProfessionCatalogTest.cpp
@@ -41,6 +42,7 @@ add_executable(planner_tests
     PullPlannerTest.cpp
     PullRulesTest.cpp
     GatherPlannerTest.cpp
+    StaleQuestItemTest.cpp
     ErrandPlannerTest.cpp
     HuntPlannerTest.cpp
     SharePlannerTest.cpp)

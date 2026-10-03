@@ -13,6 +13,7 @@
 #include "PlayerbotsPlusRegistry.h"
 #include "PlayerbotsPlusSchema.h"
 #include "ReagentIndex.h"
+#include "QuestItemIndex.h"
 #include "ScriptMgr.h"
 
 using namespace PlayerbotsPlus;
@@ -35,6 +36,7 @@ public:
             return;
         }
         ReagentIndex::Build();
+        QuestItemIndex::Build();
         if (EnsureRegistered())
             LOG_INFO("server.loading", ">> playerbots-plus: errands registered");
         else
