@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1 — 2026-10-03
+
+- Loot, sharing, crafting and auto-equip ignore pieces the class does not wear: upstream's
+  item usage lost its class check when something of the wrong type was worn (a warrior in
+  leather pants rolled need on cloth). mod-playerbots' equip-upgrades action is replaced by
+  a class-aware one for bots with `errands loot`.
+- `share quests` (whisper, or `/p share quests`): an alt offers you, one by one through the
+  game's quest window, each quest of its log you can take (upstream's `share` needs a link).
+
 ## 0.7.0 — 2026-10-03
 
 - Group pull (`errands pull`): `pull` / skull icon makes the tank plan a pull that wakes as few
