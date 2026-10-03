@@ -76,6 +76,29 @@ TEST(OwnSkill, GathererKeepsRawMaterialsOfItsCrafts)
     EXPECT_FALSE(KeptForOwnSkill(ProfessionBit::Tailoring, 0, GatherFeeds(true, true, true), false));
 }
 
+TEST(OwnSkill, MinerKeepsItsOre)
+{
+    uint32_t const feeds = GatherFeeds(true, false, false);
+    // Copper ore: only smelting uses it.
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Mining, ProfessionBit::Mining, feeds, false));
+    // Iron ore: smelting and an enchantment.
+    EXPECT_TRUE(KeptForOwnSkill(ProfessionBit::Mining | ProfessionBit::Enchanting, ProfessionBit::Mining, feeds, false));
+    // A smith without mining has no use for ore.
+    EXPECT_FALSE(KeptForOwnSkill(ProfessionBit::Mining, ProfessionBit::Blacksmithing, 0, false));
+    // Silver bar on a pure miner: still a raw material of its gathering.
+    uint32_t const bar = ProfessionBit::Blacksmithing | ProfessionBit::Engineering | ProfessionBit::Jewelcrafting;
+    EXPECT_TRUE(KeptForOwnSkill(bar, ProfessionBit::Mining, feeds, false));
+}
+
+TEST(MiningMaterial, OresAndUnusedRefinedGoodsOnly)
+{
+    EXPECT_TRUE(MiningMaterial(true, 0));                          // copper ore
+    EXPECT_TRUE(MiningMaterial(true, ProfessionBit::Enchanting));  // iron ore
+    EXPECT_TRUE(MiningMaterial(false, 0));                         // tin bar: only bronze uses it
+    EXPECT_FALSE(MiningMaterial(false, ProfessionBit::Blacksmithing | ProfessionBit::Engineering));  // copper bar
+    EXPECT_FALSE(MiningMaterial(false, ProfessionBit::Alchemy | ProfessionBit::Enchanting));         // dream dust
+}
+
 TEST(OwnSkill, GatherFeedsMirrorsUpstream)
 {
     EXPECT_EQ(GatherFeeds(true, false, false),

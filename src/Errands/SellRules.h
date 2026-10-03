@@ -26,8 +26,14 @@ struct FoodItem
 bool SellableFood(FoodItem const& food, bool foodCheat, bool enabled, uint32_t maxQuality);
 
 // Crafts a gatherer supplies (ProfessionBit mask), as upstream item usage assumes:
-// a miner keeps ore for smiths, jewelcrafters and engineers, and so on.
+// a miner keeps stones, gems and bars for smiths, jewelcrafters and engineers, and so on.
+// (Its own ore is kept through the Mining bit: smelting is a Mining recipe.)
 uint32_t GatherFeeds(bool mining, bool herbalism, bool skinning);
+
+// Does a reagent of a Mining (smelting) spell get the Mining bit: an uncrafted metal or
+// stone (ores, coal, flux), or something no other profession uses (tin bar). Bars of alloys,
+// primals, dream dust keep their crafters, so they still flow from a pure miner to smiths.
+bool MiningMaterial(bool rawMetalOrStone, uint32_t otherUsers);
 
 // Upstream marks a material "skill" for every profession once any bot asked
 // (RandomItemMgr::IsUsedBySkill caches per item). The holder really keeps it when one

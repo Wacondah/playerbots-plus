@@ -7,6 +7,7 @@
 #include "DBCStores.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "SellRules.h"
 #include "SharePlanner.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
@@ -25,7 +26,7 @@ std::pair<uint32, uint32> const Professions[] = {
     {SKILL_ALCHEMY, ProfessionBit::Alchemy},             {SKILL_ENCHANTING, ProfessionBit::Enchanting},
     {SKILL_JEWELCRAFTING, ProfessionBit::Jewelcrafting}, {SKILL_INSCRIPTION, ProfessionBit::Inscription},
     {SKILL_FIRST_AID, ProfessionBit::FirstAid},          {SKILL_COOKING, ProfessionBit::Cooking},
-    {SKILL_FISHING, ProfessionBit::Fishing},
+    {SKILL_FISHING, ProfessionBit::Fishing},             {SKILL_MINING, ProfessionBit::Mining},
 };
 
 std::unordered_map<uint32, uint32>& Index()
@@ -76,6 +77,8 @@ void ReagentIndex::Build()
                 if (VendorItem const* item = items->GetItem(slot))
                     if (!item->maxcount)
                         vendor.insert(item->item);
+    // Smelting is refining: its reagents are sorted after the crafts, its bars stay raw.
+    std::unordered_set<uint32> miningReagents, refined;
     for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
     {
         SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(i);
@@ -86,12 +89,28 @@ void ReagentIndex::Build()
         SpellInfo const* spell = sSpellMgr->GetSpellInfo(entry->Spell);
         if (!spell)
             continue;
+        bool const mining = entry->SkillLine == SKILL_MINING;
         for (int32 reagent : spell->Reagent)
             if (reagent > 0)
-                index[uint32(reagent)] |= bit;
+            {
+                if (mining)
+                    miningReagents.insert(uint32(reagent));
+                else
+                    index[uint32(reagent)] |= bit;
+            }
         for (SpellEffectInfo const& effect : spell->Effects)
             if (effect.Effect == SPELL_EFFECT_CREATE_ITEM && effect.ItemType)
-                crafted.insert(effect.ItemType);
+                (mining ? refined : crafted).insert(effect.ItemType);
+    }
+    for (uint32 reagent : miningReagents)
+    {
+        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reagent);
+        bool const metalOrStone =
+            proto && proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_METAL_STONE;
+        bool const raw = metalOrStone && !crafted.count(reagent) && !refined.count(reagent);
+        auto const it = index.find(reagent);
+        if (MiningMaterial(raw, it == index.end() ? 0 : it->second))
+            index[reagent] |= ProfessionBit::Mining;
     }
 }
 

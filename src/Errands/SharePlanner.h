@@ -27,8 +27,9 @@ constexpr uint32_t Inscription = 1u << 7;
 constexpr uint32_t FirstAid = 1u << 8;
 constexpr uint32_t Cooking = 1u << 9;
 constexpr uint32_t Fishing = 1u << 10;
+constexpr uint32_t Mining = 1u << 11;  // smelting: only the ore and what nothing else uses
 constexpr uint32_t Primary = Tailoring | Leatherworking | Blacksmithing | Engineering | Alchemy | Enchanting |
-                             Jewelcrafting | Inscription;
+                             Jewelcrafting | Inscription | Mining;
 constexpr uint32_t Secondary = FirstAid | Cooking | Fishing;
 }  // namespace ProfessionBit
 

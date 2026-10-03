@@ -31,6 +31,15 @@ TEST(Tier, PrimaryOverSecondaryOverNone)
     EXPECT_EQ(TierFor(Tailoring, Alchemy | Cooking), 0);
 }
 
+TEST(Tier, OreGoesToTheMinerBarsToTheSmith)
+{
+    using namespace ProfessionBit;
+    EXPECT_EQ(TierFor(Mining, Mining), 2);
+    EXPECT_EQ(TierFor(Mining, Blacksmithing), 0);
+    EXPECT_EQ(TierFor(Mining | Enchanting, Enchanting), 2);  // iron ore: tie, the holder keeps it
+    EXPECT_EQ(TierFor(Blacksmithing | Engineering | Jewelcrafting, Mining), 0);
+}
+
 TEST(Share, GateBlocks)
 {
     ShareSnapshot snap = One({1, ShareUsage::Other, 0, {Receiver(10, ShareUsage::Replace, 0, 5.f)}});
