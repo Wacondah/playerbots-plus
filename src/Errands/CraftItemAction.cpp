@@ -42,6 +42,16 @@ ItemUsage UsageOf(Player* player, uint32 entry)
     PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
     return ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(entry))->Get() : ITEM_USAGE_NONE;
 }
+
+// Ore a miner smelts as soon as it is at a forge: raw metal (the Mining bit), not the
+// alloys' bars; not ore a jewelcrafter of the group could prospect for gems.
+bool RawOre(uint32 entry, bool groupProspects)
+{
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry);
+    return proto && proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_METAL_STONE &&
+           (ReagentIndex::UsedBy(entry) & ProfessionBit::Mining) && !ReagentIndex::IsCrafted(entry) &&
+           !(groupProspects && proto->HasFlag(ITEM_FLAG_IS_PROSPECTABLE));
+}
 }  // namespace
 
 bool CraftItemAction::isUseful()
@@ -158,7 +168,7 @@ bool CraftItemAction::HasTools(SpellInfo const* spell)
     return true;
 }
 
-CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
+CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now, bool stationOnly)
 {
     CraftSnapshot snap;
     snap.errandsIdle = ErrandsIdle(data, now);
@@ -166,6 +176,8 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
     Player* master = RealMaster(botAI);
     std::vector<Player*> group = GroupBots(bot, 0.f);
     snap.hasMaster = master != nullptr;
+    bool const groupProspects = std::any_of(group.begin(), group.end(),
+                                            [](Player* p) { return p->HasSkill(SKILL_JEWELCRAFTING); });
     group.push_back(bot);
     std::set<uint32> const& declined = AI_VALUE(std::set<uint32>&, "craft declined");
 
@@ -176,7 +188,7 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         SpellInfo const* spell = sSpellMgr->GetSpellInfo(spellId);
         uint32 const product = spell ? ProductOf(spell) : 0;
         ItemTemplate const* proto = product ? sObjectMgr->GetItemTemplate(product) : nullptr;
-        if (!proto)
+        if (!proto || (stationOnly && !spell->RequiresSpellFocus))
             continue;
 
         RecipeOption r;
@@ -188,8 +200,14 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         r.buyable = !allHeld && FindProfession(ReagentIndex::RecipeSkill(spellId)) && HasTools(spell) &&
                     std::all_of(r.reagents.begin(), r.reagents.end(),
                                 [](ReagentNeed const& n) { return n.held >= n.perCraft || n.vendor; });
-        if (!r.castable && !r.buyable)
+        // Everything held but the forge or the anvil: a capital trip goes there.
+        r.focus = spell->RequiresSpellFocus;
+        r.atFocus = allHeld && r.focus && !r.castable && HasTools(spell) && !bot->HasSpellCooldown(spellId);
+        if (!r.castable && !r.buyable && !r.atFocus)
             continue;
+        r.smelt = ReagentIndex::RecipeSkill(spellId) == SKILL_MINING &&
+                  std::all_of(r.reagents.begin(), r.reagents.end(),
+                              [&](ReagentNeed const& n) { return RawOre(n.item, groupProspects); });
         for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
             if (spell->Reagent[i] > 0)
                 if (ItemTemplate const* reagent = sObjectMgr->GetItemTemplate(uint32(spell->Reagent[i])))
@@ -213,6 +231,9 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now)
         r.declined = declined.count(product) > 0;
         snap.recipes.push_back(r);
     }
+
+    if (stationOnly)
+        return snap;
 
     // First item nobody wants (bound: only the bot's own use counts) to disenchant.
     std::vector<Player*> const others(group.begin(), group.end() - 1);  // without the bot

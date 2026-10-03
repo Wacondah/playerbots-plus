@@ -7,6 +7,7 @@
 #include "ChatCommands.h"
 #include "CityErrandAction.h"
 #include "ErrandsValues.h"
+#include "GameObject.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Playerbots.h"
@@ -64,8 +65,15 @@ bool ErrandsStatusAction::Execute(Event event)
     }
     if (data.city.Active())
     {
-        Creature* stop = CityIndex::LiveCreature(bot->GetMap(), data.city.current);
-        out << " | city: to " << (stop ? stop->GetName() : "?") << " (" << data.city.done.size() + 1 << "/"
+        std::string name = "?";
+        if (IsStationStop(data.city.current))
+        {
+            if (GameObject* go = CityIndex::LiveGameObject(bot->GetMap(), StationSpawnId(data.city.current)))
+                name = go->GetName();
+        }
+        else if (Creature* stop = CityIndex::LiveCreature(bot->GetMap(), data.city.current))
+            name = stop->GetName();
+        out << " | city: to " << name << " (" << data.city.done.size() + 1 << "/"
             << data.city.stopsPlanned << ")";
     }
     else if (!data.city.lastReason.empty() && data.city.lastReason != "city: -")

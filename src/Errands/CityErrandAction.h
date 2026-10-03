@@ -34,6 +34,7 @@ private:
     CitySnapshot BuildCitySnapshot(ErrandsData& data, uint32 now);
     void RefreshStops(ErrandsData& data, Player* master, uint32 now);
     CityIndex::Spawn const* SpawnOf(uint32 zone, uint64 spawnId);
+    bool WorkAtStation(ErrandsData& data, CityDecision const& d);
 };
 }  // namespace PlayerbotsPlus
 

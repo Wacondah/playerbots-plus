@@ -26,10 +26,13 @@ public:
     CraftItemAction(PlayerbotAI* botAI) : Action(botAI, "craft item") {}
 
     bool isUseful() override;
+    // Casts data.craftDecision (also used at a forge or an anvil by the city trip).
     bool Execute(Event event) override;
 
+    // stationOnly: recipes needing a forge or an anvil only, no disenchant scan.
+    CraftSnapshot BuildSnapshot(ErrandsData& data, uint32 now, bool stationOnly = false);
+
 private:
-    CraftSnapshot BuildSnapshot(ErrandsData& data, uint32 now);
     // Fills `needs` from the spell's reagents; true when all are in the bags.
     bool Reagents(SpellInfo const* spell, std::vector<ReagentNeed>& needs);
     bool HasTools(SpellInfo const* spell);
