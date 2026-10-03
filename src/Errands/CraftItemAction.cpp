@@ -44,13 +44,25 @@ ItemUsage UsageOf(Player* player, uint32 entry)
 }
 
 // Ore a miner smelts as soon as it is at a forge: raw metal (the Mining bit), not the
-// alloys' bars; not ore a jewelcrafter of the group could prospect for gems.
-bool RawOre(uint32 entry, bool groupProspects)
+// alloys' bars.
+bool RawOre(uint32 entry)
 {
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry);
     return proto && proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_METAL_STONE &&
-           (ReagentIndex::UsedBy(entry) & ProfessionBit::Mining) && !ReagentIndex::IsCrafted(entry) &&
-           !(groupProspects && proto->HasFlag(ITEM_FLAG_IS_PROSPECTABLE));
+           (ReagentIndex::UsedBy(entry) & ProfessionBit::Mining) && !ReagentIndex::IsCrafted(entry);
+}
+
+// Room in the bags for what the spell creates (the core's own test; casting checks it too,
+// but CanCastSpell does not).
+bool RoomFor(Player* bot, SpellInfo const* spell, ItemTemplate const* proto)
+{
+    int32 count = 1;
+    for (SpellEffectInfo const& effect : spell->Effects)
+        if (effect.Effect == SPELL_EFFECT_CREATE_ITEM && effect.ItemType == proto->ItemId)
+            count = std::max<int32>(1, effect.CalcValue(bot));
+    count = std::min<int32>(count, std::max<int32>(1, proto->GetMaxStackSize()));
+    ItemPosCountVec dest;
+    return bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, proto->ItemId, uint32(count)) == EQUIP_ERR_OK;
 }
 }  // namespace
 
@@ -176,8 +188,6 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now, bool
     Player* master = RealMaster(botAI);
     std::vector<Player*> group = GroupBots(bot, 0.f);
     snap.hasMaster = master != nullptr;
-    bool const groupProspects = std::any_of(group.begin(), group.end(),
-                                            [](Player* p) { return p->HasSkill(SKILL_JEWELCRAFTING); });
     group.push_back(bot);
     std::set<uint32> const& declined = AI_VALUE(std::set<uint32>&, "craft declined");
 
@@ -195,19 +205,20 @@ CraftSnapshot CraftItemAction::BuildSnapshot(ErrandsData& data, uint32 now, bool
         r.spell = spellId;
         r.product = product;
         bool const allHeld = Reagents(spell, r.reagents);
-        r.castable = allHeld && botAI->CanCastSpell(spellId, bot, true);
+        bool const room = allHeld && RoomFor(bot, spell, proto);
+        r.noRoom = allHeld && !room;
+        r.castable = room && botAI->CanCastSpell(spellId, bot, true);
         // Only vendor reagents missing; primary professions only (no cooking salt runs).
         r.buyable = !allHeld && FindProfession(ReagentIndex::RecipeSkill(spellId)) && HasTools(spell) &&
                     std::all_of(r.reagents.begin(), r.reagents.end(),
                                 [](ReagentNeed const& n) { return n.held >= n.perCraft || n.vendor; });
         // Everything held but the forge or the anvil: a capital trip goes there.
         r.focus = spell->RequiresSpellFocus;
-        r.atFocus = allHeld && r.focus && !r.castable && HasTools(spell) && !bot->HasSpellCooldown(spellId);
-        if (!r.castable && !r.buyable && !r.atFocus)
+        r.atFocus = room && r.focus && !r.castable && HasTools(spell) && !bot->HasSpellCooldown(spellId);
+        if (!r.castable && !r.buyable && !r.atFocus && !r.noRoom)
             continue;
         r.smelt = ReagentIndex::RecipeSkill(spellId) == SKILL_MINING &&
-                  std::all_of(r.reagents.begin(), r.reagents.end(),
-                              [&](ReagentNeed const& n) { return RawOre(n.item, groupProspects); });
+                  std::all_of(r.reagents.begin(), r.reagents.end(), [](ReagentNeed const& n) { return RawOre(n.item); });
         for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
             if (spell->Reagent[i] > 0)
                 if (ItemTemplate const* reagent = sObjectMgr->GetItemTemplate(uint32(spell->Reagent[i])))

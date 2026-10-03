@@ -21,10 +21,10 @@ deleted the old row, so they lose their strategies at the next login.
 - `ProfessionBit::Mining = 1 << 11`, part of `Primary` (tier 2 like crafting professions).
 - `{SKILL_MINING, Mining}` in the index: `Known()` reports miners; every Mining spell becomes a
   recipe (`RecipeSkill`), so smelting is a craft option.
-- Selective reagent rule (pure `MiningMaterial(rawMetalOrStone, otherUsers)`): a Mining reagent
-  gets the Mining bit only if it is an uncrafted Metal & Stone item (ores, coal, flux) or no
-  other profession uses it (tin bar). Bars used in alloys, primals, eternals, dream dust keep
-  today's behaviour, so bars still flow from a pure miner to smiths.
+- Selective reagent rule: only the reagents of forge smelts made entirely of uncrafted Metal &
+  Stone (plain ore) get the Mining bit. Alloys (bronze, steel), the Black Forge's dark iron,
+  elementium, primals and dream dust keep today's behaviour, so bars still flow from a pure
+  miner to smiths, and a tin bar nobody uses is sold as before.
 - Smelted bars are not added to `Crafted()`: refining, not crafting; a miner keeps them through
   its gather feeds as today.
 
@@ -50,8 +50,9 @@ Part of `errands city`, for bots with `errands craft`:
 - station stops come after the forge before the anvil (bars first); at the stop the bot stops,
   dismounts and crafts one recipe per tick (`PlanStationCraft`), then leaves when nothing is
   left; time spent at a station does not count toward `City.Timeout`, capped at 2 min per
-  station; 3 failed casts give up the stop;
-- raw ore is not smelted when a jewelcrafter of the group could prospect it.
+  station and per focus for the whole trip (no hopping from forge to forge); 3 failed casts
+  give up the stop; a recipe whose product has no bag room is neither crafted nor a station
+  need, and an approved one waits (no prospecting exception: raw ore is always smelted).
 
 ## 4. Gathering detour
 
@@ -59,12 +60,14 @@ Part of `errands` (`gather node`, below hunt, above follow): when the master is 
 errands gate except the bot's own distance to the master), a bot with Mining (and a pick) or
 Herbalism goes to the nearest node it can gather within `PlayerbotsPlus.Gather.Radius` (50 yd)
 of the master, not claimed by another bot or by the master standing at it, without a hostile
-within 10 yd of it; it opens it through mod-playerbots' own loot actions. 20 s timeout, then the
-node is skipped for 60 s. Skinning is out of scope. mod-playerbots' `LootDistance` is unchanged.
+within 10 yd of it (searched around the node, seen or not), in groups whose loot rules let bots
+loot (no free-for-all); it opens it through mod-playerbots' own loot actions, after checking
+mod-playerbots would accept it. 20 s timeout, or the node turning unsafe, then it is skipped
+for 60 s, doubled at each new failure. Skinning is out of scope. mod-playerbots' `LootDistance` is unchanged.
 
 ## Testing
 
-- Unit: `MiningMaterial`, `KeptForOwnSkill` for miners, `TierFor` with Mining; station planning
+- Unit: `KeptForOwnSkill` for miners, `TierFor` with Mining; station planning
   (`FocusNeed`, `StationNeeds`, forge before anvil, multi-tick visit, timeout pause, work cap,
   id tags); `PlanStationCraft` order; `PlanGather` gates, pick, lifecycle; `CanGather`;
   `ErrandState.masterIdle` ignoring the bot's distance.

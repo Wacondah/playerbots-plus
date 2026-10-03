@@ -41,6 +41,7 @@ struct RecipeOption
     uint32_t focus = 0;           // spell focus it needs (1 anvil, 3 forge), 0 for none
     bool atFocus = false;         // reagents and tools held: only the focus is missing here
     bool smelt = false;           // smelts raw ore into bars
+    bool noRoom = false;          // reagents held but no bag room for the product
 };
 
 struct CraftSnapshot
@@ -84,6 +85,9 @@ struct CraftDecision
     bool forMaster = false;  // crafted on the master's "craft yes": offer it afterwards
     std::string reason;
 };
+
+// The foci of capital stations: 1 anvil, 3 forge (not the Black Forge or Anvil, cooking fires...).
+inline bool StationFocus(uint32_t focus) { return focus == 1 || focus == 3; }
 
 // Order: pending answer, approved recipe, ask the master, group needs, cooldown crafts, disenchant,
 // skill-ups. A buyable pick shops instead of crafting.

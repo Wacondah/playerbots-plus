@@ -13,6 +13,7 @@
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
 
+#include <algorithm>
 #include <sstream>
 
 namespace PlayerbotsPlus
@@ -74,7 +75,7 @@ bool ErrandsStatusAction::Execute(Event event)
         else if (Creature* stop = CityIndex::LiveCreature(bot->GetMap(), data.city.current))
             name = stop->GetName();
         out << " | city: to " << name << " (" << data.city.done.size() + 1 << "/"
-            << data.city.stopsPlanned << ")";
+            << std::max<size_t>(data.city.stopsPlanned, data.city.done.size() + 1) << ")";
     }
     else if (!data.city.lastReason.empty() && data.city.lastReason != "city: -")
         out << " | " << data.city.lastReason;

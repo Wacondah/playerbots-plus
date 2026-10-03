@@ -13,6 +13,8 @@ namespace
 {
 constexpr uint32_t SkillMining = 186;
 constexpr uint32_t SkillHerbalism = 182;
+// The wait doubles per failure on the same node, up to 16 times the blacklist duration.
+constexpr uint32_t MaxBackoffShift = 4;
 
 Decision Result(GatherState& state, DecisionType type, uint64_t target, std::string reason)
 {
@@ -24,6 +26,8 @@ char const* Gate(GatherSnapshot const& snap, GatherConfig const& cfg)
 {
     if (cfg.radius <= 0.f)
         return "disabled";
+    if (!snap.lootAllowed)
+        return "loot disabled";
     if (!snap.idle)
         return "master busy";
     if (snap.bagsFull)
@@ -31,17 +35,23 @@ char const* Gate(GatherSnapshot const& snap, GatherConfig const& cfg)
     return nullptr;
 }
 
+void Blacklist(GatherState& state, uint64_t node, uint32_t now, GatherConfig const& cfg)
+{
+    uint32_t const shift = std::min(state.failures[node]++, MaxBackoffShift);
+    state.blacklisted[node] = GatherBlacklist{now, cfg.blacklistMs << shift};
+}
+
 bool Eligible(GatherNode const& n, GatherSnapshot const& snap, GatherState const& state, GatherConfig const& cfg)
 {
     return n.gatherable && !n.contested && !n.guarded && Distance(n.pos, snap.masterPos) <= cfg.radius &&
-           !state.blacklistedAt.count(n.id);
+           !state.blacklisted.count(n.id);
 }
 }  // namespace
 
 Decision PlanGather(GatherSnapshot const& snap, GatherState& state, GatherConfig const& cfg, uint32_t now)
 {
-    for (auto it = state.blacklistedAt.begin(); it != state.blacklistedAt.end();)
-        it = Elapsed(now, it->second, cfg.blacklistMs) ? state.blacklistedAt.erase(it) : std::next(it);
+    for (auto it = state.blacklisted.begin(); it != state.blacklisted.end();)
+        it = Elapsed(now, it->second.at, it->second.ms) ? state.blacklisted.erase(it) : std::next(it);
 
     if (char const* gate = Gate(snap, cfg))
     {
@@ -54,13 +64,21 @@ Decision PlanGather(GatherSnapshot const& snap, GatherState& state, GatherConfig
         if (Elapsed(now, state.startedAt, cfg.timeoutMs))
         {
             uint64_t const target = std::exchange(state.target, 0);
-            state.blacklistedAt[target] = now;
+            Blacklist(state, target, now, cfg);
             return Result(state, DecisionType::Abandon, target, "timeout");
         }
-        for (GatherNode const& n : snap.nodes)
-            if (n.id == state.target && Eligible(n, snap, state, cfg))
-                return Result(state, DecisionType::Continue, n.id, "gathering");
-        state.target = 0;  // gathered, despawned or taken: next one
+        auto const it = std::find_if(snap.nodes.begin(), snap.nodes.end(),
+                                     [&](GatherNode const& n) { return n.id == state.target; });
+        if (it != snap.nodes.end())
+        {
+            if (Eligible(*it, snap, state, cfg))
+                return Result(state, DecisionType::Continue, it->id, "gathering");
+            // Still there but guarded, taken or out of reach now: not again at once.
+            uint64_t const target = std::exchange(state.target, 0);
+            Blacklist(state, target, now, cfg);
+            return Result(state, DecisionType::Abandon, target, "node unsafe");
+        }
+        state.target = 0;  // gathered or despawned: next one
     }
 
     GatherNode const* best = nullptr;
@@ -76,11 +94,11 @@ Decision PlanGather(GatherSnapshot const& snap, GatherState& state, GatherConfig
     return Result(state, DecisionType::Start, best->id, "gather start");
 }
 
-void MarkGatherFailed(GatherState& state, uint32_t now)
+void MarkGatherFailed(GatherState& state, uint32_t now, GatherConfig const& cfg)
 {
     if (!state.target)
         return;
-    state.blacklistedAt[std::exchange(state.target, 0)] = now;
+    Blacklist(state, std::exchange(state.target, 0), now, cfg);
     state.lastReason = "failed";
 }
 

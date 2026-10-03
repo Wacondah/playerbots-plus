@@ -125,3 +125,43 @@ TEST(CanGather, SkillToolAndKind)
     EXPECT_FALSE(CanGather(Lockpicking, 300, 1, true));
     EXPECT_FALSE(CanGather(Fishing, 300, 1, true));
 }
+
+TEST(GatherGate, LootPolicyOff)
+{
+    GatherState state;
+    GatherConfig const cfg;
+    PlanGather(Idle({Node(1, 10.f)}), state, cfg, T0);
+    GatherSnapshot snap = Idle({Node(1, 10.f)});
+    snap.lootAllowed = false;  // free-for-all group: mod-playerbots' bots do not loot
+    Decision const d = PlanGather(snap, state, cfg, T0 + 1);
+    EXPECT_EQ(d.type, DecisionType::Abandon);
+    EXPECT_EQ(d.reason, "loot disabled");
+}
+
+TEST(GatherLifecycle, TargetTurnedUnsafeIsDroppedForAWhile)
+{
+    GatherState state;
+    GatherConfig const cfg;
+    PlanGather(Idle({Node(1, 10.f)}), state, cfg, T0);
+    GatherNode guarded = Node(1, 10.f);
+    guarded.guarded = true;  // a mob walked next to it
+    Decision d = PlanGather(Idle({guarded}), state, cfg, T0 + 1000);
+    EXPECT_EQ(d.type, DecisionType::Abandon);
+    EXPECT_EQ(d.reason, "node unsafe");
+    // The mob leaves again: the node is not restarted at once (no back and forth).
+    EXPECT_EQ(PlanGather(Idle({Node(1, 10.f)}), state, cfg, T0 + 2000).reason, "no node");
+}
+
+TEST(GatherLifecycle, RepeatedFailuresBackOff)
+{
+    GatherState state;
+    GatherConfig const cfg;
+    PlanGather(Idle({Node(1, 10.f)}), state, cfg, T0);
+    MarkGatherFailed(state, T0);
+    uint32_t const second = T0 + cfg.blacklistMs;
+    EXPECT_EQ(PlanGather(Idle({Node(1, 10.f)}), state, cfg, second).type, DecisionType::Start);
+    MarkGatherFailed(state, second);
+    // Twice as long the second time.
+    EXPECT_EQ(PlanGather(Idle({Node(1, 10.f)}), state, cfg, second + cfg.blacklistMs).reason, "no node");
+    EXPECT_EQ(PlanGather(Idle({Node(1, 10.f)}), state, cfg, second + 2 * cfg.blacklistMs).type, DecisionType::Start);
+}

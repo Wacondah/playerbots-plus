@@ -7,14 +7,15 @@
 #include "DBCStores.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "SellRules.h"
 #include "SharePlanner.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace PlayerbotsPlus
 {
@@ -53,6 +54,8 @@ std::unordered_set<uint32>& Crafted()
     return crafted;
 }
 
+constexpr uint32 ForgeFocus = 3;
+
 uint32 BitFor(uint32 skill)
 {
     for (auto const& [id, bit] : Professions)
@@ -78,7 +81,8 @@ void ReagentIndex::Build()
                     if (!item->maxcount)
                         vendor.insert(item->item);
     // Smelting is refining: its reagents are sorted after the crafts, its bars stay raw.
-    std::unordered_set<uint32> miningReagents, refined;
+    std::vector<std::vector<uint32>> forgeSmelts;  // reagents of each forge smelt
+    std::unordered_set<uint32> refined;
     for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
     {
         SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(i);
@@ -90,28 +94,31 @@ void ReagentIndex::Build()
         if (!spell)
             continue;
         bool const mining = entry->SkillLine == SKILL_MINING;
+        std::vector<uint32> reagents;
         for (int32 reagent : spell->Reagent)
             if (reagent > 0)
-            {
-                if (mining)
-                    miningReagents.insert(uint32(reagent));
-                else
-                    index[uint32(reagent)] |= bit;
-            }
+                reagents.push_back(uint32(reagent));
+        if (!mining)
+            for (uint32 reagent : reagents)
+                index[reagent] |= bit;
+        else if (spell->RequiresSpellFocus == ForgeFocus && !reagents.empty())
+            forgeSmelts.push_back(std::move(reagents));
         for (SpellEffectInfo const& effect : spell->Effects)
             if (effect.Effect == SPELL_EFFECT_CREATE_ITEM && effect.ItemType)
                 (mining ? refined : crafted).insert(effect.ItemType);
     }
-    for (uint32 reagent : miningReagents)
+    // Only ore a capital forge smelts on its own belongs to Mining: alloys (bars), the Black
+    // Forge's dark iron and the like keep their crafters, or are sold as before.
+    auto raw = [&](uint32 item)
     {
-        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reagent);
-        bool const metalOrStone =
-            proto && proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_METAL_STONE;
-        bool const raw = metalOrStone && !crafted.count(reagent) && !refined.count(reagent);
-        auto const it = index.find(reagent);
-        if (MiningMaterial(raw, it == index.end() ? 0 : it->second))
-            index[reagent] |= ProfessionBit::Mining;
-    }
+        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
+        return proto && proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_METAL_STONE &&
+               !crafted.count(item) && !refined.count(item);
+    };
+    for (std::vector<uint32> const& reagents : forgeSmelts)
+        if (std::all_of(reagents.begin(), reagents.end(), raw))
+            for (uint32 reagent : reagents)
+                index[reagent] |= ProfessionBit::Mining;
 }
 
 uint32 ReagentIndex::RecipeSkill(uint32 spellId)

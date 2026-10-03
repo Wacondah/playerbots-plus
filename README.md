@@ -124,6 +124,19 @@ keeps them home until you whisper `errands city`.
 Outside capitals, a class trainer of the bot's class within the errands radius is a
 normal errand too.
 
+With `errands craft`, the trip also goes to a forge, then an anvil: the bot smelts its ore
+(always), then makes there what the craft rules pick (your approved recipe, group upgrades,
+cooldown crafts, skill-ups), one cast per tick. Time at a forge or an anvil does not count in
+`City.Timeout`, at most 2 minutes for each per trip; three failed casts end the stop.
+
+## Gathering
+
+Part of errands. While you stand still, a bot with Mining (and a pick) or Herbalism gathers
+the nodes it can open within `Gather.Radius` (50 yd) of you: never one another bot or you are
+taking, nor one with a hostile within 10 yd, nor in free-for-all groups (mod-playerbots' loot
+rule). A node it fails on, or that turns unsafe, is skipped for a minute, longer each time.
+A miner keeps its ore (smelting is a Mining recipe); ore picked by another alt goes to it.
+
 ## Group pull
 
 Part of `errands on`. Select a mob and whisper `pull` to the tank (or `/p pull`), or put

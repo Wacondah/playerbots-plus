@@ -90,6 +90,8 @@ struct CityState
     uint32_t stopsPlanned = 0;
     uint32_t visitSince = 0;  // working at the current station since (0: not)
     uint32_t workedMs = 0;    // time spent at stations this trip: not counted in the timeout
+    uint32_t cappedNeeds = 0;  // forge or anvil needs that hit the work cap this trip
+    uint32_t stationFailures = 0;  // failed casts at the current station
     std::string lastReason;
 
     bool Active() const { return active; }

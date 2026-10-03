@@ -24,11 +24,6 @@ uint32_t GatherFeeds(bool mining, bool herbalism, bool skinning)
     return feeds;
 }
 
-bool MiningMaterial(bool rawMetalOrStone, uint32_t otherUsers)
-{
-    return rawMetalOrStone || !otherUsers;
-}
-
 bool KeptForOwnSkill(uint32_t usedBy, uint32_t known, uint32_t gatherFeeds, bool crafted)
 {
     return (usedBy & known) || (!crafted && (usedBy & gatherFeeds));

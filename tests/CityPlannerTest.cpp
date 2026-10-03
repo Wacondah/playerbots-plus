@@ -255,3 +255,63 @@ TEST(CityStation, CreatureStopsAreNotCapped)
     s.atStop = true;
     EXPECT_EQ(PlanCity(s, state, cfg, T0 + cfg.idleDelayMs + cfg.workMs + 1).step, CityStep::Visit);
 }
+
+TEST(CityStation, ALaterTripMayUseTheSameForgeAgain)
+{
+    CityState state;
+    CityConfig const cfg;
+    CitySnapshot s = InCity();
+    s.needs = CityNeed::Forge;
+    s.stops = {{StationStopId(1), {5, 0, 0}, CityNeed::Forge}};
+    Started(s, state, cfg);
+    MarkCityVisited(state, T0 + 4000);
+    s.needs = 0;
+    EXPECT_EQ(PlanCity(s, state, cfg, T0 + 5000).step, CityStep::End);
+    // New ore later, on command: the forge of the last trip is a stop again.
+    s.needs = CityNeed::Forge;
+    s.requested = true;
+    EXPECT_EQ(PlanCity(s, state, cfg, T0 + 6000).stop, StationStopId(1));
+}
+
+TEST(CityStation, TheWorkCapHoldsForTheWholeTrip)
+{
+    CityState state;
+    CityConfig const cfg;
+    CitySnapshot s = InCity();
+    s.needs = CityNeed::Forge | CityNeed::ClassTraining;
+    s.stops = {{StationStopId(1), {5, 0, 0}, CityNeed::Forge},
+               {StationStopId(2), {6, 0, 0}, CityNeed::Forge},
+               {7, {50, 0, 0}, CityNeed::ClassTraining}};
+    Started(s, state, cfg);
+    s.atStop = true;
+    uint32_t const at = T0 + cfg.idleDelayMs + 1000;
+    PlanCity(s, state, cfg, at);
+    // Capped at the first forge with ore left: not the second forge, the trainer.
+    EXPECT_EQ(PlanCity(s, state, cfg, at + cfg.workMs).stop, 7u);
+}
+
+TEST(CityStation, FailuresStartAtZeroAtEachStop)
+{
+    CityState state;
+    CityConfig const cfg;
+    CitySnapshot s = InCity();
+    s.needs = CityNeed::Forge | CityNeed::Anvil;
+    s.stops = {{StationStopId(1), {5, 0, 0}, CityNeed::Forge}, {StationStopId(2), {9, 0, 0}, CityNeed::Anvil}};
+    Started(s, state, cfg);
+    state.stationFailures = 3;
+    MarkCityVisited(state, T0 + 4000);
+    EXPECT_EQ(state.stationFailures, 0u);
+    EXPECT_EQ(PlanCity(s, state, cfg, T0 + 5000).stop, StationStopId(2));
+    EXPECT_EQ(state.stationFailures, 0u);
+}
+
+TEST(CityStation, StopsCountStationNeedsOnce)
+{
+    CitySnapshot s = InCity();
+    s.needs = CityNeed::Forge | CityNeed::ClassTraining;
+    s.stops = {{StationStopId(1), {5, 0, 0}, CityNeed::Forge},
+               {StationStopId(2), {6, 0, 0}, CityNeed::Forge},
+               {StationStopId(3), {7, 0, 0}, CityNeed::Forge},
+               {7, {50, 0, 0}, CityNeed::ClassTraining}};
+    EXPECT_EQ(CountCityStops(s), 2u);
+}

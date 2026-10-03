@@ -100,18 +100,15 @@ bool CityErrandAction::WorkAtStation(ErrandsData& data, CityDecision const& d)
     }
 
     uint32 const now = getMSTime();
-    if (data.stationStop != d.stop)
-    {
-        data.stationStop = d.stop;
-        data.stationFailures = 0;
-    }
     CraftItemAction craft(botAI);
     CraftDecision const decision = PlanStationCraft(craft.BuildSnapshot(data, now, true), data.craft);
-    if (decision.action == CraftAction::Craft && data.stationFailures < StationMaxFailures)
+    if (decision.action == CraftAction::Craft && data.city.stationFailures < StationMaxFailures)
     {
         data.craftDecision = decision;
         if (!craft.Execute(Event()))
-            ++data.stationFailures;
+            ++data.city.stationFailures;
+        else if (decision.forMaster)
+            data.craft.approvedSpell = data.craft.approvedProduct = 0;  // started: offered afterwards
         return true;
     }
 
@@ -131,11 +128,10 @@ int32 CityErrandAction::CountStops()
     ErrandsData& data = Data();
     data.cityStopsAt = 0;
     RefreshStops(data, master, getMSTime());
-    int32 count = 0;
-    for (CityStop const& s : data.cityStops)
-        if (s.covers & data.cityNeeds)
-            ++count;
-    return count;
+    CitySnapshot snap;
+    snap.stops = data.cityStops;
+    snap.needs = data.cityNeeds;
+    return int32(CountCityStops(snap));
 }
 
 CitySnapshot CityErrandAction::BuildCitySnapshot(ErrandsData& data, uint32 now)

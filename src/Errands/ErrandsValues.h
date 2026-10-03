@@ -82,8 +82,6 @@ struct ErrandsData
     uint32 cityNeeds = 0;
     uint32 cityZone = 0;
     uint32 cityStopsAt = 0;  // when cityStops was computed
-    uint64 stationStop = 0;  // the forge or anvil the failures below are counted for
-    uint32 stationFailures = 0;
     GatherState gather;
     Decision gatherDecision;
     std::vector<GatherNode> gatherNodes;  // last scan, reused between two scans

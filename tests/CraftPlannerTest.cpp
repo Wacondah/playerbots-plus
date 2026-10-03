@@ -1,3 +1,4 @@
+#include "CityPlanner.h"
 #include "CraftPlanner.h"
 
 #include <gtest/gtest.h>
@@ -310,7 +311,7 @@ TEST(CraftStation, ApprovedThenSmeltThenGroupThenSkill)
     CraftDecision d = PlanStationCraft(Idle({unwanted, skill, group, smelt, master}), state);
     EXPECT_EQ(d.spell, 1u);
     EXPECT_TRUE(d.forMaster);
-    EXPECT_EQ(state.approvedSpell, 0u);
+    EXPECT_EQ(state.approvedSpell, 1u);  // cleared once the cast has started (adapter)
     EXPECT_EQ(PlanStationCraft(Idle({unwanted, skill, group, smelt}), state).spell, 2u);
     EXPECT_EQ(PlanStationCraft(Idle({unwanted, skill, group}), state).spell, 3u);
     EXPECT_EQ(PlanStationCraft(Idle({unwanted, skill}), state).spell, 4u);
@@ -339,4 +340,36 @@ TEST(Craft, ApprovedNeedingAStationKeepsTheApproval)
     CraftDecision d = PlanCraft(Idle({master, group}), state, CraftConfig{}, T0);
     EXPECT_EQ(d.spell, 2u);
     EXPECT_EQ(state.approvedSpell, 1u);
+}
+
+TEST(Craft, ApprovedNeedingAnotherFocusIsDropped)
+{
+    RecipeOption master = AtStation(1, 50, 623);  // Black Anvil: no capital has one
+    master.castable = false;
+    master.atFocus = true;
+    CraftState state;
+    state.approvedSpell = 1;
+    EXPECT_EQ(PlanCraft(Idle({master}), state, CraftConfig{}, T0).reason, "cannot craft the approved recipe now");
+    EXPECT_EQ(state.approvedSpell, 0u);
+}
+
+TEST(Craft, ApprovedWithFullBagsKeepsTheApproval)
+{
+    RecipeOption master = Recipe(1, 50);
+    master.castable = false;
+    master.noRoom = true;
+    CraftState state;
+    state.approvedSpell = 1;
+    PlanCraft(Idle({master}), state, CraftConfig{}, T0);
+    EXPECT_EQ(state.approvedSpell, 1u);
+}
+
+TEST(CraftStation, NoRoomIsNotAStationNeed)
+{
+    RecipeOption smelt = AtStation(1, 5, ForgeFocus);
+    smelt.castable = false;
+    smelt.smelt = true;
+    smelt.noRoom = true;
+    CraftSnapshot snap = Idle({smelt});
+    EXPECT_EQ(StationNeeds(snap, CraftState{}), 0u);
 }

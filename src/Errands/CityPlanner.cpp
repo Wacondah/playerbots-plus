@@ -45,10 +45,18 @@ CityStop const* Next(CitySnapshot const& snap, CityState const& state)
                 best = &s;
         return best;
     };
-    if (snap.needs & CityNeed::Forge)
+    uint32_t const needs = snap.needs & ~state.cappedNeeds;
+    if (needs & CityNeed::Forge)
         if (CityStop const* forge = nearest(CityNeed::Forge))
             return forge;
-    return nearest(snap.needs);
+    return nearest(needs);
+}
+
+void SetCurrent(CityState& state, uint64_t id, uint32_t now)
+{
+    state.current = id;
+    state.currentSince = now;
+    state.stationFailures = 0;
 }
 
 // Closes the work time at the current station.
@@ -64,6 +72,7 @@ CityDecision Finish(CityState& state, uint32_t needs, uint32_t now, CityStep ste
     StopWorking(state, now);
     state.active = false;
     state.current = 0;
+    state.stationFailures = 0;
     state.ended = true;
     state.endedAt = now;
     state.endedNeeds = needs;
@@ -98,6 +107,7 @@ CityDecision PlanCity(CitySnapshot const& snap, CityState& state, CityConfig con
                 if (!Elapsed(now, state.visitSince, cfg.workMs))
                     return Decide(state, CityStep::Visit, "city: work", stop);
                 StopWorking(state, now);  // work cap: leave the rest for the next trip
+                state.cappedNeeds |= stop->covers;
                 state.done.insert(state.current);
                 state.current = 0;
             }
@@ -118,8 +128,7 @@ CityDecision PlanCity(CitySnapshot const& snap, CityState& state, CityConfig con
 
         if (CityStop const* next = Next(snap, state))
         {
-            state.current = next->id;
-            state.currentSince = now;
+            SetCurrent(state, next->id, now);
             return Decide(state, CityStep::GoTo, "city: going", next);
         }
         return Finish(state, snap.needs, now, CityStep::End, "city: done");
@@ -131,6 +140,11 @@ CityDecision PlanCity(CitySnapshot const& snap, CityState& state, CityConfig con
         return Decide(state, CityStep::None, "city: -");
     if (!snap.requested && !Elapsed(now, state.masterMovedAt, cfg.idleDelayMs))
         return Decide(state, CityStep::None, "city: waiting");
+    // A new trip: nothing of the last one counts (a forge visited then serves again).
+    state.done.clear();
+    state.visitSince = 0;
+    state.workedMs = 0;
+    state.cappedNeeds = 0;
     CityStop const* first = Next(snap, state);
     if (!first)
         return Decide(state, CityStep::None, "city: nothing to do");
@@ -140,12 +154,8 @@ CityDecision PlanCity(CitySnapshot const& snap, CityState& state, CityConfig con
     state.active = true;
     state.zone = snap.zone;
     state.startedAt = now;
-    state.done.clear();
-    state.visitSince = 0;
-    state.workedMs = 0;
     state.stopsPlanned = CountCityStops(snap);
-    state.current = first->id;
-    state.currentSince = now;
+    SetCurrent(state, first->id, now);
     return Decide(state, CityStep::GoTo, "city: going", first);
 }
 
@@ -155,6 +165,7 @@ void MarkCityVisited(CityState& state, uint32_t now)
     if (state.current)
         state.done.insert(state.current);
     state.current = 0;
+    state.stationFailures = 0;
 }
 
 uint32_t FocusNeed(uint32_t focus)
@@ -182,10 +193,16 @@ uint32_t StationNeeds(CraftSnapshot const& snap, CraftState const& state)
 
 uint32_t CountCityStops(CitySnapshot const& snap)
 {
+    // Every forge and anvil of the capital is listed (fallbacks), but one of each is visited.
     uint32_t count = 0;
+    uint32_t stations = 0;
     for (CityStop const& s : snap.stops)
-        if (s.covers & snap.needs)
+    {
+        if (IsStationStop(s.id))
+            stations |= s.covers & snap.needs;
+        else if (s.covers & snap.needs)
             ++count;
-    return count;
+    }
+    return count + ((stations & CityNeed::Forge) ? 1 : 0) + ((stations & CityNeed::Anvil) ? 1 : 0);
 }
 }  // namespace PlayerbotsPlus

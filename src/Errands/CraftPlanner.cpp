@@ -68,7 +68,8 @@ CraftDecision PlanCraft(CraftSnapshot const& snap, CraftState& state, CraftConfi
                     state.approvedSpell = state.approvedProduct = 0;
                 return Pick(state, &r, true, "master");
             }
-            waitsForStation = r.atFocus;  // crafted at the next forge or anvil of a capital trip
+            // Crafted at the next forge or anvil of a capital trip, or once the bags have room.
+            waitsForStation = (r.atFocus && StationFocus(r.focus)) || r.noRoom;
         }
         if (!waitsForStation)
         {
@@ -117,12 +118,10 @@ CraftDecision PlanStationCraft(CraftSnapshot const& snap, CraftState& state)
         return best;
     };
 
+    // The approval is cleared by the caller once the cast has started.
     if (state.approvedSpell)
         if (RecipeOption const* r = here([&](RecipeOption const& o) { return o.spell == state.approvedSpell; }))
-        {
-            state.approvedSpell = state.approvedProduct = 0;
             return Result(state, CraftAction::Craft, r, true, "craft for master");
-        }
     if (RecipeOption const* r = here([](RecipeOption const& o) { return o.smelt; }))
         return Result(state, CraftAction::Craft, r, false, "craft for smelting");
     if (RecipeOption const* r = here([](RecipeOption const& o) { return o.usefulToGroup; }))

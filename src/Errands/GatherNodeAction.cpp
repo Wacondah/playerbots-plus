@@ -8,12 +8,15 @@
 #include "ErrandsCommon.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "GroupItems.h"
 #include "LootAction.h"
 #include "LootObjectStack.h"
 #include "NearestGameObjects.h"
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
+
+#include <algorithm>
 
 namespace PlayerbotsPlus
 {
@@ -30,23 +33,47 @@ std::pair<uint32, uint32> NodeLock(GameObject* go)
 }
 
 bool HasGathering(Player* bot) { return bot->HasSkill(SKILL_MINING) || bot->HasSkill(SKILL_HERBALISM); }
+
+// A hostile next to the node, whatever the bot can see from where it stands (a mine tunnel
+// hides the kobolds by the vein). Triggers and non-attackable dummies do not count.
+bool Guarded(Player* bot, GameObject* go)
+{
+    std::list<Unit*> near;
+    Acore::AnyUnfriendlyUnitInObjectRangeCheck check(go, bot, GatherGuardRadius);
+    Acore::UnitListSearcher<Acore::AnyUnfriendlyUnitInObjectRangeCheck> searcher(go, near, check);
+    Cell::VisitObjects(go, searcher, GatherGuardRadius);
+    return std::any_of(near.begin(), near.end(),
+                       [&](Unit* u)
+                       {
+                           Creature* c = u->ToCreature();
+                           return bot->IsHostileTo(u) && !u->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE) &&
+                                  !u->HasUnitFlag(UNIT_FLAG_NON_ATTACKABLE) && !u->HasUnitFlag(UNIT_FLAG_IMMUNE_TO_PC) &&
+                                  !(c && (c->IsTrigger() || c->IsTotem()));
+                       });
+}
 }  // namespace
 
 bool GatherNodeAction::isUseful()
 {
-    if (!HasGathering(bot))
-        return false;
     ErrandsData& data = AI_VALUE(ErrandsData&, "errands data");
-    uint32 const now = getMSTime();
     Player* master = RealMaster(botAI);
+    if (!HasGathering(bot) || !master)
+    {
+        data.gather.target = 0;  // no stale claim for the other bots
+        return false;
+    }
+    uint32 const now = getMSTime();
 
     GatherSnapshot snap;
-    snap.idle = master && DetourIdle(data, now) && !bot->IsInCombat();
+    snap.idle = DetourIdle(data, now) && !bot->IsInCombat();
     snap.bagsFull = FreeSlots(bot) == 0;
-    if (master)
-        snap.masterPos = {master->GetPositionX(), master->GetPositionY(), master->GetPositionZ()};
+    // mod-playerbots' own loot policy (LootAction::isUseful): no looting in free-for-all groups.
+    Group* group = bot->GetGroup();
+    snap.lootAllowed = botAI->HasStrategy("loot", BOT_STATE_NON_COMBAT) &&
+                       (sPlayerbotAIConfig.freeMethodLoot || !group || group->GetLootMethod() != FREE_FOR_ALL);
+    snap.masterPos = {master->GetPositionX(), master->GetPositionY(), master->GetPositionZ()};
     snap.botPos = {bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()};
-    if (snap.idle && !snap.bagsFull)
+    if (snap.idle && !snap.bagsFull && snap.lootAllowed)
     {
         if (!data.gatherScannedAt || Elapsed(now, data.gatherScannedAt, GatherScanIntervalMs))
         {
@@ -84,7 +111,7 @@ bool GatherNodeAction::Execute(Event /*event*/)
     LootObject loot(bot, guid);
     if (loot.IsEmpty() || !loot.IsLootPossible(bot))
     {
-        MarkGatherFailed(data.gather, getMSTime());
+        MarkGatherFailed(data.gather, getMSTime(), GatherSettings());
         return false;
     }
     AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
@@ -104,11 +131,12 @@ std::vector<GatherNode> GatherNodeAction::ScanNodes(Player* master)
     Cell::VisitObjects(master, searcher, radius);
 
     bool const pick = bot->HasItemTotemCategory(TC_MINING_PICK);
-    GuidVector const hostiles = AI_VALUE(GuidVector, "possible targets");
     for (GameObject* go : gos)
     {
         if (go->GetGoType() != GAMEOBJECT_TYPE_CHEST || go->GetGoState() != GO_STATE_READY ||
             go->getLootState() != GO_READY || go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE))
+            continue;
+        if (go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND) && !go->ActivateToQuest(bot))
             continue;
         auto const [skill, required] = NodeLock(go);
         if (skill != SKILL_MINING && skill != SKILL_HERBALISM)
@@ -120,11 +148,13 @@ std::vector<GatherNode> GatherNodeAction::ScanNodes(Player* master)
         n.gatherable = CanGather(skill, bot->HasSkill(skill) ? bot->GetSkillValue(skill) : 0, required, pick);
         if (!n.gatherable)
             continue;
+        // mod-playerbots' own view of the node (its pick list, quest-only loot): what it refuses
+        // on arrival is not worth the walk.
+        LootObject loot(bot, go->GetGUID());
+        if (loot.IsEmpty() || loot.skillId != skill || (loot.reqItem && !bot->HasItemCount(loot.reqItem, 1)))
+            continue;
         n.contested = ClaimedByOther(master, go, skill);
-        for (ObjectGuid const& h : hostiles)
-            if (Unit* unit = botAI->GetUnit(h); unit && unit->IsAlive() && !unit->IsCritter() &&
-                                               bot->IsHostileTo(unit) && go->GetDistance(unit) <= GatherGuardRadius)
-                n.guarded = true;
+        n.guarded = Guarded(bot, go);
         nodes.push_back(n);
     }
     return nodes;
@@ -136,10 +166,16 @@ bool GatherNodeAction::ClaimedByOther(Player* master, GameObject* go, uint32 ski
     if (master->HasSkill(skill) && master->GetDistance(go) <= INTERACTION_DISTANCE)
         return true;
     uint64 const id = go->GetGUID().GetRawValue();
+    uint32 const now = getMSTime();
+    uint32 const timeout = GatherSettings().timeoutMs;
     for (Player* mate : GroupBots(bot, 0.f))
     {
         PlayerbotAI* ai = GET_PLAYERBOT_AI(mate);
-        if (ai && ai->GetAiObjectContext()->GetValue<ErrandsData&>("errands data")->Get().gather.target == id)
+        if (!ai || !ai->HasStrategy("errands", BOT_STATE_NON_COMBAT))
+            continue;
+        // A claim older than the mate's own timeout is one it has dropped (or stopped looking at).
+        GatherState const& gather = ai->GetAiObjectContext()->GetValue<ErrandsData&>("errands data")->Get().gather;
+        if (gather.target == id && !Elapsed(now, gather.startedAt, timeout))
             return true;
     }
     return false;

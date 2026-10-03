@@ -90,15 +90,6 @@ TEST(OwnSkill, MinerKeepsItsOre)
     EXPECT_TRUE(KeptForOwnSkill(bar, ProfessionBit::Mining, feeds, false));
 }
 
-TEST(MiningMaterial, OresAndUnusedRefinedGoodsOnly)
-{
-    EXPECT_TRUE(MiningMaterial(true, 0));                          // copper ore
-    EXPECT_TRUE(MiningMaterial(true, ProfessionBit::Enchanting));  // iron ore
-    EXPECT_TRUE(MiningMaterial(false, 0));                         // tin bar: only bronze uses it
-    EXPECT_FALSE(MiningMaterial(false, ProfessionBit::Blacksmithing | ProfessionBit::Engineering));  // copper bar
-    EXPECT_FALSE(MiningMaterial(false, ProfessionBit::Alchemy | ProfessionBit::Enchanting));         // dream dust
-}
-
 TEST(OwnSkill, GatherFeedsMirrorsUpstream)
 {
     EXPECT_EQ(GatherFeeds(true, false, false),

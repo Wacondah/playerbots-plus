@@ -23,6 +23,7 @@ struct GatherSnapshot
 {
     bool idle = false;  // the master is idle (every errands gate but the bot's distance)
     bool bagsFull = false;
+    bool lootAllowed = true;  // mod-playerbots' loot policy lets this bot loot
     Vec3 masterPos;
     Vec3 botPos;
     std::vector<GatherNode> nodes;
@@ -35,19 +36,26 @@ struct GatherConfig
     uint32_t blacklistMs = 60000;
 };
 
+struct GatherBlacklist
+{
+    uint32_t at = 0;
+    uint32_t ms = 0;
+};
+
 struct GatherState
 {
     uint64_t target = 0;
     uint32_t startedAt = 0;
-    std::unordered_map<uint64_t, uint32_t> blacklistedAt;
+    std::unordered_map<uint64_t, GatherBlacklist> blacklisted;
+    std::unordered_map<uint64_t, uint32_t> failures;  // per node: each failure doubles the wait
     std::string lastReason;
 };
 
 // Start/Continue: go and open decision.target. Abandon: gave up on it.
 Decision PlanGather(GatherSnapshot const& snap, GatherState& state, GatherConfig const& cfg, uint32_t now);
 
-// The node could not be opened on arrival: skip it for a while.
-void MarkGatherFailed(GatherState& state, uint32_t now);
+// The node could not be opened on arrival: skip it for a while (longer each time).
+void MarkGatherFailed(GatherState& state, uint32_t now, GatherConfig const& cfg = {});
 
 // Mining (with a pick) or herbalism at or above the node's required skill.
 bool CanGather(uint32_t lockSkill, uint32_t skillValue, uint32_t requiredSkill, bool hasMiningPick);
