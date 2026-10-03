@@ -65,7 +65,7 @@ bool ShareItemAction::Execute(Event /*event*/)
     botAI->TellMasterNoFacing("Gave " + what + " to " + receiver->GetName());
     // Upstream equips on an item push packet, which a direct move does not send.
     if (PlayerbotAI* receiverAI = gear ? GET_PLAYERBOT_AI(receiver) : nullptr)
-        receiverAI->DoSpecificAction("equip upgrade", Event("share item"), true);
+        receiverAI->DoSpecificAction("errands equip upgrades", Event("share item"), true);
     return true;
 }
 
