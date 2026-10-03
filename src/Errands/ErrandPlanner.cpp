@@ -40,7 +40,8 @@ void TrackMaster(Snapshot const& snap, ErrandState& state, uint32_t now)
 }
 
 // Why the bot may not run errands right now, or nullptr if it may.
-char const* Blocker(Snapshot const& snap, ErrandState const& state, PlannerConfig const& cfg, uint32_t now)
+char const* Blocker(Snapshot const& snap, ErrandState const& state, PlannerConfig const& cfg, uint32_t now,
+                    bool checkDistance = true)
 {
     if (!snap.hasMaster)
         return "no master";
@@ -56,7 +57,7 @@ char const* Blocker(Snapshot const& snap, ErrandState const& state, PlannerConfi
         return "resting";
     if (snap.masterMounted || snap.masterOnTaxi)
         return "master mounted";
-    if (Distance(snap.botPos, snap.masterPos) > cfg.radius + cfg.margin)
+    if (checkDistance && Distance(snap.botPos, snap.masterPos) > cfg.radius + cfg.margin)
         return "too far from master";
     if (!Elapsed(now, state.masterStillSince, cfg.idleDelayMs))
         return "master moving";
@@ -188,6 +189,7 @@ Decision Plan(Snapshot const& snap, ErrandState& state, PlannerConfig const& cfg
     if (snap.hasMaster && snap.masterSameMap)
         TrackMaster(snap, state, now);
     ExpireBlacklist(state, cfg, now);
+    state.masterIdle = Blocker(snap, state, cfg, now, false) == nullptr;
 
     if (char const* blocker = Blocker(snap, state, cfg, now))
         return state.active.IsActive() ? Abandon(state, blocker) : Idle(state, blocker);

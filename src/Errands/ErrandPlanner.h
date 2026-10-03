@@ -113,6 +113,9 @@ struct ErrandState
     std::unordered_map<uint64_t, uint32_t> blacklistedAt;
     std::unordered_map<uint64_t, Visit> visits;
     std::string lastReason;
+    // Every errands gate holds except the bot's own distance to the master: detours (gathering)
+    // may go on off the leash.
+    bool masterIdle = false;
 };
 
 enum class DecisionType : uint8_t

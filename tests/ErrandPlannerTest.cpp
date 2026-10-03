@@ -398,3 +398,27 @@ TEST(Pick, TrainClassAfterTrainBeforeReagents)
     EXPECT_EQ(d.kind, ErrandKind::TrainClass);
     EXPECT_EQ(d.reason, "start train class");
 }
+
+TEST(MasterIdle, IgnoresTheBotsDistance)
+{
+    Snapshot snap = Ready();
+    snap.botPos = {40.f, 0.f, 0.f};
+    ErrandState state;
+    Decision d = PlanAfterIdle(snap, state, PlannerConfig{});
+    EXPECT_EQ(d.reason, "too far from master");
+    EXPECT_TRUE(state.masterIdle);
+}
+
+TEST(MasterIdle, FalseWhileTheMasterMovesOrFights)
+{
+    Snapshot snap = Ready();
+    ErrandState state;
+    PlannerConfig const cfg;
+    Plan(snap, state, cfg, T0);
+    EXPECT_FALSE(state.masterIdle);  // idle delay not over yet
+    Plan(snap, state, cfg, T0 + cfg.idleDelayMs);
+    EXPECT_TRUE(state.masterIdle);
+    snap.masterInCombat = true;
+    Plan(snap, state, cfg, T0 + cfg.idleDelayMs + 1);
+    EXPECT_FALSE(state.masterIdle);
+}
