@@ -11,6 +11,7 @@
 #include "Playerbots.h"
 #include "PlayerbotsPlusConfig.h"
 #include "PlayerbotsPlusRegistry.h"
+#include "PlayerbotsPlusSchema.h"
 #include "ReagentIndex.h"
 #include "ScriptMgr.h"
 
@@ -39,6 +40,17 @@ public:
         else
             LOG_ERROR("server.loading", "playerbots-plus: mod-playerbots contexts are empty, module inactive");
     }
+};
+
+class PlayerbotsPlusDatabaseScript : public DatabaseScript
+{
+public:
+    PlayerbotsPlusDatabaseScript()
+        : DatabaseScript("PlayerbotsPlusDatabaseScript", {DATABASEHOOK_ON_AFTER_DATABASES_LOADED})
+    {
+    }
+
+    void OnAfterDatabasesLoaded(uint32 /*updateFlags*/) override { EnsureDbStoreValueIsText(); }
 };
 
 // "errands on" / "errands off" from a master, whispered to one bot or in party chat.
@@ -150,6 +162,7 @@ private:
 
 void AddPlayerbotsPlusScripts()
 {
+    new PlayerbotsPlusDatabaseScript();
     new PlayerbotsPlusWorldScript();
     new PlayerbotsPlusPlayerScript();
 }
