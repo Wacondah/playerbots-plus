@@ -76,6 +76,7 @@ public:
         creators["professions"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "professions"); };
         creators["role"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "role"); };
         creators["questlog"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "questlog"); };
+        creators["share quests"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "share quests"); };
         creators["craft yes"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "craft yes"); };
         creators["craft no"] = [](PlayerbotAI* ai) -> Trigger* { return new ChatCommandTrigger(ai, "craft no"); };
     }
@@ -90,6 +91,8 @@ public:
         creators["city errand"] = [](PlayerbotAI* ai) -> Action* { return new CityErrandAction(ai); };
         creators["errands levelup"] = [](PlayerbotAI* ai) -> Action* { return new LevelUpAction(ai); };
         creators["share quests"] = [](PlayerbotAI* ai) -> Action* { return new ShareQuestsAction(ai); };
+        creators["share quests command"] = [](PlayerbotAI* ai) -> Action* { return new ShareQuestsCommandAction(ai); };
+        creators["share quests to master"] = [](PlayerbotAI* ai) -> Action* { return new ShareQuestsToMasterAction(ai); };
         creators["errands loot roll"] = [](PlayerbotAI* ai) -> Action* { return new LootNeedAction(ai); };
         creators["errands release"] = [](PlayerbotAI* ai) -> Action* { return new ReleaseWhenAloneAction(ai); };
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };

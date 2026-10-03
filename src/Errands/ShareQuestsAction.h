@@ -13,6 +13,8 @@ namespace PlayerbotsPlus
 constexpr uint32 QuestShareIntervalMs = 30000;
 // Same reach as the game's quest sharing.
 constexpr float QuestShareDistance = 30.f;
+// Offers to the master wait for his answer; checked this often.
+constexpr uint32 QuestPushIntervalMs = 2000;
 
 // "errands quests": give the other alts of the group the quests they can take. Direct,
 // bot to bot: the game's party push would also pop a quest window for the master.
@@ -20,6 +22,28 @@ class ShareQuestsAction : public Action
 {
 public:
     ShareQuestsAction(PlayerbotAI* botAI) : Action(botAI, "share quests") {}
+
+    bool isUseful() override;
+    bool Execute(Event event) override;
+};
+
+// "share quests" (whisper, or party chat for every bot): from now on, offer the master, one
+// after the other through the game's own quest window, every quest of this bot's log the
+// master can take. Only on command.
+class ShareQuestsCommandAction : public Action
+{
+public:
+    ShareQuestsCommandAction(PlayerbotAI* botAI) : Action(botAI, "share quests command") {}
+
+    bool Execute(Event event) override;
+};
+
+// The offers themselves: one at a time (the game holds a single quest window), the next when
+// the master has answered the last one.
+class ShareQuestsToMasterAction : public Action
+{
+public:
+    ShareQuestsToMasterAction(PlayerbotAI* botAI) : Action(botAI, "share quests to master") {}
 
     bool isUseful() override;
     bool Execute(Event event) override;

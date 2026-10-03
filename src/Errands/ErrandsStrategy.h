@@ -152,6 +152,8 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("errands tick", {NextAction("share quests", QuestShareRelevance)}));
+        triggers.push_back(new TriggerNode("share quests", {NextAction("share quests command", ChatCommandRelevance)}));
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("share quests to master", QuestShareRelevance)}));
     }
 };
 

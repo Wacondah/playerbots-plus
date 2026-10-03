@@ -16,6 +16,7 @@
 #include "ShoppingPlanner.h"
 #include "Value.h"
 
+#include <set>
 #include <unordered_map>
 
 namespace PlayerbotsPlus
@@ -69,6 +70,10 @@ struct ErrandsData
     uint32 lastCraftScanAt = 0;
     uint32 lastQuestShareAt = 0;
     uint32 lastQuestCleanAt = 0;
+    bool questPush = false;  // "share quests": offering the master the quests of the log, one by one
+    uint32 questPushAt = 0;
+    uint32 questPushOffered = 0;
+    std::set<uint32> questPushDeclined;  // already offered for this command
     uint32 calmSince = 0;  // the whole group out of combat since (dead-state release)
     uint32 pendingOfferProduct = 0;  // crafted for the master, offered once it is in the bags
     uint32 pendingOfferSince = 0;

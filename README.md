@@ -188,6 +188,7 @@ configured, add it once from party chat — `/p nc +errands` — and it is saved
 | `professions reset` then `professions reset confirm` | forget both primary professions now (assignment kept) |
 | `nc +errands craft` | enable crafting (party chat: `/p nc +errands craft`) |
 | `craft yes` / `craft no` | answer a crafting offer |
+| `share quests` (party chat: `/p share quests`) | the alt offers you, one by one through the game quest window, each quest of its log you can take |
 | `pull` (target selected) / skull icon out of combat | the tank plans and runs a group pull (party chat: `/p pull`) |
 | `pull force` / `pull cancel` | accept a pull announced with extra mobs / stop the pull and release the group |
 | `nc +debug errands` | log each decision to chat and the `playerbots` log |
