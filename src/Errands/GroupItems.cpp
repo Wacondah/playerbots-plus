@@ -33,7 +33,9 @@ ShareUsage ToShareUsage(ItemUsage usage)
 ItemUsage UsageFor(Player* player, uint32 itemId)
 {
     PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
-    return ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(itemId))->Get() : ITEM_USAGE_NONE;
+    ItemUsage const usage =
+        ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(itemId))->Get() : ITEM_USAGE_NONE;
+    return FittingUsage(player, sObjectMgr->GetItemTemplate(itemId), usage);
 }
 
 float GainFor(Player* receiver, Item* item)
@@ -47,6 +49,8 @@ float GainFor(Player* receiver, Item* item)
     return score - currentScore;
 }
 
+}  // namespace
+
 // mod-playerbots' class rule (the bots' own "item usage" applies it): the class's main
 // armor type at that level (mail for a paladin before 40, plate after), its weapon types.
 bool FitsClass(Player* player, ItemTemplate const* proto, uint32 level)
@@ -57,7 +61,12 @@ bool FitsClass(Player* player, ItemTemplate const* proto, uint32 level)
         return sRandomItemMgr.CanEquipWeapon(proto, player->getClass());
     return true;
 }
-}  // namespace
+
+ItemUsage FittingUsage(Player* player, ItemTemplate const* proto, ItemUsage usage)
+{
+    bool const wear = usage == ITEM_USAGE_EQUIP || usage == ITEM_USAGE_REPLACE || usage == ITEM_USAGE_BAD_EQUIP;
+    return wear && proto && !FitsClass(player, proto, player->GetLevel()) ? ITEM_USAGE_NONE : usage;
+}
 
 Item* FindBagItem(Player* bot, uint64 guid)
 {

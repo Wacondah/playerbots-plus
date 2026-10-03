@@ -44,7 +44,7 @@ bool LootNeedAction::Execute(Event /*event*/)
         std::string param = std::to_string(roll->itemid);
         if (roll->itemRandomPropId)
             param += "," + std::to_string(roll->itemRandomPropId);
-        ItemUsage const usage = AI_VALUE2(ItemUsage, "item usage", param);
+        ItemUsage const usage = FittingUsage(bot, proto, AI_VALUE2(ItemUsage, "item usage", param));
 
         LootFacts facts;
         facts.gearUpgrade = (proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) &&

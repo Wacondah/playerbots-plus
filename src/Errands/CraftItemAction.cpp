@@ -40,7 +40,9 @@ bool GroupUses(ItemUsage usage)
 ItemUsage UsageOf(Player* player, uint32 entry)
 {
     PlayerbotAI* ai = GET_PLAYERBOT_AI(player);
-    return ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(entry))->Get() : ITEM_USAGE_NONE;
+    ItemUsage const usage =
+        ai ? ai->GetAiObjectContext()->GetValue<ItemUsage>("item usage", int32(entry))->Get() : ITEM_USAGE_NONE;
+    return FittingUsage(player, sObjectMgr->GetItemTemplate(entry), usage);
 }
 
 // Ore a miner smelts as soon as it is at a forge: raw metal (the Mining bit), not the

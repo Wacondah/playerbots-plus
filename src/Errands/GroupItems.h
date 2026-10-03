@@ -8,6 +8,7 @@
 #include "Bag.h"
 #include "Player.h"
 #include "FutureGear.h"
+#include "ItemUsageValue.h"
 #include "SharePlanner.h"
 
 #include <vector>
@@ -30,6 +31,12 @@ void ForEachBagItem(Player* bot, Fn fn)
                 if (Item* item = bag->GetItemByPos(i))
                     fn(item);
 }
+
+// Does the class wear it (armor type by level, weapon types)? mod-playerbots' "item usage" may
+// still say equip for a piece of the wrong type, when the worn piece is a wrong one too.
+bool FitsClass(Player* player, ItemTemplate const* proto, uint32 level);
+// `usage` with "equip" turned into "none" for a piece the class does not wear.
+ItemUsage FittingUsage(Player* player, ItemTemplate const* proto, ItemUsage usage);
 
 // The item with this instance GUID in the bot's bags, nullptr if it is gone.
 Item* FindBagItem(Player* bot, uint64 guid);
