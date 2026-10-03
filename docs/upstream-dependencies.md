@@ -37,3 +37,5 @@ start here.
 | `Group::GetRolls`, `Roll::playerVote`, `Group::CountRollVote`; action `"release"`; triggers `"very often"`, `"often"` | `AltCareActions` | need rolls, release when nobody can resurrect |
 | `PlayerbotAI::ResetStrategies`, `GetStrategies`, `IsTank`/`IsHeal`; strategy `"threat"`; `AiFactory::GetPlayerSpecTab(s)` | `RoleAction` | role command |
 | `BOT\t` addon-message commands and `#a` reply routing (`PlayerbotAI::HandleCommand`) | `QuestLogAction`, addon | questlog protocol |
+| `EquipAction::EquipItems`, `IterateItems`, `CollectItemsVisitor`, value `item upgrade`, `PlayerbotAIConfig::autoEquipUpgradeLoot` | `EquipFittingAction` re-implements `EquipUpgradesPacketAction::Execute` (same trigger names: `trade status`, `item push result`, `loot roll won`, `random`) with `FittingUsage`; `EquipReplaceMultiplier` silences the upstream action. Re-check against upstream's `EquipUpgradesPacketAction` when updating. |
+| `RandomItemMgr::CanEquipArmor`, `CanEquipWeapon` | `FitsClass`: the class rule, which `ItemUsageValue` loses when a worn piece of the wrong type is compared by score. |

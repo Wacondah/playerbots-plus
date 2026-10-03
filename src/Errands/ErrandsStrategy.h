@@ -5,6 +5,7 @@
 #ifndef PLAYERBOTS_PLUS_ERRANDS_STRATEGY_H
 #define PLAYERBOTS_PLUS_ERRANDS_STRATEGY_H
 
+#include "EquipFittingAction.h"
 #include "PullActions.h"
 #include "Strategy.h"
 
@@ -154,7 +155,8 @@ public:
     }
 };
 
-// Rolls need on gear the bot would wear and on materials of its own professions.
+// Rolls need on gear the bot would wear and on materials of its own professions, and wears
+// upgrades the class can wear (mod-playerbots' own auto-equip is replaced).
 class ErrandsLootStrategy : public Strategy
 {
 public:
@@ -165,6 +167,15 @@ public:
     void InitTriggers(std::vector<TriggerNode*>& triggers) override
     {
         triggers.push_back(new TriggerNode("very often", {NextAction("errands loot roll", LootNeedRelevance)}));
+        // The triggers of upstream's "equip upgrades packet action", with our action instead.
+        for (char const* trigger : {"trade status", "item push result", "loot roll won"})
+            triggers.push_back(new TriggerNode(trigger, {NextAction("errands equip upgrades", ChatCommandRelevance)}));
+        triggers.push_back(new TriggerNode("random", {NextAction("errands equip upgrades", 6.0f)}));
+    }
+
+    void InitMultipliers(std::vector<Multiplier*>& multipliers) override
+    {
+        multipliers.push_back(new EquipReplaceMultiplier(botAI));
     }
 };
 

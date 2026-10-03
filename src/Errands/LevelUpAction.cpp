@@ -26,7 +26,7 @@ int32 PremadeSpecNo(Player* player, std::string const& name)
 bool LevelUpAction::Execute(Event /*event*/)
 {
     // Gear kept for this level can be worn now (mod-playerbots does it for random bots only).
-    botAI->DoSpecificAction("equip upgrade", Event("errands levelup"), true);
+    botAI->DoSpecificAction("errands equip upgrades", Event("errands levelup"), true);
 
     std::string const& chosen = AI_VALUE(std::string&, "chosen spec");
     int32 const specNo = PremadeSpecNo(bot, chosen);

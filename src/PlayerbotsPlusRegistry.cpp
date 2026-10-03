@@ -13,6 +13,7 @@
 #include "CraftItemAction.h"
 #include "DKAiObjectContext.h"
 #include "DruidAiObjectContext.h"
+#include "EquipFittingAction.h"
 #include "ErrandsStatusAction.h"
 #include "ErrandsStrategy.h"
 #include "ErrandsTriggers.h"
@@ -96,6 +97,7 @@ public:
         creators["gather node"] = [](PlayerbotAI* ai) -> Action* { return new GatherNodeAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
         creators["rebalance bags"] = [](PlayerbotAI* ai) -> Action* { return new RebalanceBagsAction(ai); };
+        creators["errands equip upgrades"] = [](PlayerbotAI* ai) -> Action* { return new EquipFittingAction(ai); };
         creators["clean quest items"] = [](PlayerbotAI* ai) -> Action* { return new CleanQuestItemsAction(ai); };
         creators["professions"] = [](PlayerbotAI* ai) -> Action* { return new ProfessionsAction(ai); };
         creators["role"] = [](PlayerbotAI* ai) -> Action* { return new RoleAction(ai); };
