@@ -1,7 +1,23 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 — 2026-10-03
 
+- Group pull (`errands pull`): `pull` / skull icon makes the tank plan a pull that wakes as few
+  mobs as possible (puller: the tank if it shoots, else the closest ranged dps, else the tank
+  on foot; firing spot out of other mobs' aggro, hiding spot near the group, group holds);
+  `pull force` / `pull cancel`.
+- Mining: a miner keeps its ore (Mining is in the reagent index; ore had no user and was sold
+  as junk), ore of other alts goes to the miner, smelting is a craft recipe.
+- Capital trips go to a forge, then an anvil, to smelt and craft per the craft rules (time at
+  a station does not count in `City.Timeout`, 2 min per focus per trip).
+- Gathering detour: with the master idle, a miner (pick) or herbalist gathers nodes within
+  `Gather.Radius` (50 yd) of him, safely (no hostile near the node, no free-for-all loot).
+- Housekeeping: quest items no quest needs any more (all done, no vendor price, nobody in
+  the group or the master needs them) are destroyed; `errands bags`.
+- Gear for the master and future gear follow the class armor and weapon rule (no leather
+  for a mail wearer) and the bots' upgrade margin.
+- The module widens `playerbots_db_store.value` to TEXT at startup (long strategy lists
+  failed to save and were erased).
 - `errands levelup`: alts spend their talent points on level-up, following the spec picked
   with `talents spec <name>` (remembered), else their current tree; they ask otherwise.
 - `errands quests`: alts share quests with each other (never with the master).
