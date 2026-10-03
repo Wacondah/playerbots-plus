@@ -33,6 +33,8 @@ constexpr float QuestShareRelevance = 1.96f;
 constexpr float LevelUpRelevance = ChatCommandRelevance;
 // Just above mod-playerbots' "loot roll" (100): its roll then skips what we voted.
 constexpr float LootNeedRelevance = 101.0f;
+// Below hunt (the tank pulls first), above follow: a node near the idle master.
+constexpr float GatherRelevance = 1.85f;
 // Dead state: above the default dead actions, which wait for a resurrection.
 constexpr float ReleaseRelevance = 50.0f;
 // Above mod-playerbots' own pull (105–107) and every combat action: the puller's walk wins.
@@ -55,6 +57,7 @@ public:
         triggers.push_back(new TriggerNode("questlog", {NextAction("questlog", ChatCommandRelevance)}));
         triggers.push_back(new TriggerNode("errands tick", {NextAction("offer to master", OfferRelevance)}));
         triggers.push_back(new TriggerNode("errands tick", {NextAction("city errand", CityRelevance)}));
+        triggers.push_back(new TriggerNode("errands tick", {NextAction("gather node", GatherRelevance)}));
     }
 };
 

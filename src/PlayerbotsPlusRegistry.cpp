@@ -16,6 +16,7 @@
 #include "ErrandsStrategy.h"
 #include "ErrandsTriggers.h"
 #include "ErrandsValues.h"
+#include "GatherNodeAction.h"
 #include "HunterAiObjectContext.h"
 #include "HuntQuestMobAction.h"
 #include "LevelUpAction.h"
@@ -91,6 +92,7 @@ public:
         creators["errands release"] = [](PlayerbotAI* ai) -> Action* { return new ReleaseWhenAloneAction(ai); };
         creators["errands status"] = [](PlayerbotAI* ai) -> Action* { return new ErrandsStatusAction(ai); };
         creators["hunt quest mob"] = [](PlayerbotAI* ai) -> Action* { return new HuntQuestMobAction(ai); };
+        creators["gather node"] = [](PlayerbotAI* ai) -> Action* { return new GatherNodeAction(ai); };
         creators["share item"] = [](PlayerbotAI* ai) -> Action* { return new ShareItemAction(ai); };
         creators["rebalance bags"] = [](PlayerbotAI* ai) -> Action* { return new RebalanceBagsAction(ai); };
         creators["professions"] = [](PlayerbotAI* ai) -> Action* { return new ProfessionsAction(ai); };

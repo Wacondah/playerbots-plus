@@ -60,6 +60,15 @@ PlayerbotsPlus.Hunt.MaxLevelAbove = 2
 PlayerbotsPlus.Hunt.PackRadius = 8
 
 ###################################################################################################
+# GATHERING  (part of "errands")
+#
+#    PlayerbotsPlus.Gather.Radius       While you stand still, a bot with Mining (and a pick)
+#                                       or Herbalism gathers the nodes it can open within this
+#                                       many yards of you. 0 disables.          Default: 50
+
+PlayerbotsPlus.Gather.Radius = 50
+
+###################################################################################################
 # ERRANDS BAGS  (strategy "errands bags")
 #
 # Out of combat, an alt below this many free bag slots gives stackable items to a nearby

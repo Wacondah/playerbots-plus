@@ -28,6 +28,7 @@ void ModuleConfig::Load()
     huntMaxLevelAbove = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Hunt.MaxLevelAbove", 2);
     huntRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.Radius", 45.0f);
     huntPackRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Hunt.PackRadius", 8.0f);
+    gatherRadius = sConfigMgr->GetOption<float>("PlayerbotsPlus.Gather.Radius", 50.0f);
     bagsMinFreeSlots = sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Bags.MinFreeSlots", 1);
     shoppingReservePer10Levels =
         sConfigMgr->GetOption<uint32>("PlayerbotsPlus.Craft.ReserveCopperPer10Levels", 10000);
@@ -49,5 +50,11 @@ HuntConfig HuntSettings()
 {
     ModuleConfig const& c = Config();
     return HuntConfig{c.huntRadius, c.huntMaxLevelAbove, c.planner.timeoutMs, c.planner.blacklistMs};
+}
+
+GatherConfig GatherSettings()
+{
+    ModuleConfig const& c = Config();
+    return GatherConfig{c.gatherRadius, c.planner.timeoutMs, c.planner.blacklistMs};
 }
 }  // namespace PlayerbotsPlus

@@ -41,6 +41,8 @@ bool ErrandsStatusAction::Execute(Event event)
         << " | blacklisted: " << data.state.blacklistedAt.size();
     if (botAI->HasStrategy("errands hunt", BotState::BOT_STATE_NON_COMBAT))
         out << " | hunt: " << (data.hunt.lastReason.empty() ? "-" : data.hunt.lastReason);
+    if (bot->HasSkill(SKILL_MINING) || bot->HasSkill(SKILL_HERBALISM))
+        out << " | gather: " << (data.gather.lastReason.empty() ? "-" : data.gather.lastReason);
     if (botAI->HasStrategy("errands share", BotState::BOT_STATE_NON_COMBAT))
         out << " | share: " << (data.share.lastReason.empty() ? "-" : data.share.lastReason);
     if (botAI->HasStrategy("errands bags", BotState::BOT_STATE_NON_COMBAT))

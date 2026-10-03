@@ -10,6 +10,7 @@
 #include "CraftPlanner.h"
 #include "ErrandPlanner.h"
 #include "HuntPlanner.h"
+#include "GatherPlanner.h"
 #include "QuestItems.h"
 #include "SharePlanner.h"
 #include "ShoppingPlanner.h"
@@ -81,6 +82,10 @@ struct ErrandsData
     uint32 cityNeeds = 0;
     uint32 cityZone = 0;
     uint32 cityStopsAt = 0;  // when cityStops was computed
+    GatherState gather;
+    Decision gatherDecision;
+    std::vector<GatherNode> gatherNodes;  // last scan, reused between two scans
+    uint32 gatherScannedAt = 0;
 
     bool OfferBusy() const { return offer.Active() || pendingOfferProduct; }
     bool OfferDeclined(uint32 entry, uint32 now) const
@@ -96,6 +101,14 @@ inline bool ErrandsIdle(ErrandsData const& data, uint32 now)
 {
     return !data.city.Active() && data.decision.type == DecisionType::Idle &&
            data.decision.reason == "nothing to do" && !Elapsed(now, data.decidedAt, FreshDecisionMs);
+}
+
+// The master is idle for a detour off the leash (gathering): every errands gate holds but the
+// bot's own distance to the master, no errand runs and no city trip either.
+inline bool DetourIdle(ErrandsData const& data, uint32 now)
+{
+    return !data.city.Active() && data.state.masterIdle && !data.state.active.IsActive() &&
+           !Elapsed(now, data.decidedAt, FreshDecisionMs);
 }
 
 class ErrandsDataValue : public ManualSetValue<ErrandsData&>

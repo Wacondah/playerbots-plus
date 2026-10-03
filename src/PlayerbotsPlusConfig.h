@@ -7,6 +7,7 @@
 
 #include "ErrandPlanner.h"
 #include "HuntPlanner.h"
+#include "GatherPlanner.h"
 
 #include <cstdint>
 
@@ -24,6 +25,7 @@ struct ModuleConfig
     uint32_t huntMaxLevelAbove = 2;
     float huntRadius = 45.f;
     float huntPackRadius = 8.f;
+    float gatherRadius = 50.f;  // gathering detour around the idle master (0: off)
     uint32_t bagsMinFreeSlots = 1;
     uint32_t shoppingReservePer10Levels = 10000;
     uint32_t shoppingMaxCopper = 5000;
@@ -38,6 +40,7 @@ struct ModuleConfig
 
 ModuleConfig& Config();
 HuntConfig HuntSettings();
+GatherConfig GatherSettings();
 }  // namespace PlayerbotsPlus
 
 #endif
